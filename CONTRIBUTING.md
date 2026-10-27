@@ -1,6 +1,6 @@
 # Hướng dẫn đóng góp — PELA
 
-Tài liệu này mô tả quy trình làm việc chung của nhóm.
+Tài liệu này mô tả quy trình làm việc chung của nhóm. Quy tắc dành cho AI agent nằm ở [AGENTS.md](AGENTS.md).
 
 ## Mục lục
 
@@ -96,7 +96,9 @@ fix(mobile): retry outbox items after reconnect
 chore(db): add V3 migration for listening_attempt
 ```
 
-Không thêm trailer `Co-Authored-By` hay dòng "Generated with …" của công cụ AI. Ai dùng công cụ AI thì tự tắt phần ghi công này trong cấu hình trên máy mình.
+Không thêm trailer `Co-Authored-By` hay dòng "Generated with …" của công cụ AI. Repo đã tắt sẵn cho Claude Code trong `.claude/settings.json`; công cụ khác thì tự tắt trong cấu hình trên máy mình.
+
+File cấu hình agent dùng chung (`AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`) được commit. Cấu hình cá nhân để ở `CLAUDE.local.md` và `.claude/settings.local.json` (đã gitignore).
 
 ## Code Review Checklist
 
@@ -146,7 +148,12 @@ Migration **chỉ chạy bằng Flyway**. Không dùng `supabase db push` / `sup
 - `DB_URL`, `DB_USER`, `DB_PASSWORD`: lấy trong nút **Connect** của project. Dùng **Session pooler (cổng 5432)** hoặc **Direct connection**. **Không dùng Transaction pooler (cổng 6543)** — Flyway sẽ lỗi.
 - `SUPABASE_JWT_ISSUER`: `https://<project-ref>.supabase.co/auth/v1`
 - `SUPABASE_JWKS_URL`: `https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json`
-- Project còn dùng JWT secret kiểu cũ (HS256) thì không có JWKS; khi đó cần biến `SUPABASE_JWT_SECRET` thay thế. **TODO:** backend hiện chỉ hỗ trợ JWKS; nhóm thống nhất dùng JWT Signing Keys (bất đối xứng) hoặc bổ sung decoder HS256.
+- Project **phải bật JWT Signing Keys** (khoá bất đối xứng). Backend chỉ xác thực JWT qua JWKS, không hỗ trợ Legacy JWT secret (HS256).
+  1. Project Settings → **JWT Keys**.
+  2. Nếu đang ở chế độ Legacy JWT secret: chuyển sang Signing Keys, tạo khoá mới và bật lên.
+  3. Mở `https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json` — phải trả về ít nhất một khoá.
+  
+  Đổi khoá làm các phiên đăng nhập cũ hết hiệu lực; với project dev chỉ cần đăng nhập lại.
 
 ### 4. Frontend
 
@@ -270,7 +277,7 @@ export function makeSubmitReview(deps: { outbox: OutboxPort; clock: ClockPort })
 - **Bắt buộc** unit test cho domain + application, mục tiêu độ phủ **≥ 70%** (PER-7). Báo cáo JaCoCo: `backend/build/reports/jacoco/`.
 - **Test vector dùng chung**: logic có ở cả client và server (SM-2, Star, sinh câu hỏi, đếm từ) phải có case trong `frontend/packages/fixtures/*.json`, chạy ở cả Vitest và JUnit.
 - **Repository**: Testcontainers với image `pgvector/pgvector:pg17` cho repository dùng pgvector / SQL đặc thù.
-- **Stub Supabase khi test**: `schema.sql` tham chiếu `auth.users`, `auth.uid()`, role `authenticated` — những thứ chỉ Supabase có. Vì vậy test chạy thêm `backend/src/test/resources/db/stub/V0_1__supabase_auth_stub.sql` (trước V1) để giả lập. Schema dùng thêm đối tượng Supabase nào khác thì bổ sung vào file stub này, không sửa migration thật.
+- **Stub Supabase khi test**: `schema.sql` tham chiếu `auth.users` (`id`, `email`, `raw_user_meta_data`), `auth.uid()`, role `authenticated` và `anon` — những thứ chỉ Supabase có. Vì vậy test chạy thêm `backend/src/test/resources/db/stub/V0_1__supabase_auth_stub.sql` (trước V1) để giả lập. Schema dùng thêm đối tượng Supabase nào khác thì bổ sung vào file stub này, không sửa migration thật.
 - **Kiến trúc**: `ArchitectureTest` (ArchUnit) và `pnpm depcruise` chạy trong CI.
 - **E2E**: Detox (mobile) và Playwright (admin web) cho các luồng chính trước buổi demo.
 
