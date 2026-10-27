@@ -1,4 +1,4 @@
-package com.pela.config;
+package com.pela.platform.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
