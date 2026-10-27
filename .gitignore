@@ -42,8 +42,6 @@ frontend/apps/mobile/ios/
 *.aab
 *.ipa
 
-# Claude Code local settings
+# Claude Code — chỉ file cá nhân (AGENTS.md, CLAUDE.md, .claude/settings.json được commit)
 .claude/settings.local.json
-AGENTS.md
-CLAUDE.md
-.claude/
+CLAUDE.local.md
