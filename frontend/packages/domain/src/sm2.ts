@@ -5,7 +5,7 @@
  */
 
 export interface Sm2State {
-  easeFactor: number;
+  easinessFactor: number;
   repetitions: number;
   intervalDays: number;
   consecutiveFailures: number;
@@ -18,8 +18,8 @@ export interface Sm2Review {
 
 /** Hằng số theo BR-26. Giá trị chính thức đọc từ cấu hình; đây là mặc định để test. */
 export const SM2_DEFAULTS = {
-  initialEaseFactor: 2.5,
-  minEaseFactor: 1.3,
+  initialEasinessFactor: 2.5,
+  minEasinessFactor: 1.3,
   qualityCorrect: 5,
   qualityWrong: 2,
   failuresBeforeReinforcement: 3,
