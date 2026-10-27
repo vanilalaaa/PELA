@@ -1,0 +1,9 @@
+{
+  "name": "@pela/fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Test vector JSON dùng chung giữa packages/domain (TS) và backend (Java).",
+  "exports": {
+    "./*.json": "./*.json"
+  }
+}

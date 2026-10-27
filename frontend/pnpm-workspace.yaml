@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+# React Native / Expo cần node_modules dạng hoisted trong monorepo
+nodeLinker: hoisted
+
+# Một bản React duy nhất cho cả workspace (theo phiên bản Expo SDK yêu cầu)
+overrides:
+  react: 19.3.0
+  react-dom: 19.3.0
