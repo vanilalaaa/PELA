@@ -1,0 +1,57 @@
+openapi: 3.1.0
+info:
+  title: PELA API
+  version: 0.1.0
+  description: |
+    REST API của PELA — Personalized English Learning Application.
+    Mọi endpoint nằm dưới tiền tố `/v1`. `userId` luôn lấy từ JWT (SEC-4), không lấy từ body.
+servers:
+  - url: http://localhost:8080/v1
+    description: Local
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Kiểm tra trạng thái dịch vụ
+      operationId: getHealth
+      security: []
+      tags: [platform]
+      responses:
+        '200':
+          description: Dịch vụ hoạt động
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    const: ok
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token do Supabase Auth cấp.
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Mã lỗi ổn định, dạng UPPER_SNAKE_CASE
+              examples: [VALIDATION_FAILED]
+            message:
+              type: string
+              description: Mô tả ngắn cho người phát triển
+            details:
+              description: Thông tin bổ sung (ví dụ lỗi theo từng field)
+              type: [object, array, 'null']
