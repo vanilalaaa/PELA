@@ -14,7 +14,7 @@ PELA là ứng dụng di động giúp người học tiếng Anh đi theo lộ 
 - **Listening** — bài nghe theo cấp độ.
 - **Gamification** — Star, streak, bảng xếp hạng, kết nối bạn bè.
 - **Offline-first** — dữ liệu cục bộ bằng WatermelonDB, đồng bộ qua outbox.
-- **Admin portal** — quản lý nội dung, kho đề, cấu hình hệ thống và prompt AI.
+- **Admin portal** — tài khoản, lộ trình, kho đề Listening/Writing, báo cáo, dashboard, nhật ký hoạt động.
 
 ## Kiến trúc tổng quan
 
@@ -42,6 +42,7 @@ flowchart LR
 
     M -- "sync lô đáp án (UUID)" --> API
     W --> API
+    M -. "tải audio (signed URL)" .-> ST
     M -. đăng nhập .-> AUTH
     W -. đăng nhập .-> AUTH
     API -- "xác thực JWT" --> AUTH
@@ -55,10 +56,10 @@ flowchart LR
 
 | Thành phần | Công nghệ |
 |---|---|
-| Backend | Java 21, Spring Boot 3.5, Spring Security (OAuth2 Resource Server), JdbcTemplate, Flyway, ArchUnit, JUnit 5, Testcontainers — Gradle (Kotlin DSL) |
+| Backend | Java 21, Spring Boot 3.5, Spring Security (OAuth2 Resource Server), JdbcTemplate, Flyway, ArchUnit, JUnit 5, Testcontainers, JaCoCo — Gradle (Kotlin DSL) |
 | Mobile | React Native + Expo (dev build), TypeScript strict, React Navigation, Zustand, React Hook Form + Zod, i18next (vi/en), WatermelonDB |
 | Admin web | React + TypeScript (Vite), TanStack Query, React Router, Zustand, React Hook Form + Zod |
-| Frontend chung | pnpm workspace, `@pela/domain`, `@pela/api-contract`, `@pela/fixtures`, Vitest, dependency-cruiser |
+| Frontend chung | pnpm workspace, `@pela/domain`, `@pela/api-contract`, `@pela/fixtures`, Vitest, dependency-cruiser, oxlint |
 | Hạ tầng | Supabase: PostgreSQL 17 + pgvector, Auth, Storage |
 | AI | Google Gemini: `gemini-2.5-flash`, `gemini-embedding-001` (768 chiều) |
 | Push | FCM / APNs |
@@ -75,9 +76,9 @@ flowchart LR
 │  ├─ packages/domain/      TS thuần: SM-2, quy đổi Star, …
 │  ├─ packages/api-contract/ DTO + Zod từ OpenAPI
 │  └─ packages/fixtures/    test vector JSON dùng chung với backend
-├─ supabase/
+├─ db/
 │  ├─ migrations/           Flyway (V1__init.sql = schema.sql)
-│  └─ seed/
+│  └─ seed/                 dữ liệu dev
 ├─ docs/                    SRS, kiến trúc, sơ đồ, OpenAPI, ADR
 └─ CONTRIBUTING.md          quy trình làm việc của nhóm
 ```

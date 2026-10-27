@@ -7,4 +7,4 @@ TODO: chưa có file tài liệu kiến trúc trong repo — nhóm bổ sung.
 Tóm tắt nhanh (chi tiết xem tài liệu gốc):
 
 - Backend: modular monolith, 16 module, mỗi module có `domain/`, `application/port/in`, `application/port/out`, `application/usecase`, `adapter/in/web`, `adapter/in/job`, `adapter/out/...`. Ranh giới được kiểm bằng ArchUnit (`backend/src/test/java/com/pela/ArchitectureTest.java`).
-- Frontend: tầng `domain` → `application` → `presentation`/`infrastructure`. Ranh giới được kiểm bằng dependency-cruiser (`frontend/.dependency-cruiser.cjs`).
+- Frontend: chia theo feature — `src/features/<module>/{application,infrastructure,presentation}`, hạ tầng chung ở `src/core/infrastructure`, composition root mobile ở `src/app/container.ts`. Ranh giới được kiểm bằng dependency-cruiser (`frontend/.dependency-cruiser.cjs`).

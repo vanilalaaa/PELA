@@ -65,7 +65,11 @@ Quy trình:
 5. Người còn lại review và **approve** trước khi merge.
 6. Merge bằng **squash merge**. Xoá nhánh sau khi merge.
 
+**Tiêu đề PR phải theo [Commit Convention](#commit-convention)** (ví dụ `feat(srs): add review submission use case`), vì khi squash GitHub lấy tiêu đề PR làm commit message trên `develop`.
+
 Mô tả PR phải ghi mã UC/BR liên quan (ví dụ `UC-24, BR-7`). Dùng template có sẵn trong `.github/PULL_REQUEST_TEMPLATE.md`.
+
+Đưa `develop` lên `main` (chốt bản nộp): mở PR `develop` → `main` và merge bằng **merge commit**, không squash. Squash ở bước này làm lịch sử `main` và `develop` lệch nhau, lần merge sau sẽ ra conflict giả.
 
 Không commit trực tiếp và không force-push lên `main`/`develop`.
 
@@ -126,18 +130,23 @@ cp .env.example .env
 cd backend
 # nạp biến môi trường từ ../.env vào shell (ví dụ: set -a; source ../.env; set +a)
 ./gradlew build      # compile + test
-./gradlew bootRun    # Flyway tự chạy migration trong ../supabase/migrations khi khởi động
+./gradlew bootRun    # Flyway tự chạy migration trong ../db/migrations khi khởi động
 ```
 
 Kiểm tra `GET http://localhost:8080/v1/health` → `{"status":"ok"}`.
 
-Flyway đọc migration từ `filesystem:../supabase/migrations` (đổi bằng biến `FLYWAY_LOCATIONS`). Chạy app từ thư mục `backend/`.
+Flyway đọc migration từ `filesystem:../db/migrations` (đổi bằng biến `FLYWAY_LOCATIONS`). Chạy app từ thư mục `backend/`.
+
+Migration **chỉ chạy bằng Flyway**. Không dùng `supabase db push` / `supabase migration` của Supabase CLI.
 
 ### 3. Supabase
 
 - Mỗi người dùng **một project dev riêng**. Không chạy migration hay seed lên project đang dùng để test/demo.
 - Bật extension `vector` (pgvector) trong project.
-- Lấy `DB_URL`, `DB_USER`, `DB_PASSWORD` trong Project Settings → Database; `SUPABASE_JWT_ISSUER`, `SUPABASE_JWKS_URL` theo URL project.
+- `DB_URL`, `DB_USER`, `DB_PASSWORD`: lấy trong nút **Connect** của project. Dùng **Session pooler (cổng 5432)** hoặc **Direct connection**. **Không dùng Transaction pooler (cổng 6543)** — Flyway sẽ lỗi.
+- `SUPABASE_JWT_ISSUER`: `https://<project-ref>.supabase.co/auth/v1`
+- `SUPABASE_JWKS_URL`: `https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json`
+- Project còn dùng JWT secret kiểu cũ (HS256) thì không có JWKS; khi đó cần biến `SUPABASE_JWT_SECRET` thay thế. **TODO:** backend hiện chỉ hỗ trợ JWKS; nhóm thống nhất dùng JWT Signing Keys (bất đối xứng) hoặc bổ sung decoder HS256.
 
 ### 4. Frontend
 
@@ -156,10 +165,10 @@ App mobile dùng **dev build**, không dùng Expo Go.
 
 ```text
 backend/src/main/java/com/pela/
-├─ config/                     cấu hình Spring (security…)
 └─ <module>/                   shared, identity, onboarding, assessment, roadmap, srs,
    │                           challenge, rag, writing, listening, gamification, social,
    │                           notification, sync, admin, platform
+   │                           (cấu hình Spring dùng chung: platform/config/)
    ├─ domain/                  entity, value object, luật nghiệp vụ — Java thuần
    ├─ application/
    │  ├─ port/in/              interface use case (API công khai của module)
@@ -171,15 +180,22 @@ backend/src/main/java/com/pela/
       └─ out/                  JdbcTemplate, Gemini, Supabase, FCM…
 
 frontend/
-├─ apps/mobile/src/            domain, application, infrastructure, presentation, compositionRoot.ts
-├─ apps/admin-web/src/         domain, application, infrastructure, presentation
+├─ apps/mobile/src/
+│  ├─ app/container.ts         composition root duy nhất
+│  ├─ core/infrastructure/     hạ tầng dùng chung (DB cục bộ, API client, Supabase…)
+│  ├─ domain/                  logic riêng của app (logic dùng chung ở packages/domain)
+│  └─ features/<module>/       trùng tên module backend
+│     ├─ application/          use case, port — không import React/infrastructure/presentation
+│     ├─ infrastructure/       hiện thực port
+│     └─ presentation/         screen, component, ViewModel hook
+├─ apps/admin-web/src/         core/infrastructure, domain, features/<module>/… (như mobile)
 ├─ packages/domain/            TS thuần dùng chung (SM-2, Star…)
 ├─ packages/api-contract/      DTO + Zod từ OpenAPI
 ├─ packages/fixtures/          test vector JSON dùng chung với backend
 └─ .dependency-cruiser.cjs     luật ranh giới tầng
 
-supabase/migrations/           Flyway V{n}__*.sql
-supabase/seed/                 dữ liệu dev
+db/migrations/                 Flyway V{n}__*.sql
+db/seed/                       dữ liệu dev
 docs/                          SRS, kiến trúc, sơ đồ, OpenAPI, ADR
 ```
 
@@ -191,7 +207,7 @@ Thứ tự: **domain → port → use case → adapter → controller → test**
 
 ```java
 // domain/ReviewCard.java — luật SM-2, Java thuần
-public record ReviewCard(UUID id, double easeFactor, int repetitions, int intervalDays) {
+public record ReviewCard(UUID id, double easinessFactor, int repetitions, int intervalDays) {
     public ReviewCard apply(boolean correct) { /* BR-26 */ }
 }
 
@@ -215,28 +231,28 @@ Test: unit test cho `ReviewCard` (dùng `sm2-cases.json`) và `SubmitReviewServi
 
 ### 2. Thêm màn hình mobile
 
-Thứ tự: **use case trong `application/` → ViewModel hook → screen**.
+Thứ tự: **use case trong `features/<module>/application/` → ViewModel hook → screen**.
 
 ```ts
-// src/application/review/submitReview.ts — không import React / WatermelonDB
+// src/features/srs/application/submitReview.ts — không import React / WatermelonDB
 export function makeSubmitReview(deps: { outbox: OutboxPort; clock: ClockPort }) {
   return async (answers: ReviewAnswer[]) => { /* ghi vào outbox */ };
 }
 
-// src/presentation/review/useReviewViewModel.ts — hook nhận use case đã tiêm
-// src/presentation/review/ReviewScreen.tsx — chỉ render, chuỗi qua t('review.title')
-// src/compositionRoot.ts — tạo adapter WatermelonDB và tiêm vào makeSubmitReview
+// src/features/srs/presentation/useReviewViewModel.ts — hook nhận use case đã tiêm
+// src/features/srs/presentation/ReviewScreen.tsx — chỉ render, chuỗi qua t('review.title')
+// src/app/container.ts — tạo adapter WatermelonDB và tiêm vào makeSubmitReview
 ```
 
 ### 3. Thêm bảng
 
-1. Tạo migration mới: `supabase/migrations/V{n}__add_listening_attempt.sql` (`snake_case`, khoá chính UUID). Không sửa migration đã merge.
-2. Nếu bảng dùng offline: cập nhật schema và migration WatermelonDB trong `apps/mobile/src/infrastructure/`.
+1. Tạo migration mới: `db/migrations/V{n}__add_listening_attempt.sql` (`snake_case`, khoá chính UUID). Không sửa migration đã merge.
+2. Nếu bảng dùng offline: cập nhật schema và migration WatermelonDB trong `apps/mobile/src/core/infrastructure/`.
 3. Commit với scope `db`: `chore(db): add listening_attempt table`.
 
 ### 4. Thêm prompt AI
 
-- Thêm bản ghi `prompt_template` (key, version, nội dung, JSON schema output) bằng migration hoặc qua Admin portal.
+- Thêm bản ghi `prompt_template` (key, version, nội dung, JSON schema output) **bằng migration**. Admin portal không có màn quản lý prompt/cấu hình (ngoài phạm vi R1.0).
 - Không viết prompt trong code. Code chỉ tham chiếu key của prompt; version đang dùng là cấu hình.
 - Output LLM được validate theo JSON schema; luôn có fallback.
 
@@ -254,6 +270,7 @@ export function makeSubmitReview(deps: { outbox: OutboxPort; clock: ClockPort })
 - **Bắt buộc** unit test cho domain + application, mục tiêu độ phủ **≥ 70%** (PER-7). Báo cáo JaCoCo: `backend/build/reports/jacoco/`.
 - **Test vector dùng chung**: logic có ở cả client và server (SM-2, Star, sinh câu hỏi, đếm từ) phải có case trong `frontend/packages/fixtures/*.json`, chạy ở cả Vitest và JUnit.
 - **Repository**: Testcontainers với image `pgvector/pgvector:pg17` cho repository dùng pgvector / SQL đặc thù.
+- **Stub Supabase khi test**: `schema.sql` tham chiếu `auth.users`, `auth.uid()`, role `authenticated` — những thứ chỉ Supabase có. Vì vậy test chạy thêm `backend/src/test/resources/db/stub/V0_1__supabase_auth_stub.sql` (trước V1) để giả lập. Schema dùng thêm đối tượng Supabase nào khác thì bổ sung vào file stub này, không sửa migration thật.
 - **Kiến trúc**: `ArchitectureTest` (ArchUnit) và `pnpm depcruise` chạy trong CI.
 - **E2E**: Detox (mobile) và Playwright (admin web) cho các luồng chính trước buổi demo.
 
@@ -291,5 +308,6 @@ export function makeSubmitReview(deps: { outbox: OutboxPort; clock: ClockPort })
 - Không commit `.env`, Gemini API key, Supabase service role key, keystore. `.gitignore` đã chặn sẵn; vẫn phải tự kiểm diff.
 - Chỉ **backend** giữ service role key. Mobile và admin web chỉ dùng **anon key** (biến `EXPO_PUBLIC_*`, `VITE_*` sẽ bị đóng gói vào client — không đặt secret vào đó).
 - Mỗi người dùng Gemini key và project Supabase dev riêng.
+- Project Supabase gói Free tự **tạm dừng sau khoảng 1 tuần không dùng**. Backend không kết nối được DB thì vào Dashboard kiểm tra và bấm Restore trước khi tìm lỗi khác.
 - Không log PII (email, tên, nội dung bài viết, token).
 - Lỡ commit secret: báo nhóm ngay và **thu hồi/đổi key** — xoá commit là không đủ.
