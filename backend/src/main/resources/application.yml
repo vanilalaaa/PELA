@@ -6,8 +6,8 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   flyway:
-    # Migration dùng chung với thư mục supabase/ ở gốc repo (chạy app từ thư mục backend/)
-    locations: ${FLYWAY_LOCATIONS:filesystem:../supabase/migrations}
+    # Migration dùng chung với thư mục db/ ở gốc repo (chạy app từ thư mục backend/)
+    locations: ${FLYWAY_LOCATIONS:filesystem:../db/migrations}
   security:
     oauth2:
       resourceserver:

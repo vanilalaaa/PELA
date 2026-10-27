@@ -1,7 +1,8 @@
 # Giá trị giả cho test — không phải secret thật.
 spring:
   flyway:
-    locations: filesystem:../supabase/migrations
+    # Stub schema auth của Supabase (chỉ test) + migration thật
+    locations: classpath:db/stub,filesystem:../db/migrations
   security:
     oauth2:
       resourceserver:
