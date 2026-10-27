@@ -1,9 +1,14 @@
 /**
  * Ranh giới tầng frontend (xem CONTRIBUTING.md).
- * Cấu trúc trong mỗi app: src/domain, src/application, src/infrastructure, src/presentation.
+ * Cấu trúc mỗi app (chia theo feature):
+ *   src/features/<module>/{application,infrastructure,presentation}
+ *   src/core/infrastructure   hạ tầng dùng chung
+ *   src/domain                logic riêng của app
+ *   src/app/container.ts      composition root (mobile)
  * packages/domain được coi là tầng domain.
  */
 const DOMAIN = '^(packages/domain/src|apps/[^/]+/src/domain)/';
+const INFRASTRUCTURE = '^apps/[^/]+/src/(core/infrastructure|features/[^/]+/infrastructure)/';
 
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
@@ -20,10 +25,11 @@ module.exports = {
       name: 'application-no-infrastructure-presentation-react',
       comment: 'Application không import infrastructure, presentation hay React.',
       severity: 'error',
-      from: { path: '^apps/[^/]+/src/application/' },
+      from: { path: '^apps/[^/]+/src/features/[^/]+/application/' },
       to: {
         path: [
-          '^apps/[^/]+/src/(infrastructure|presentation)/',
+          INFRASTRUCTURE,
+          '^apps/[^/]+/src/features/[^/]+/presentation/',
           '(^|/)node_modules/(react|react-native|react-dom)/',
         ],
       },
@@ -32,8 +38,8 @@ module.exports = {
       name: 'presentation-no-infrastructure',
       comment: 'Presentation không import infrastructure; phụ thuộc được tiêm qua composition root.',
       severity: 'error',
-      from: { path: '^apps/[^/]+/src/presentation/' },
-      to: { path: '^apps/[^/]+/src/infrastructure/' },
+      from: { path: '^apps/[^/]+/src/features/[^/]+/presentation/' },
+      to: { path: INFRASTRUCTURE },
     },
   ],
   options: {
