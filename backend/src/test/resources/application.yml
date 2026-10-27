@@ -1,0 +1,14 @@
+# Giá trị giả cho test — không phải secret thật.
+spring:
+  flyway:
+    locations: filesystem:../supabase/migrations
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://example.invalid/auth/v1
+          jwk-set-uri: https://example.invalid/auth/v1/.well-known/jwks.json
+
+pela:
+  gemini:
+    api-key: test

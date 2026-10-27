@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: pela-backend
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  flyway:
+    # Migration dùng chung với thư mục supabase/ ở gốc repo (chạy app từ thư mục backend/)
+    locations: ${FLYWAY_LOCATIONS:filesystem:../supabase/migrations}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_JWT_ISSUER}
+          jwk-set-uri: ${SUPABASE_JWKS_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+pela:
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
