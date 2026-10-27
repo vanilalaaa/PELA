@@ -1,5 +1,5 @@
 /**
- * Ranh giới tầng frontend (xem AGENTS.md).
+ * Ranh giới tầng frontend (xem CONTRIBUTING.md).
  * Cấu trúc trong mỗi app: src/domain, src/application, src/infrastructure, src/presentation.
  * packages/domain được coi là tầng domain.
  */

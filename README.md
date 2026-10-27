@@ -79,7 +79,6 @@ flowchart LR
 │  ├─ migrations/           Flyway (V1__init.sql = schema.sql)
 │  └─ seed/
 ├─ docs/                    SRS, kiến trúc, sơ đồ, OpenAPI, ADR
-├─ AGENTS.md                quy tắc cho AI agent
 └─ CONTRIBUTING.md          quy trình làm việc của nhóm
 ```
 
@@ -115,7 +114,6 @@ pnpm --filter admin-web dev
 
 - [docs/](docs/README.md) — SRS, kiến trúc, sơ đồ, OpenAPI, ADR
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Git workflow, quy ước code, test, Definition of Done
-- [AGENTS.md](AGENTS.md) — quy tắc cho AI agent làm việc trong repo
 
 ## Nhóm thực hiện
 

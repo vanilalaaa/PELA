@@ -1,6 +1,6 @@
 # Hướng dẫn đóng góp — PELA
 
-Tài liệu này mô tả quy trình làm việc chung của nhóm. Quy tắc dành cho AI agent nằm ở [AGENTS.md](AGENTS.md).
+Tài liệu này mô tả quy trình làm việc chung của nhóm.
 
 ## Mục lục
 
@@ -92,7 +92,7 @@ fix(mobile): retry outbox items after reconnect
 chore(db): add V3 migration for listening_attempt
 ```
 
-Không thêm trailer `Co-Authored-By` hay dòng "Generated with …" của công cụ AI. Repo đã tắt sẵn cho Claude Code trong `.claude/settings.json`.
+Không thêm trailer `Co-Authored-By` hay dòng "Generated with …" của công cụ AI. Ai dùng công cụ AI thì tự tắt phần ghi công này trong cấu hình trên máy mình.
 
 ## Code Review Checklist
 
