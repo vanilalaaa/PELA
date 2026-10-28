@@ -1,0 +1,26 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "error": "Something went wrong"
+  },
+  "uiKit": {
+    "title": "UI Kit (dev)",
+    "subtitle": "Internal screen to compare components against Figma — not a user-facing screen.",
+    "sectionButton": "Button",
+    "sectionCard": "Card",
+    "sectionInput": "Input",
+    "sectionProgress": "ProgressBar",
+    "sectionStar": "StarRating",
+    "sectionSheet": "BottomSheet",
+    "sectionQuestion": "QuestionOption",
+    "openSheet": "Open BottomSheet",
+    "inputLabel": "Your name",
+    "inputPlaceholder": "Enter your name...",
+    "inputError": "This field cannot be empty"
+  }
+}

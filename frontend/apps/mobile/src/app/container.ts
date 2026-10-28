@@ -8,10 +8,16 @@
  * application layer của feature đó). Hiện tại container chỉ chịu trách nhiệm khởi tạo phần
  * hạ tầng dùng chung (i18n, database) theo đúng nguyên tắc "1 composition root".
  */
+import { initI18n } from '../core/infrastructure/i18n';
 import { createSqliteDatabase } from '../core/infrastructure/database';
 import type { Database } from '@nozbe/watermelondb';
 
 let databasePromise: Promise<Database> | null = null;
+
+/** Gọi 1 lần ở App.tsx, trước khi render NavigationContainer. */
+export function bootstrap() {
+  initI18n();
+}
 
 /**
  * Lazy-init WatermelonDB (SQLite, dùng được trên dev build/device thật — KHÔNG hoạt động

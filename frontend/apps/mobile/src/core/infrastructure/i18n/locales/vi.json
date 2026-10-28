@@ -1,0 +1,26 @@
+{
+  "common": {
+    "ok": "Đồng ý",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "close": "Đóng",
+    "loading": "Đang tải...",
+    "retry": "Thử lại",
+    "error": "Đã có lỗi xảy ra"
+  },
+  "uiKit": {
+    "title": "UI Kit (dev)",
+    "subtitle": "Màn demo nội bộ để so sánh component với Figma — không phải màn cho người dùng.",
+    "sectionButton": "Button",
+    "sectionCard": "Card",
+    "sectionInput": "Input",
+    "sectionProgress": "ProgressBar",
+    "sectionStar": "StarRating",
+    "sectionSheet": "BottomSheet",
+    "sectionQuestion": "QuestionOption",
+    "openSheet": "Mở BottomSheet",
+    "inputLabel": "Tên của bạn",
+    "inputPlaceholder": "Nhập tên...",
+    "inputError": "Trường này không được để trống"
+  }
+}
