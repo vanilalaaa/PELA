@@ -23,7 +23,8 @@
     },
     "scheme": "pela",
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withWatermelonDB"
     ]
   }
 }
