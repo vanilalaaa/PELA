@@ -1,13 +1,19 @@
 spring:
   application:
     name: pela-backend
+  config:
+    # Đọc backend/.env (gitignore) khi chạy từ thư mục backend/; không có file thì dùng biến môi trường
+    import: optional:file:.env[.properties]
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5 # Supabase gói Free giới hạn số kết nối
   flyway:
     # Migration dùng chung với thư mục db/ ở gốc repo (chạy app từ thư mục backend/)
     locations: ${FLYWAY_LOCATIONS:filesystem:../db/migrations}
+    baseline-on-migrate: false
   security:
     oauth2:
       resourceserver:

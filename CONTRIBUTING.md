@@ -121,19 +121,20 @@ Người mở PR tự kiểm trước, reviewer kiểm lại:
 ```bash
 git clone <repo-url> SE121-PELA
 cd SE121-PELA
-cp .env.example .env
+cp .env.example backend/.env
 ```
 
-Điền `.env` bằng thông tin của **project Supabase dev riêng** (xem mục 3). Không commit `.env`.
+Điền `backend/.env` bằng thông tin của **project Supabase dev riêng** (xem mục 3). Chỉ cần nhóm biến Backend; biến `EXPO_PUBLIC_*` / `VITE_*` đặt trong `.env` của từng app frontend. Không commit `.env`.
 
 ### 2. Backend
 
 ```bash
 cd backend
-# nạp biến môi trường từ ../.env vào shell (ví dụ: set -a; source ../.env; set +a)
 ./gradlew build      # compile + test
-./gradlew bootRun    # Flyway tự chạy migration trong ../db/migrations khi khởi động
+./gradlew bootRun    # tự đọc backend/.env; Flyway chạy migration trong ../db/migrations khi khởi động
 ```
+
+Spring đọc `backend/.env` qua `spring.config.import: optional:file:.env[.properties]`, nên phải chạy lệnh từ thư mục `backend/`. Không có file thì dùng biến môi trường của shell. Khi chạy thành công lần đầu, log Flyway báo `Successfully applied N migrations to schema "public"` và Supabase Table Editor có thêm bảng `flyway_schema_history`.
 
 Kiểm tra `GET http://localhost:8080/v1/health` → `{"status":"ok"}`.
 
