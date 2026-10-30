@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../core/ui/theme';
 import {
@@ -14,11 +14,11 @@ import {
 } from '../../core/ui/components';
 
 /**
- * Màn "Storybook" nội bộ (dev-only, item 17 trong task) — liệt kê từng component ở đủ
- * state (default, pressed, disabled) và cả 2 theme, để người làm UI so trực tiếp với Figma.
+ * Màn "Storybook" nội bộ, chỉ có trong bản dev: liệt kê từng component ở đủ state (default,
+ * pressed, disabled) và cả 2 theme, để so trực tiếp với Figma.
  * Riêng state "pressed" không demo tĩnh được vì chỉ xuất hiện khi đang chạm (xem Button.tsx).
  *
- * Không export khỏi __DEV__ (xem RootNavigator.tsx).
+ * Chỉ được đăng ký vào navigator khi `__DEV__` (xem RootNavigator.tsx).
  */
 export function UiKitScreen() {
   const { t } = useTranslation();
@@ -42,22 +42,22 @@ export function UiKitScreen() {
       </View>
 
       <Section title={t('uiKit.sectionButton')}>
-        <Button label="Primary" variant="primary" onPress={() => {}} />
-        <Button label="Secondary" variant="secondary" onPress={() => {}} />
-        <Button label="Ghost" variant="ghost" onPress={() => {}} />
-        <Button label="Disabled" variant="primary" disabled onPress={() => {}} />
-        <Button label="Loading" variant="primary" loading onPress={() => {}} />
+        <Button label={t('uiKit.buttonPrimary')} variant="primary" onPress={() => {}} />
+        <Button label={t('uiKit.buttonSecondary')} variant="secondary" onPress={() => {}} />
+        <Button label={t('uiKit.buttonGhost')} variant="ghost" onPress={() => {}} />
+        <Button label={t('uiKit.buttonDisabled')} variant="primary" disabled onPress={() => {}} />
+        <Button label={t('uiKit.buttonLoading')} variant="primary" loading onPress={() => {}} />
       </Section>
 
       <Section title={t('uiKit.sectionCard')}>
         <Card>
-          <Text style={{ color: theme.colors.textPrimary }}>Card tĩnh (không bấm được)</Text>
+          <Text style={{ color: theme.colors.textPrimary }}>{t('uiKit.cardStatic')}</Text>
         </Card>
         <Card onPress={() => {}}>
-          <Text style={{ color: theme.colors.textPrimary }}>Card bấm được (có state pressed)</Text>
+          <Text style={{ color: theme.colors.textPrimary }}>{t('uiKit.cardPressable')}</Text>
         </Card>
         <Card onPress={() => {}} disabled>
-          <Text style={{ color: theme.colors.textPrimary }}>Card disabled</Text>
+          <Text style={{ color: theme.colors.textPrimary }}>{t('uiKit.cardDisabled')}</Text>
         </Card>
       </Section>
 
@@ -69,7 +69,7 @@ export function UiKitScreen() {
           onChangeText={setInputValue}
         />
         <Input label={t('uiKit.inputLabel')} value="" errorMessage={t('uiKit.inputError')} />
-        <Input label={t('uiKit.inputLabel')} value="Không sửa được" disabled />
+        <Input label={t('uiKit.inputLabel')} value={t('uiKit.inputReadonly')} disabled />
       </Section>
 
       <Section title={t('uiKit.sectionProgress')}>
@@ -88,8 +88,8 @@ export function UiKitScreen() {
         {questionStates.map((s) => (
           <QuestionOption
             key={s}
-            label={`Option — ${s}`}
-            state={s === 'default' && selectedOption === 'default' ? 'default' : s}
+            label={t('uiKit.questionOption', { state: s })}
+            state={s === 'disabled' ? 'disabled' : selectedOption === s ? s : 'default'}
             onPress={() => setSelectedOption(s)}
           />
         ))}
@@ -98,9 +98,9 @@ export function UiKitScreen() {
       <Section title={t('uiKit.sectionSheet')}>
         <Button label={t('uiKit.openSheet')} onPress={() => setSheetVisible(true)} />
         <BottomSheet visible={sheetVisible} onClose={() => setSheetVisible(false)}>
-          <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg }}>BottomSheet</Text>
+          <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg }}>{t('uiKit.sheetTitle')}</Text>
           <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.sm }}>
-            Dựng bằng Modal + Animated có sẵn trong React Native, không thêm lib native mới.
+            {t('uiKit.sheetBody')}
           </Text>
           <Button label={t('common.close')} variant="ghost" onPress={() => setSheetVisible(false)} />
         </BottomSheet>
@@ -120,21 +120,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </View>
   );
 }
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  const theme = useTheme();
-  return (
-    <View style={styles.row}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.md }}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-});

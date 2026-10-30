@@ -21,6 +21,33 @@
     "openSheet": "Mở BottomSheet",
     "inputLabel": "Tên của bạn",
     "inputPlaceholder": "Nhập tên...",
-    "inputError": "Trường này không được để trống"
+    "inputError": "Trường này không được để trống",
+    "open": "Mở UI Kit",
+    "buttonPrimary": "Chính",
+    "buttonSecondary": "Phụ",
+    "buttonGhost": "Ghost",
+    "buttonDisabled": "Vô hiệu",
+    "buttonLoading": "Đang tải",
+    "cardStatic": "Card tĩnh (không bấm được)",
+    "cardPressable": "Card bấm được (có trạng thái pressed)",
+    "cardDisabled": "Card vô hiệu",
+    "inputReadonly": "Không sửa được",
+    "questionOption": "Lựa chọn — {{state}}",
+    "sheetTitle": "BottomSheet",
+    "sheetBody": "Dựng bằng Modal và Animated có sẵn của React Native, không thêm thư viện native."
+  },
+  "dbCheck": {
+    "title": "Kiểm tra DB (dev)",
+    "open": "Kiểm tra DB",
+    "subtitle": "Ghi một review_card mẫu vào WatermelonDB, đọc lại và so từng field. Tắt hẳn app rồi mở lại và bấm \"Đọc lại\" để kiểm tra dữ liệu còn lưu.",
+    "write": "Ghi review_card mẫu",
+    "read": "Đọc lại và so sánh",
+    "delete": "Xoá bản ghi mẫu",
+    "written": "Đã ghi bản ghi mẫu.",
+    "deleted": "Đã xoá bản ghi mẫu.",
+    "missing": "Không tìm thấy bản ghi mẫu.",
+    "error": "Lỗi: {{message}}",
+    "passed": "QUA: mọi field đều đúng",
+    "failed": "LỖI: có field sai"
   }
 }
