@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Modal, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 
@@ -15,8 +16,9 @@ export interface BottomSheetProps {
  */
 export function BottomSheet({ visible, onClose, children, style }: BottomSheetProps) {
   const theme = useTheme();
-  const translateY = useRef(new Animated.Value(300)).current;
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const { t } = useTranslation();
+  const [translateY] = useState(() => new Animated.Value(300));
+  const [backdropOpacity] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (visible) {
@@ -35,7 +37,7 @@ export function BottomSheet({ visible, onClose, children, style }: BottomSheetPr
       <Animated.View
         style={[styles.backdrop, { backgroundColor: theme.colors.overlay, opacity: backdropOpacity }]}
       >
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Đóng" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
       </Animated.View>
       <Animated.View
         style={[
