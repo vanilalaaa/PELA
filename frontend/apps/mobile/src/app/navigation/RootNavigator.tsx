@@ -64,10 +64,11 @@ export function RootNavigator() {
           notification: theme.colors.danger,
         },
         fonts: {
+          // Mỗi family đã là một độ đậm riêng (xem tokens.ts), nên fontWeight để '400'.
           regular: { fontFamily: theme.typography.fontFamily.regular, fontWeight: '400' },
-          medium: { fontFamily: theme.typography.fontFamily.medium, fontWeight: '500' },
-          bold: { fontFamily: theme.typography.fontFamily.bold, fontWeight: '700' },
-          heavy: { fontFamily: theme.typography.fontFamily.bold, fontWeight: '800' },
+          medium: { fontFamily: theme.typography.fontFamily.medium, fontWeight: '400' },
+          bold: { fontFamily: theme.typography.fontFamily.bold, fontWeight: '400' },
+          heavy: { fontFamily: theme.typography.fontFamily.heavy, fontWeight: '400' },
         },
       }}
     >

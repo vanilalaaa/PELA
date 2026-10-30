@@ -70,10 +70,8 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
               styles.label,
               {
                 color: getTextColor(pressed),
-                // PELA/button-lg (Figma): Baloo 2 Bold 18/22, letterSpacing 1 — chưa load được
-                // font Baloo 2 thật (chưa có asset .ttf) nên fontFamily sẽ fallback font hệ thống.
+                // PELA/button-lg (Figma): Baloo 2 Bold 18/22, letterSpacing 1.
                 fontFamily: theme.textStyles.buttonLg.fontFamily,
-                fontWeight: theme.textStyles.buttonLg.fontWeight,
                 fontSize: theme.textStyles.buttonLg.fontSize,
                 lineHeight: theme.textStyles.buttonLg.lineHeight,
                 letterSpacing: theme.textStyles.buttonLg.letterSpacing,

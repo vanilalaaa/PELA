@@ -58,8 +58,7 @@ export function QuestionOption({ label, state = 'default', onPress, testID }: Qu
       <Text
         style={{
           color: text,
-          fontFamily: theme.textStyles.body.fontFamily,
-          fontWeight: theme.textStyles.bodyBold.fontWeight,
+          fontFamily: theme.textStyles.bodyBold.fontFamily,
           fontSize: theme.textStyles.body.fontSize,
           lineHeight: theme.textStyles.body.lineHeight,
         }}

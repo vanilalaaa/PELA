@@ -7,7 +7,7 @@
  * ngày 2026-10-28. Tên biến gốc được ghi lại trong comment mỗi dòng để dễ đối chiếu lại khi
  * Figma đổi.
  *
- * CHỈ có 1 bảng màu (light) — Figma chưa thiết kế dark mode nên không làm dark mode ở đây.
+ * Chỉ có 1 bảng màu (light): Release 1.0 chỉ có giao diện sáng, team không làm dark mode.
  *
  * Quy ước: mọi màu sắc trong component PHẢI lấy từ đây (qua useTheme()), không hardcode hex.
  */
@@ -39,7 +39,7 @@ export interface ColorTokens {
   starEmpty: string;
 }
 
-// Giá trị thật từ Figma Variables (collection Color, mode duy nhất — Figma không có dark mode).
+// Giá trị thật từ Figma Variables (collection Color, mode duy nhất).
 export const colorTokens: ColorTokens = {
   background: '#f5faff', // var(--color-bg-canvas)
   surface: '#ffffff', // var(--color-bg-surface)
@@ -94,14 +94,17 @@ export const radius = {
 /**
  * Type scale — size/lineHeight lấy THẬT từ Figma (pela/font-size/*, pela/line-height/*).
  * 2 font family thật: "Baloo 2" (heading/button, Bold–ExtraBold) và "Nunito" (body/caption,
- * SemiBold–ExtraBold). CHƯA bundle file font thật (.ttf) nên RN sẽ fallback về font hệ thống
- * cho tới khi thêm asset + load qua expo-font — xem TODO ở App.tsx.
+ * SemiBold–ExtraBold). File .ttf tĩnh nằm ở assets/fonts, được nhúng lúc build qua config
+ * plugin expo-font (app.json). Mỗi độ đậm là một family riêng theo tên file (vd. 'Nunito-Bold'),
+ * vì Android không tự chọn file theo fontWeight cho font tự thêm; không đặt thêm fontWeight để
+ * tránh Android làm đậm giả lên font đã đậm.
  */
 export const typography = {
   fontFamily: {
-    regular: 'Nunito',
-    medium: 'Nunito',
-    bold: 'Baloo 2',
+    regular: 'Nunito-SemiBold',
+    medium: 'Nunito-Bold',
+    bold: 'Baloo2-Bold',
+    heavy: 'Baloo2-ExtraBold',
   },
   // Scale chung (map gần nhất với scale thật: micro/caption/body/h3/h2/h1).
   size: {
@@ -132,21 +135,21 @@ export const typography = {
  * với 1 text style cụ thể trong design, thay vì ghép tay size/lineHeight/weight ở trên.
  */
 export const textStyles = {
-  display: { fontFamily: 'Baloo 2', fontWeight: '800' as const, fontSize: 34, lineHeight: 40, letterSpacing: -1 },
-  h1: { fontFamily: 'Baloo 2', fontWeight: '800' as const, fontSize: 28, lineHeight: 34, letterSpacing: -1 },
-  h2: { fontFamily: 'Baloo 2', fontWeight: '700' as const, fontSize: 22, lineHeight: 28, letterSpacing: -1 },
-  h3: { fontFamily: 'Baloo 2', fontWeight: '700' as const, fontSize: 18, lineHeight: 24, letterSpacing: -1 },
-  eyebrow: { fontFamily: 'Nunito', fontWeight: '800' as const, fontSize: 11, lineHeight: 14, letterSpacing: 6 },
-  body: { fontFamily: 'Nunito', fontWeight: '600' as const, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyStrong: { fontFamily: 'Nunito', fontWeight: '800' as const, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyBold: { fontFamily: 'Nunito', fontWeight: '700' as const, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyLg: { fontFamily: 'Nunito', fontWeight: '600' as const, fontSize: 17, lineHeight: 26, letterSpacing: 0 },
-  caption: { fontFamily: 'Nunito', fontWeight: '600' as const, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
-  captionBold: { fontFamily: 'Nunito', fontWeight: '700' as const, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
-  micro: { fontFamily: 'Nunito', fontWeight: '700' as const, fontSize: 11, lineHeight: 14, letterSpacing: 0 },
-  buttonSm: { fontFamily: 'Baloo 2', fontWeight: '700' as const, fontSize: 14, lineHeight: 18, letterSpacing: 1 },
-  buttonMd: { fontFamily: 'Baloo 2', fontWeight: '700' as const, fontSize: 16, lineHeight: 20, letterSpacing: 1 },
-  buttonLg: { fontFamily: 'Baloo 2', fontWeight: '700' as const, fontSize: 18, lineHeight: 22, letterSpacing: 1 },
+  display: { fontFamily: 'Baloo2-ExtraBold', fontSize: 34, lineHeight: 40, letterSpacing: -1 },
+  h1: { fontFamily: 'Baloo2-ExtraBold', fontSize: 28, lineHeight: 34, letterSpacing: -1 },
+  h2: { fontFamily: 'Baloo2-Bold', fontSize: 22, lineHeight: 28, letterSpacing: -1 },
+  h3: { fontFamily: 'Baloo2-Bold', fontSize: 18, lineHeight: 24, letterSpacing: -1 },
+  eyebrow: { fontFamily: 'Nunito-ExtraBold', fontSize: 11, lineHeight: 14, letterSpacing: 6 },
+  body: { fontFamily: 'Nunito-SemiBold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyStrong: { fontFamily: 'Nunito-ExtraBold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyBold: { fontFamily: 'Nunito-Bold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyLg: { fontFamily: 'Nunito-SemiBold', fontSize: 17, lineHeight: 26, letterSpacing: 0 },
+  caption: { fontFamily: 'Nunito-SemiBold', fontSize: 13, lineHeight: 18, letterSpacing: 0 },
+  captionBold: { fontFamily: 'Nunito-Bold', fontSize: 13, lineHeight: 18, letterSpacing: 0 },
+  micro: { fontFamily: 'Nunito-Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0 },
+  buttonSm: { fontFamily: 'Baloo2-Bold', fontSize: 14, lineHeight: 18, letterSpacing: 1 },
+  buttonMd: { fontFamily: 'Baloo2-Bold', fontSize: 16, lineHeight: 20, letterSpacing: 1 },
+  buttonLg: { fontFamily: 'Baloo2-Bold', fontSize: 18, lineHeight: 22, letterSpacing: 1 },
 } as const;
 
 /**
