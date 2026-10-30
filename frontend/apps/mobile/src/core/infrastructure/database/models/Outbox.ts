@@ -7,14 +7,17 @@ export type OutboxOperation = 'create' | 'update' | 'delete';
 export type OutboxStatus = 'pending' | 'syncing' | 'synced' | 'failed';
 
 /**
- * Hàng đợi ghi offline chung (AGENTS.md mục 5 — "mọi write offline phải đi qua outbox").
- * Mọi thay đổi ở bảng offline khác (review_card, lesson_progress, writing_draft, ...) khi
- * app offline phải tạo kèm 1 dòng Outbox; khi có mạng, 1 worker đọc các dòng `pending`,
- * gửi lên API theo id client-generated (idempotent) rồi đánh dấu `synced`.
+ * Hàng đợi ghi offline chung (AGENTS.md mục 5). Mỗi thao tác ghi offline tạo kèm 1 dòng
+ * Outbox; khi có mạng, worker đọc các dòng `pending` của user đang đăng nhập, gửi lên API
+ * kèm UUID do client sinh (gửi lại an toàn) rồi đánh dấu `synced`.
+ *
+ * `payload` chỉ chứa dữ liệu thô (đáp án, nội dung bài viết…), không chứa giá trị client tự
+ * tính như Star, streak, interval_days hay status của review_card (BR-23).
  */
 export class Outbox extends Model {
   static table = 'outbox';
 
+  @field('user_id') userId!: string;
   @field('entity_table') entityTable!: string;
   @field('entity_id') entityId!: string;
   @field('operation') operation!: OutboxOperation;

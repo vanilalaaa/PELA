@@ -11,7 +11,6 @@ export class ListeningClip extends Model {
   @field('title') title!: string;
   @field('cefr_level') cefrLevel!: string;
   /** Vẫn giữ nguyên theo schema server hiện tại — xem comment ở schema.ts. */
-  @field('difficulty_level') difficultyLevel!: number;
   @field('order_index') orderIndex!: number;
   @field('audio_url') audioUrl!: string;
   @field('duration_sec') durationSec!: number | null;

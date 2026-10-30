@@ -1,110 +1,85 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Database } from '@nozbe/watermelondb';
-import { createInMemoryTestDatabase } from './adapters/createDatabase';
-import { Outbox, ReviewCard } from './models';
+import { Q, type Database } from '@nozbe/watermelondb';
+import { createTestDatabase } from '../../../test/createTestDatabase';
+import { Outbox } from './models';
 
 /**
- * Test outbox (task 18) — dùng LokiJS adapter CHẠY IN-MEMORY (không cần SQLite/device thật),
- * đúng yêu cầu "viết 1 test outbox dùng LokiJS adapter chạy in-memory".
+ * Kiểm tra bảng outbox lưu và đọc đúng trên WatermelonDB (LokiJS trong bộ nhớ). Đây mới là
+ * test CRUD của schema ở giai đoạn scaffold; logic enqueue và worker sync sẽ có test riêng.
  *
- * Kịch bản: khi offline sửa review_card (vd. sau khi chấm 1 câu Challenge), app phải ghi
- * đồng thời 1 dòng outbox pending (AGENTS.md mục 5 — "mọi write offline đi qua outbox").
- * Mỗi test tạo lại 1 Database LokiJS mới (fresh in-memory) để các test độc lập với nhau.
+ * Payload mẫu là một lô đáp án thô của Daily Challenge: client chỉ gửi đáp án kèm UUID do
+ * client sinh, server tự chấm và tính lại SM-2, Star, streak (BR-23).
  */
 describe('outbox (LokiJS in-memory)', () => {
   let database: Database;
 
-  beforeEach(async () => {
-    database = await createInMemoryTestDatabase(`pela_test_${Date.now()}_${Math.random()}`);
+  beforeEach(() => {
+    database = createTestDatabase();
   });
 
-  it('tạo dòng outbox pending khi ghi offline 1 review_card', async () => {
-    const userId = 'user-1';
-    const vocabId = 'vocab-1';
-
+  async function enqueueAnswers(userId: string, batchId: string): Promise<Outbox> {
+    let created!: Outbox;
     await database.write(async () => {
-      const card = await database.get<ReviewCard>('review_card').create((r) => {
-        r._raw.id = 'card-1'; // id client-generated = id dùng khi sync lên server (idempotent).
-        r.userId = userId;
-        r.vocabId = vocabId;
-        r.easinessFactor = 2.5;
-        r.intervalDays = 1;
-        r.repetitionCount = 1;
-        r.errorCount = 0;
-        r.nextReviewDate = '2026-10-29';
-        r.status = 'learning';
-        r.consecutiveIncorrectCount = 0;
-        r.needsReinforcement = false;
-        r.origin = 'topic';
-        r.inPool = true;
-      });
-
-      await database.get<Outbox>('outbox').create((o) => {
-        o.entityTable = 'review_card';
-        o.entityId = card.id;
+      created = await database.get<Outbox>('outbox').create((o) => {
+        o.userId = userId;
+        o.entityTable = 'challenge_session';
+        o.entityId = 'session-1';
         o.operation = 'create';
         o.payload = {
-          card_id: card.id,
-          user_id: userId,
-          vocab_id: vocabId,
-          interval_days: 1,
-          status: 'learning',
+          batch_id: batchId,
+          session_id: 'session-1',
+          answers: [
+            { answer_id: 'answer-1', item_id: 'item-1', selected_option: 'B', answered_at: '2026-10-30T08:00:00Z' },
+            { answer_id: 'answer-2', item_id: 'item-2', selected_option: 'D', answered_at: '2026-10-30T08:00:20Z' },
+          ],
         };
         o.status = 'pending';
         o.retryCount = 0;
       });
     });
+    return created;
+  }
 
-    const pendingRows = await database.get<Outbox>('outbox').query().fetch();
-    expect(pendingRows).toHaveLength(1);
-    expect(pendingRows[0]?.status).toBe('pending');
-    expect(pendingRows[0]?.entityTable).toBe('review_card');
-    expect(pendingRows[0]?.payload).toMatchObject({ card_id: 'card-1' });
-  });
-
-  it('đánh dấu synced sau khi gửi lên server thành công (giả lập worker sync)', async () => {
-    await database.write(async () => {
-      await database.get<Outbox>('outbox').create((o) => {
-        o.entityTable = 'review_card';
-        o.entityId = 'card-2';
-        o.operation = 'update';
-        o.payload = { card_id: 'card-2', status: 'review' };
-        o.status = 'pending';
-        o.retryCount = 0;
-      });
-    });
+  it('lưu lô đáp án thô ở trạng thái pending', async () => {
+    await enqueueAnswers('user-1', 'batch-1');
 
     const [row] = await database.get<Outbox>('outbox').query().fetch();
-    expect(row).toBeDefined();
+    expect(row?.status).toBe('pending');
+    expect(row?.userId).toBe('user-1');
+    expect(row?.payload).toMatchObject({ batch_id: 'batch-1', session_id: 'session-1' });
+    expect(row?.payload).not.toHaveProperty('interval_days');
+    expect(row?.payload).not.toHaveProperty('status');
+  });
+
+  it('chỉ lấy dòng pending của user đang đăng nhập', async () => {
+    await enqueueAnswers('user-1', 'batch-1');
+    await enqueueAnswers('user-2', 'batch-2');
+
+    const rows = await database
+      .get<Outbox>('outbox')
+      .query(Q.where('user_id', 'user-1'), Q.where('status', 'pending'))
+      .fetch();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.payload).toMatchObject({ batch_id: 'batch-1' });
+  });
+
+  it('đánh dấu synced sau khi server xác nhận', async () => {
+    const row = await enqueueAnswers('user-1', 'batch-1');
 
     await database.write(async () => {
-      await row!.update((o) => {
+      await row.update((o) => {
         o.status = 'synced';
         o.syncedAt = new Date();
       });
     });
 
-    const updated = await database.get<Outbox>('outbox').find(row!.id);
+    const updated = await database.get<Outbox>('outbox').find(row.id);
     expect(updated.status).toBe('synced');
     expect(updated.syncedAt).not.toBeNull();
   });
 
-  it('tăng retry_count và lưu error_message khi gửi lên server thất bại', async () => {
-    let outboxId = '';
-
-    await database.write(async () => {
-      const created = await database.get<Outbox>('outbox').create((o) => {
-        o.entityTable = 'review_card';
-        o.entityId = 'card-3';
-        o.operation = 'update';
-        o.payload = { card_id: 'card-3' };
-        o.status = 'pending';
-        o.retryCount = 0;
-      });
-      outboxId = created.id;
-    });
-
-    const row = await database.get<Outbox>('outbox').find(outboxId);
+  it('tăng retry_count và lưu error_message khi gửi thất bại', async () => {
+    const row = await enqueueAnswers('user-1', 'batch-1');
 
     await database.write(async () => {
       await row.update((o) => {
@@ -114,7 +89,7 @@ describe('outbox (LokiJS in-memory)', () => {
       });
     });
 
-    const updated = await database.get<Outbox>('outbox').find(outboxId);
+    const updated = await database.get<Outbox>('outbox').find(row.id);
     expect(updated.status).toBe('failed');
     expect(updated.retryCount).toBe(1);
     expect(updated.errorMessage).toBe('Network timeout');

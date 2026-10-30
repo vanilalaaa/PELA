@@ -16,7 +16,6 @@ export class Vocabulary extends Model {
   @field('topic') topic!: string | null;
   @field('cefr_level') cefrLevel!: string | null;
   /** Vẫn giữ nguyên theo schema server hiện tại — xem comment ở schema.ts. */
-  @field('difficulty_level') difficultyLevel!: number;
   @field('source') source!: 'curated' | 'writing';
   @field('owner_user_id') ownerUserId!: string | null;
 }

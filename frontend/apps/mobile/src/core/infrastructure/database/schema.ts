@@ -15,14 +15,12 @@ import { appSchema, tableSchema } from '@nozbe/watermelondb';
  *       timestamptz        -> 'number' (epoch ms, quy ước chuẩn của WatermelonDB)
  *       date               -> 'string' ('YYYY-MM-DD', không cần giờ)
  *       jsonb              -> 'string' (JSON.stringify/parse qua getter ở Model)
- *   - `vocabulary.difficulty_level` và `listening_clip.difficulty_level` vẫn giữ (mirror
- *     đúng V1__init.sql hiện tại) — KHÔNG tự xoá ở đây vì đây là việc của SRS/schema.sql,
- *     người dùng đã yêu cầu chưa đụng tới các tài liệu đó ở thời điểm này.
- *   - `writing_draft` KHÔNG tồn tại ở Supabase — là bảng local-only để soạn bài Writing khi
- *     offline trước khi đẩy lên qua outbox (sẽ map sang 1 bảng server khi feature Writing có
- *     API thật; tạm thiết kế hợp lý theo nhu cầu "soạn nháp -> nộp").
- *   - `outbox` là hàng đợi ghi offline chung cho toàn app (AGENTS.md mục 5 — "mọi write offline
- *     phải đi qua outbox").
+ *   - `writing_draft` chỉ có ở local trong Release 1.0: lưu và mở lại bản nháp Writing, kể cả
+ *     offline; không đồng bộ bản nháp giữa các máy.
+ *   - `outbox` là hàng đợi ghi offline chung cho toàn app (AGENTS.md mục 5). Mỗi dòng gắn
+ *     `user_id` để worker sync chỉ đẩy dữ liệu của tài khoản đang đăng nhập.
+ *
+ * Mọi thay đổi schema phải tăng `version` và thêm bước tương ứng trong `migrations.ts`.
  */
 export const schema = appSchema({
   version: 1,
@@ -40,7 +38,6 @@ export const schema = appSchema({
         { name: 'image_url', type: 'string', isOptional: true },
         { name: 'topic', type: 'string', isOptional: true },
         { name: 'cefr_level', type: 'string', isOptional: true },
-        { name: 'difficulty_level', type: 'number' },
         { name: 'source', type: 'string' },
         { name: 'owner_user_id', type: 'string', isOptional: true },
       ],
@@ -151,7 +148,6 @@ export const schema = appSchema({
         { name: 'topic', type: 'string' },
         { name: 'title', type: 'string' },
         { name: 'cefr_level', type: 'string', isIndexed: true },
-        { name: 'difficulty_level', type: 'number' },
         { name: 'order_index', type: 'number' },
         { name: 'audio_url', type: 'string' },
         { name: 'duration_sec', type: 'number', isOptional: true },
@@ -163,7 +159,7 @@ export const schema = appSchema({
     tableSchema({
       name: 'writing_draft',
       columns: [
-        // Local-only (chưa có bảng server) — xem comment đầu file.
+        // Chỉ có ở local — xem comment đầu file.
         { name: 'user_id', type: 'string', isIndexed: true },
         { name: 'prompt_id', type: 'string', isOptional: true },
         { name: 'topic', type: 'string', isOptional: true },
@@ -206,12 +202,13 @@ export const schema = appSchema({
     tableSchema({
       name: 'outbox',
       columns: [
-        // Hàng đợi ghi offline chung — mọi write offline (tạo/sửa/xoá bất kỳ bảng nào ở trên)
-        // phải tạo 1 dòng outbox tương ứng rồi mới được coi là "đã lưu" (AGENTS.md mục 5).
+        // Mỗi thao tác ghi offline tạo 1 dòng outbox. Payload chỉ chứa dữ liệu thô (vd. đáp án
+        // của learner); server tự tính lại Star, streak, SM-2 (BR-23).
+        { name: 'user_id', type: 'string', isIndexed: true },
         { name: 'entity_table', type: 'string', isIndexed: true },
         { name: 'entity_id', type: 'string', isIndexed: true },
         { name: 'operation', type: 'string' }, // 'create' | 'update' | 'delete'
-        { name: 'payload', type: 'string' }, // JSON snapshot để gửi lên server
+        { name: 'payload', type: 'string' }, // JSON dữ liệu thô gửi lên server
         { name: 'status', type: 'string', isIndexed: true }, // 'pending' | 'syncing' | 'synced' | 'failed'
         { name: 'retry_count', type: 'number' },
         { name: 'created_at', type: 'number' },
