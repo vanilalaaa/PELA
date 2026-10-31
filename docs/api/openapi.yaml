@@ -36,6 +36,34 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Access token do Supabase Auth cấp.
+  responses:
+    BadRequest:
+      description: "Request sai cú pháp. Mã: MALFORMED_REQUEST, BAD_REQUEST"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Unauthorized:
+      description: "Thiếu hoặc sai access token. Mã: UNAUTHENTICATED, INVALID_TOKEN. Có header WWW-Authenticate: Bearer"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Forbidden:
+      description: "Không có quyền. Mã mặc định: FORBIDDEN"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    NotFound:
+      description: "Không tìm thấy. Mã mặc định: NOT_FOUND"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Conflict:
+      description: "Xung đột trạng thái. Mã mặc định: CONFLICT"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    ValidationFailed:
+      description: "Dữ liệu không hợp lệ hoặc vi phạm luật nghiệp vụ. Mã: VALIDATION_FAILED; details là danh sách {field, message}"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Locked:
+      description: "Tài nguyên bị khoá (tài khoản, Final Test…). Mã mặc định: LOCKED"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    TooManyRequests:
+      description: "Vượt giới hạn số lần. Mã mặc định: TOO_MANY_REQUESTS"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    InternalError:
+      description: "Lỗi không mong đợi. Mã: INTERNAL_ERROR (không lộ chi tiết nội bộ)"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
   schemas:
     Error:
       type: object
