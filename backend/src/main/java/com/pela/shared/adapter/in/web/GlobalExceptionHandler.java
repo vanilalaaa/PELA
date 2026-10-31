@@ -5,7 +5,9 @@ import com.pela.shared.domain.exception.ForbiddenException;
 import com.pela.shared.domain.exception.LockedException;
 import com.pela.shared.domain.exception.NotFoundException;
 import com.pela.shared.domain.exception.PelaException;
+import com.pela.shared.domain.exception.ServiceUnavailableException;
 import com.pela.shared.domain.exception.TooManyRequestsException;
+import com.pela.shared.domain.exception.UnauthorizedException;
 import com.pela.shared.domain.exception.ValidationFailedException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -42,6 +44,8 @@ public class GlobalExceptionHandler {
             case LockedException e -> HttpStatus.LOCKED;
             case TooManyRequestsException e -> HttpStatus.TOO_MANY_REQUESTS;
             case ValidationFailedException e -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case UnauthorizedException e -> HttpStatus.UNAUTHORIZED;
+            case ServiceUnavailableException e -> HttpStatus.SERVICE_UNAVAILABLE;
             default -> HttpStatus.BAD_REQUEST;
         };
         return respond(status, ApiErrorResponse.of(ex.code(), ex.getMessage(), ex.details()));
