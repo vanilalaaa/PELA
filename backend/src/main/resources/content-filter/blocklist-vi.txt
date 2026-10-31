@@ -1,0 +1,30 @@
+# BR-15 — từ/cụm từ cấm tiếng Việt. Mỗi dòng một mục, viết có dấu (file lưu UTF-8).
+# So khớp theo ranh giới từ: "đụ" không khớp "đụng". Không thêm dạng bỏ dấu của từ một âm tiết
+# (vd "lon", "du") vì trùng từ thường; chỉ thêm dạng bỏ dấu cho cụm nhiều âm tiết.
+# Danh sách khởi đầu — nhóm rà soát và bổ sung trước khi test người dùng.
+đụ
+địt
+đéo
+đĩ
+lồn
+buồi
+cặc
+đụ má
+đụ mẹ
+địt mẹ
+đù má
+mẹ mày
+con mẹ mày
+đồ chó
+thằng chó
+óc chó
+ngu như chó
+đồ khốn
+khốn nạn
+đm
+đmm
+vcl
+vkl
+vãi lồn
+dit me
+du ma

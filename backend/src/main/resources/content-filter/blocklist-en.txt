@@ -1,0 +1,31 @@
+# BR-15 — từ/cụm từ cấm tiếng Anh. Mỗi dòng một mục, không phân biệt hoa thường.
+# So khớp theo ranh giới từ: "ass" không khớp "class", "passage". Dạng biến thể phải liệt kê riêng.
+# Danh sách khởi đầu — nhóm rà soát và bổ sung trước khi test người dùng.
+fuck
+fucking
+fucked
+fucker
+motherfucker
+shit
+shitty
+bullshit
+bitch
+bitches
+bastard
+asshole
+ass
+dick
+dickhead
+cock
+pussy
+cunt
+twat
+wanker
+slut
+whore
+nigger
+nigga
+faggot
+retard
+kill yourself
+kys
