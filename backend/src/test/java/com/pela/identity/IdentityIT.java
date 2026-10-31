@@ -2,15 +2,18 @@ package com.pela.identity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.pela.identity.application.port.in.ReleaseExpiredSuspensionUseCase;
 import com.pela.identity.application.port.out.SupabaseAuthException;
 import com.pela.identity.application.port.out.SupabaseAuthException.Reason;
 import com.pela.identity.application.port.out.SupabaseAuthPort;
@@ -45,6 +48,9 @@ class IdentityIT extends PostgresIntegrationTest {
 
     @MockitoBean
     SupabaseAuthPort supabase;
+
+    @Autowired
+    ReleaseExpiredSuspensionUseCase suspensionRelease;
 
     /** Tạo tài khoản như Supabase: insert auth.users, trigger V1 tạo public.users. */
     private UUID createUser(String role, String status) {
@@ -218,5 +224,119 @@ class IdentityIT extends PostgresIntegrationTest {
                         .content("{\"email\":\"someone@example.test\"}"))
                 .andExpect(status().isAccepted());
         verify(supabase).resetPasswordForEmail("someone@example.test");
+    }
+
+    private String accountStatus(UUID id) {
+        return jdbc.queryForObject("SELECT status FROM users WHERE user_id = ?", String.class, id);
+    }
+
+    @Test
+    void statusFilterBlocksSuspendedAccountOnEveryV1Request() throws Exception {
+        UUID id = createUser("learner", "active");
+        jdbc.update("UPDATE users SET status = 'suspended', suspend_reason = 'Spam', suspended_until = NULL WHERE user_id = ?", id);
+
+        mvc.perform(get("/v1/me").with(jwt().jwt(j -> j.subject(id.toString()))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCOUNT_SUSPENDED"))
+                .andExpect(jsonPath("$.error.details.reason").value("Spam"))
+                .andExpect(jsonPath("$.error.details.suspendedUntil").isEmpty());
+        // Chặn trước cả khi route có tồn tại hay không
+        mvc.perform(get("/v1/anything").with(jwt().jwt(j -> j.subject(id.toString()))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCOUNT_SUSPENDED"));
+        // Vẫn đăng xuất được
+        mvc.perform(post("/v1/auth/logout").with(jwt().jwt(j -> j.subject(id.toString()).tokenValue("suspended-token"))))
+                .andExpect(status().isNoContent());
+        verify(supabase).logout("suspended-token", LogoutScope.LOCAL);
+    }
+
+    @Test
+    void statusFilterBlocksPendingDeletionWithDeletionDate() throws Exception {
+        UUID id = createUser("learner", "active");
+        jdbc.update("UPDATE users SET status = 'pending_deletion', deletion_requested_at = ? WHERE user_id = ?",
+                Timestamp.from(Instant.parse("2026-10-20T00:00:00Z")), id);
+
+        mvc.perform(get("/v1/me").with(jwt().jwt(j -> j.subject(id.toString()))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCOUNT_PENDING_DELETION"))
+                .andExpect(jsonPath("$.error.details.deletionScheduledAt").value("2026-11-19T00:00:00Z"));
+    }
+
+    @Test
+    void pendingDeletionAccountCannotLogIn() throws Exception {
+        UUID id = createUser("learner", "active");
+        jdbc.update("UPDATE users SET status = 'pending_deletion', deletion_requested_at = ? WHERE user_id = ?",
+                Timestamp.from(Instant.parse("2026-10-20T00:00:00Z")), id);
+        when(supabase.signInWithPassword(email(id), PASSWORD)).thenReturn(session(id, true));
+
+        login(id, PASSWORD).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCOUNT_PENDING_DELETION"))
+                .andExpect(jsonPath("$.error.details.deletionScheduledAt").value("2026-11-19T00:00:00Z"));
+        verify(supabase).logout("access-" + id, LogoutScope.LOCAL);
+    }
+
+    @Test
+    void expiredSuspensionIsReleasedByStatusFilter() throws Exception {
+        UUID id = createUser("learner", "active");
+        jdbc.update("UPDATE users SET status = 'suspended', suspend_reason = 'Short', "
+                + "suspended_until = now() - interval '1 minute' WHERE user_id = ?", id);
+
+        mvc.perform(get("/v1/me").with(jwt().jwt(j -> j.subject(id.toString()))))
+                .andExpect(status().isOk());
+
+        assertThat(accountStatus(id)).isEqualTo("active");
+        assertThat(jdbc.queryForMap("SELECT suspended_until, suspend_reason FROM users WHERE user_id = ?", id))
+                .containsEntry("suspended_until", null)
+                .containsEntry("suspend_reason", null);
+    }
+
+    @Test
+    void suspensionReleaseUseCaseIsIdempotent() {
+        UUID expired = createUser("learner", "active");
+        UUID stillSuspended = createUser("learner", "active");
+        jdbc.update("UPDATE users SET status = 'suspended', suspend_reason = 'x', "
+                + "suspended_until = now() - interval '1 hour' WHERE user_id = ?", expired);
+        jdbc.update("UPDATE users SET status = 'suspended', suspend_reason = 'y', "
+                + "suspended_until = now() + interval '1 day' WHERE user_id = ?", stillSuspended);
+
+        // Job theo giờ và login/filter gọi cùng use case
+        assertThat(suspensionRelease.releaseAllExpired()).isGreaterThanOrEqualTo(1);
+        assertThat(accountStatus(expired)).isEqualTo("active");
+        assertThat(accountStatus(stillSuspended)).isEqualTo("suspended");
+
+        assertThat(suspensionRelease.releaseIfExpired(expired)).isFalse();
+        assertThat(suspensionRelease.releaseIfExpired(stillSuspended)).isFalse();
+        assertThat(suspensionRelease.releaseAllExpired()).isZero();
+        assertThat(accountStatus(expired)).isEqualTo("active");
+    }
+
+    @Test
+    void resetTokenIsRandomOneTimeAndHidesRecoverySession() throws Exception {
+        UUID id = createUser("learner", "active");
+        String recoveryAccessToken = "recovery-access-" + id;
+        when(supabase.verifyRecoveryOtp(email(id), "123456"))
+                .thenReturn(new SupabaseSession(recoveryAccessToken, "recovery-refresh", 3600, "bearer", id, true));
+
+        String body = mvc.perform(post("/v1/auth/password/verify-otp").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"" + email(id) + "\",\"code\":\"123456\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expiresIn").value(600))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("recovery-"))))
+                .andReturn().getResponse().getContentAsString();
+        String resetToken = com.jayway.jsonpath.JsonPath.read(body, "$.resetToken");
+        assertThat(resetToken).hasSizeGreaterThanOrEqualTo(43).doesNotContain(recoveryAccessToken);
+
+        String resetBody = "{\"resetToken\":\"" + resetToken
+                + "\",\"newPassword\":\"NewSecret1\",\"confirmPassword\":\"NewSecret1\"}";
+        mvc.perform(post("/v1/auth/password/reset").contentType(MediaType.APPLICATION_JSON).content(resetBody))
+                .andExpect(status().isNoContent());
+        verify(supabase).updatePassword(recoveryAccessToken, "NewSecret1");
+        verify(supabase).logout(recoveryAccessToken, LogoutScope.LOCAL);
+
+        // Dùng lại token đã dùng
+        mvc.perform(post("/v1/auth/password/reset").contentType(MediaType.APPLICATION_JSON).content(resetBody))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("INVALID_RESET_TOKEN"));
+        verify(supabase, times(1)).updatePassword(anyString(), anyString());
     }
 }
