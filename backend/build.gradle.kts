@@ -18,6 +18,10 @@ repositories {
     mavenCentral()
 }
 
+// Mockito nạp sẵn bằng -javaagent (hướng dẫn của Mockito cho JDK 21+), không cần
+// ByteBuddy tự attach bằng một tiến trình JVM phụ.
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -36,9 +40,17 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    maxHeapSize = "768m"
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
     finalizedBy(tasks.jacocoTestReport)
+}
+
+// bootRun là lệnh chạy local: mặc định profile dev, đổi bằng biến SPRING_PROFILES_ACTIVE
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    systemProperty("spring.profiles.active", System.getenv("SPRING_PROFILES_ACTIVE") ?: "dev")
 }
