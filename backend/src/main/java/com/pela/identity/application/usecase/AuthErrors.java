@@ -37,6 +37,13 @@ final class AuthErrors {
         return new ForbiddenException("ACCOUNT_SUSPENDED", "Account is suspended", details);
     }
 
+    /** BR-33: tài khoản đã yêu cầu xoá; deletionScheduledAt = ngày xoá hẳn (null nếu thiếu mốc). */
+    static ForbiddenException accountPendingDeletion(Instant deletionScheduledAt) {
+        Map<String, Object> details = new HashMap<>();
+        details.put("deletionScheduledAt", deletionScheduledAt == null ? null : deletionScheduledAt.toString());
+        return new ForbiddenException("ACCOUNT_PENDING_DELETION", "Account is scheduled for deletion", details);
+    }
+
     static ForbiddenException emailNotVerified() {
         return new ForbiddenException("EMAIL_NOT_VERIFIED", "Email address has not been verified", null);
     }

@@ -45,8 +45,10 @@ class AuthServiceTest {
     private final InMemoryUserAccounts accounts = new InMemoryUserAccounts();
     private final MutableClock clock = new MutableClock(Instant.parse("2026-11-01T08:00:00Z"));
     private final SystemSettingPort settings = key -> Optional.ofNullable(Map.of(
-            "auth.lockout_max_attempts", "5", "auth.lockout_minutes", "15").get(key));
-    private final AuthService service = new AuthService(auth, accounts, settings, clock);
+            "auth.lockout_max_attempts", "5", "auth.lockout_window_minutes", "15", "auth.lockout_minutes", "15",
+            "account.deletion_grace_days", "30").get(key));
+    private final AuthService service = new AuthService(auth, accounts, settings, clock,
+            InMemoryUserAccounts.standing(accounts, settings, clock));
 
     private UserAccount learner;
 
@@ -166,6 +168,21 @@ class AuthServiceTest {
         }
 
         @Test
+        void pendingDeletionGets403WithDeletionDateAndSessionIsRevoked() {
+            accounts.pendingDeletion(learner.userId(), Instant.parse("2026-10-25T10:00:00Z"));
+            when(auth.signInWithPassword(EMAIL, PASSWORD)).thenReturn(session(learner.userId(), true));
+
+            assertThatThrownBy(() -> service.login(EMAIL, PASSWORD))
+                    .isInstanceOf(ForbiddenException.class)
+                    .satisfies(e -> {
+                        assertThat(code(e)).isEqualTo("ACCOUNT_PENDING_DELETION");
+                        assertThat(((PelaException) e).details())
+                                .isEqualTo(Map.of("deletionScheduledAt", "2026-11-24T10:00:00Z"));
+                    });
+            verify(auth).logout("access-token", LogoutScope.LOCAL);
+        }
+
+        @Test
         void unverifiedWithoutConfirmedEmailGets403() {
             accounts.withStatus(learner.userId(), AccountStatus.UNVERIFIED, null, null);
             when(auth.signInWithPassword(EMAIL, PASSWORD)).thenReturn(session(learner.userId(), false));
@@ -273,6 +290,16 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> service.refresh("refresh-token"))
                     .satisfies(e -> assertThat(code(e)).isEqualTo("ACCOUNT_SUSPENDED"));
+            verify(auth).logout("access-token", LogoutScope.LOCAL);
+        }
+
+        @Test
+        void refreshForPendingDeletionAccountIsRejected() {
+            accounts.pendingDeletion(learner.userId(), Instant.parse("2026-10-25T10:00:00Z"));
+            when(auth.refresh("refresh-token")).thenReturn(session(learner.userId(), true));
+
+            assertThatThrownBy(() -> service.refresh("refresh-token"))
+                    .satisfies(e -> assertThat(code(e)).isEqualTo("ACCOUNT_PENDING_DELETION"));
             verify(auth).logout("access-token", LogoutScope.LOCAL);
         }
 

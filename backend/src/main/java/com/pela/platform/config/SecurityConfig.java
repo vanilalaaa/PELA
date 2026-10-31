@@ -1,7 +1,10 @@
 package com.pela.platform.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pela.identity.adapter.in.web.AccountStatusFilter;
+import com.pela.identity.application.port.in.AccountStatusGuardUseCase;
 import com.pela.shared.adapter.in.web.JsonSecurityErrorHandler;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -22,6 +26,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper,
+            ObjectProvider<AccountStatusGuardUseCase> accountStatusGuard,
             @Value("${springdoc.api-docs.enabled:false}") boolean apiDocsEnabled) throws Exception {
         JsonSecurityErrorHandler errors = new JsonSecurityErrorHandler(objectMapper);
         return http
@@ -43,6 +48,9 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(errors)
                         .accessDeniedHandler(errors))
+                // Sau khi xác thực JWT: chặn tài khoản suspended / pending_deletion trên mọi /v1/**
+                .addFilterAfter(new AccountStatusFilter(accountStatusGuard, objectMapper),
+                        BearerTokenAuthenticationFilter.class)
                 .build();
     }
 }

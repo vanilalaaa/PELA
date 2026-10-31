@@ -18,5 +18,8 @@ springdoc:
     enabled: false
 
 pela:
+  # Job chạy theo lịch không chạy ngầm trong test; test gọi use case trực tiếp
+  jobs:
+    enabled: false
   gemini:
     api-key: test

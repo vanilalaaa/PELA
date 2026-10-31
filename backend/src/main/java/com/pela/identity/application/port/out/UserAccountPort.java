@@ -24,6 +24,12 @@ public interface UserAccountPort {
     /** unverified → active sau khi Supabase xác nhận email. */
     void markEmailVerified(UUID userId);
 
-    /** suspended → active khi khoá có thời hạn đã hết (trước khi job mở khoá chạy). */
-    void liftExpiredSuspension(UUID userId, Instant now);
+    /**
+     * suspended → active nếu suspended_until đã qua. Idempotent: gọi lại hay gọi cho tài khoản không
+     * thoả điều kiện thì không đổi gì. Trả true nếu đã mở khoá.
+     */
+    boolean releaseExpiredSuspension(UUID userId, Instant now);
+
+    /** Như {@link #releaseExpiredSuspension} cho mọi tài khoản; trả số tài khoản được mở khoá. */
+    int releaseAllExpiredSuspensions(Instant now);
 }

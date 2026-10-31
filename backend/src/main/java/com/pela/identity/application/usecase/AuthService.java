@@ -29,18 +29,22 @@ import org.springframework.stereotype.Service;
 public class AuthService implements RegisterUseCase, LoginUseCase, RefreshSessionUseCase, LogoutUseCase {
 
     static final String MAX_ATTEMPTS_SETTING = "auth.lockout_max_attempts";
+    static final String LOCKOUT_WINDOW_SETTING = "auth.lockout_window_minutes";
     static final String LOCKOUT_MINUTES_SETTING = "auth.lockout_minutes";
 
     private final SupabaseAuthPort auth;
     private final UserAccountPort accounts;
     private final SystemSettingPort settings;
     private final ClockPort clock;
+    private final AccountStanding standing;
 
-    public AuthService(SupabaseAuthPort auth, UserAccountPort accounts, SystemSettingPort settings, ClockPort clock) {
+    AuthService(SupabaseAuthPort auth, UserAccountPort accounts, SystemSettingPort settings, ClockPort clock,
+            AccountStanding standing) {
         this.auth = auth;
         this.accounts = accounts;
         this.settings = settings;
         this.clock = clock;
+        this.standing = standing;
     }
 
     @Override
@@ -93,14 +97,8 @@ public class AuthService implements RegisterUseCase, LoginUseCase, RefreshSessio
 
         accounts.updateLoginState(account.userId(), s -> LoginState.CLEAN);
 
-        // Chỉ báo lý do khoá/chưa xác minh khi mật khẩu đã đúng; phiên vừa cấp bị thu hồi ngay
-        if (account.isSuspendedAt(now)) {
-            revokeQuietly(session);
-            throw AuthErrors.accountSuspended(account);
-        }
-        if (account.suspensionExpiredAt(now)) {
-            accounts.liftExpiredSuspension(account.userId(), now);
-        }
+        // Chỉ báo lý do khoá / chờ xoá / chưa xác minh khi mật khẩu đã đúng; phiên vừa cấp bị thu hồi ngay
+        requireUsable(account, now, session);
         if (account.status() == AccountStatus.UNVERIFIED) {
             if (!session.emailConfirmed()) {
                 revokeQuietly(session);
@@ -121,9 +119,8 @@ public class AuthService implements RegisterUseCase, LoginUseCase, RefreshSessio
         }
         Instant now = clock.now();
         UserAccount account = accounts.findById(session.userId()).orElse(null);
-        if (account != null && account.isSuspendedAt(now)) {
-            revokeQuietly(session);
-            throw AuthErrors.accountSuspended(account);
+        if (account != null) {
+            requireUsable(account, now, session);
         }
         return tokens(session);
     }
@@ -142,8 +139,18 @@ public class AuthService implements RegisterUseCase, LoginUseCase, RefreshSessio
     }
 
     private LockoutPolicy lockoutPolicy() {
-        Duration minutes = Duration.ofMinutes(settings.requiredInt(LOCKOUT_MINUTES_SETTING));
-        return new LockoutPolicy(settings.requiredInt(MAX_ATTEMPTS_SETTING), minutes, minutes);
+        return new LockoutPolicy(settings.requiredInt(MAX_ATTEMPTS_SETTING),
+                Duration.ofMinutes(settings.requiredInt(LOCKOUT_WINDOW_SETTING)),
+                Duration.ofMinutes(settings.requiredInt(LOCKOUT_MINUTES_SETTING)));
+    }
+
+    private void requireUsable(UserAccount account, Instant now, SupabaseSession session) {
+        try {
+            standing.requireUsable(account, now);
+        } catch (RuntimeException ex) {
+            revokeQuietly(session);
+            throw ex;
+        }
     }
 
     private void revokeQuietly(SupabaseSession session) {

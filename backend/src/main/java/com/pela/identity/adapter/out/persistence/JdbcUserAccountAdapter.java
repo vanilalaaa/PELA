@@ -22,7 +22,8 @@ public class JdbcUserAccountAdapter implements UserAccountPort {
 
     private static final String COLUMNS = """
             user_id, email, full_name, username, avatar_url, role, status, cefr_level, timezone,
-            failed_login_count, failed_login_window_started_at, locked_until, suspended_until, suspend_reason
+            failed_login_count, failed_login_window_started_at, locked_until, suspended_until, suspend_reason,
+            deletion_requested_at
             """;
 
     private static final RowMapper<UserAccount> MAPPER = JdbcUserAccountAdapter::map;
@@ -68,12 +69,20 @@ public class JdbcUserAccountAdapter implements UserAccountPort {
         jdbc.update("UPDATE users SET status = 'active' WHERE user_id = ? AND status = 'unverified'", userId);
     }
 
+    /** Điều kiện chung cho job và login: khoá có thời hạn đã hết. */
+    private static final String RELEASE_EXPIRED = """
+            UPDATE users SET status = 'active', suspended_until = NULL, suspend_reason = NULL
+            WHERE status = 'suspended' AND suspended_until IS NOT NULL AND suspended_until <= ?
+            """;
+
     @Override
-    public void liftExpiredSuspension(UUID userId, Instant now) {
-        jdbc.update("""
-                UPDATE users SET status = 'active', suspended_until = NULL, suspend_reason = NULL
-                WHERE user_id = ? AND status = 'suspended' AND suspended_until IS NOT NULL AND suspended_until <= ?
-                """, userId, Timestamp.from(now));
+    public boolean releaseExpiredSuspension(UUID userId, Instant now) {
+        return jdbc.update(RELEASE_EXPIRED + " AND user_id = ?", Timestamp.from(now), userId) > 0;
+    }
+
+    @Override
+    public int releaseAllExpiredSuspensions(Instant now) {
+        return jdbc.update(RELEASE_EXPIRED, Timestamp.from(now));
     }
 
     private static UserAccount map(ResultSet rs, int rowNum) throws SQLException {
@@ -92,7 +101,8 @@ public class JdbcUserAccountAdapter implements UserAccountPort {
                         instant(rs.getTimestamp("failed_login_window_started_at")),
                         instant(rs.getTimestamp("locked_until"))),
                 instant(rs.getTimestamp("suspended_until")),
-                rs.getString("suspend_reason"));
+                rs.getString("suspend_reason"),
+                instant(rs.getTimestamp("deletion_requested_at")));
     }
 
     private static Instant instant(Timestamp value) {
