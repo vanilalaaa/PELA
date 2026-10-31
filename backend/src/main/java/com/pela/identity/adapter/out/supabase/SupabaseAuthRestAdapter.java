@@ -99,11 +99,27 @@ public class SupabaseAuthRestAdapter implements SupabaseAuthPort {
         if (properties.serviceRoleKey().isEmpty()) {
             throw new SupabaseAuthException(Reason.UNAVAILABLE, "SUPABASE_SERVICE_ROLE_KEY is not configured");
         }
+        String key = properties.serviceRoleKey();
         call("deleteUser", Reason.UNKNOWN, () -> client.delete().uri("/admin/users/{id}", userId)
-                .header("apikey", properties.serviceRoleKey())
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.serviceRoleKey())
+                .headers(h -> adminKeyHeaders(h, key))
                 .retrieve().onStatus(HttpStatusCode::isError, errors("deleteUser", Reason.UNKNOWN))
                 .toBodilessEntity());
+    }
+
+    /**
+     * Header cho Admin API. Theo tài liệu Supabase (Guides → API keys): secret key mới {@code sb_secret_...}
+     * "short strings, not JWTs" — gửi ở header {@code apikey}, không gửi ở {@code Authorization: Bearer}.
+     * service_role kiểu cũ là JWT (bắt đầu bằng {@code eyJ}) thì gửi cả {@code Authorization: Bearer} như trước.
+     */
+    static void adminKeyHeaders(HttpHeaders headers, String key) {
+        headers.set("apikey", key);
+        if (isLegacyJwtKey(key)) {
+            headers.setBearerAuth(key);
+        }
+    }
+
+    static boolean isLegacyJwtKey(String key) {
+        return key.startsWith("eyJ");
     }
 
     private static RestClient.ResponseSpec.ErrorHandler errors(String operation, Reason clientErrorReason) {

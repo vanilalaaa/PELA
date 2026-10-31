@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.headerDoesNotExist;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
@@ -129,16 +130,60 @@ class SupabaseAuthRestAdapterTest {
         server.verify();
     }
 
+    /** Supabase API keys: sb_secret_ không phải JWT — chỉ gửi ở apikey, không gửi Authorization. */
     @Test
-    void deleteUserUsesServiceRoleKeyOnAdminApi() {
-        server.expect(requestTo(BASE + "/admin/users/" + USER_ID))
+    void deleteUserWithNewSecretKeySendsOnlyApikeyHeader() {
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE);
+        MockRestServiceServer adminServer = MockRestServiceServer.bindTo(builder).build();
+        var secretAdapter = new SupabaseAuthRestAdapter(builder.build(),
+                new SupabaseProperties("https://project.supabase.test", "sb_publishable_abc", "sb_secret_xyz"));
+        adminServer.expect(requestTo(BASE + "/admin/users/" + USER_ID))
                 .andExpect(method(HttpMethod.DELETE))
-                .andExpect(header("apikey", "service-key"))
-                .andExpect(header("Authorization", "Bearer service-key"))
+                .andExpect(header("apikey", "sb_secret_xyz"))
+                .andExpect(headerDoesNotExist("Authorization"))
                 .andRespond(withSuccess());
 
-        adapter.deleteUser(USER_ID);
-        server.verify();
+        secretAdapter.deleteUser(USER_ID);
+        adminServer.verify();
+    }
+
+    /** service_role kiểu cũ là JWT (eyJ...): gửi apikey và thêm Authorization: Bearer. */
+    @Test
+    void deleteUserWithLegacyServiceRoleJwtAlsoSendsBearer() {
+        String legacyKey = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.sig";
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE);
+        MockRestServiceServer adminServer = MockRestServiceServer.bindTo(builder).build();
+        var legacyAdapter = new SupabaseAuthRestAdapter(builder.build(),
+                new SupabaseProperties("https://project.supabase.test", "anon", legacyKey));
+        adminServer.expect(requestTo(BASE + "/admin/users/" + USER_ID))
+                .andExpect(method(HttpMethod.DELETE))
+                .andExpect(header("apikey", legacyKey))
+                .andExpect(header("Authorization", "Bearer " + legacyKey))
+                .andRespond(withSuccess());
+
+        legacyAdapter.deleteUser(USER_ID);
+        adminServer.verify();
+    }
+
+    /** Endpoint auth công khai: publishable key chỉ ở apikey; Authorization chỉ mang token của người dùng. */
+    @Test
+    void publicCallsSendPublishableKeyOnlyAsApikey() {
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE);
+        MockRestServiceServer publicServer = MockRestServiceServer.bindTo(builder).build();
+        var newKeysAdapter = new SupabaseAuthRestAdapter(builder.build(),
+                new SupabaseProperties("https://project.supabase.test", "sb_publishable_abc", "sb_secret_xyz"));
+        publicServer.expect(requestTo(BASE + "/token?grant_type=password"))
+                .andExpect(header("apikey", "sb_publishable_abc"))
+                .andExpect(headerDoesNotExist("Authorization"))
+                .andRespond(withSuccess(SESSION_JSON, MediaType.APPLICATION_JSON));
+        publicServer.expect(requestTo(BASE + "/logout?scope=local"))
+                .andExpect(header("apikey", "sb_publishable_abc"))
+                .andExpect(header("Authorization", "Bearer user-jwt"))
+                .andRespond(withNoContent());
+
+        newKeysAdapter.signInWithPassword("a@example.test", "Secret123");
+        newKeysAdapter.logout("user-jwt", LogoutScope.LOCAL);
+        publicServer.verify();
     }
 
     @ParameterizedTest
