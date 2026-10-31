@@ -4,6 +4,13 @@ spring:
     # Migration thật + seed dev (R__dev_seed.sql)
     locations: ${FLYWAY_LOCATIONS:filesystem:../db/migrations,filesystem:../db/seed}
 
+# Swagger UI: http://localhost:8080/swagger-ui.html (chỉ profile dev)
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 logging:
   level:
     # Câu SQL do JdbcTemplate chạy. Không bật TRACE cho StatementCreatorUtils: giá trị bind có thể chứa PII.

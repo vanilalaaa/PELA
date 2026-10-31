@@ -10,6 +10,13 @@ spring:
           issuer-uri: https://example.invalid/auth/v1
           jwk-set-uri: https://example.invalid/auth/v1/.well-known/jwks.json
 
+# Giống main: springdoc tắt mặc định, profile dev bật
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 pela:
   gemini:
     api-key: test

@@ -21,6 +21,14 @@ management:
       exposure:
         include: health
 
+# Swagger UI / OpenAPI sinh tự động: tắt mặc định, profile dev bật lại.
+# Hợp đồng API chính thức vẫn là docs/api/openapi.yaml.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 pela:
   gemini:
     api-key: ${GEMINI_API_KEY:}

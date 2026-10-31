@@ -32,6 +32,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
+    // Swagger UI để xem API khi dev; tắt mặc định, chỉ bật ở profile dev (application-dev.yml).
+    // Dòng 2.8.x dành cho Spring Boot 3.5; 3.x dành cho Boot 4.
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

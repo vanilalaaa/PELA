@@ -141,6 +141,8 @@ Flyway đọc migration từ `filesystem:../db/migrations` (đổi bằng biến
 
 `./gradlew bootRun` mặc định bật profile **dev** (`application-dev.yml`): log câu SQL của JdbcTemplate ở mức DEBUG và nạp thêm seed `db/seed/R__dev_seed.sql`. Seed là migration lặp lại (`R__`) nên không chiếm số version; mọi lệnh trong đó phải chạy lại được (`ON CONFLICT`). Chạy không có profile dev: `SPRING_PROFILES_ACTIVE=default ./gradlew bootRun`.
 
+Profile dev cũng bật Swagger UI (springdoc) tại `http://localhost:8080/swagger-ui.html`, sinh từ code để xem nhanh. Ngoài dev, springdoc tắt và các đường dẫn này cần token. Hợp đồng API chính thức vẫn là `docs/api/openapi.yaml`; đổi API thì cập nhật file đó.
+
 Migration **chỉ chạy bằng Flyway**. Không dùng `supabase db push` / `supabase migration` của Supabase CLI.
 
 ### 3. Supabase

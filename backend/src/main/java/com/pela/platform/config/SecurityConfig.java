@@ -2,6 +2,7 @@ package com.pela.platform.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pela.shared.adapter.in.web.JsonSecurityErrorHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,15 +13,23 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
+    private static final String[] API_DOCS_PATHS = {"/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper,
+            @Value("${springdoc.api-docs.enabled:false}") boolean apiDocsEnabled) throws Exception {
         JsonSecurityErrorHandler errors = new JsonSecurityErrorHandler(objectMapper);
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/health", "/actuator/health").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/v1/health", "/actuator/health").permitAll();
+                    // Swagger UI chỉ mở khi springdoc bật (profile dev); ngoài dev các đường dẫn này cần token
+                    if (apiDocsEnabled) {
+                        auth.requestMatchers(API_DOCS_PATHS).permitAll();
+                    }
+                    auth.anyRequest().authenticated();
+                })
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(errors)

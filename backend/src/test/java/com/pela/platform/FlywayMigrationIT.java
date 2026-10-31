@@ -1,4 +1,4 @@
-package com.pela.platform.adapter.out;
+package com.pela.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
