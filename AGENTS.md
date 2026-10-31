@@ -7,7 +7,7 @@ Quy tắc cho mọi AI agent (Claude Code, Codex, Cursor, …) làm việc trong
 - PELA — ứng dụng học tiếng Anh cá nhân hoá (CEFR, SM-2, Challenge, Writing chấm bằng AI, RAG tạo đề Writing, Listening, gamification, offline-first). Đồ án SE121 — UIT.
 - `backend/`: Java 21 + Spring Boot 3, REST `/v1`, modular monolith Clean Architecture, package `com.pela`, 16 module.
 - `frontend/`: pnpm workspace — `apps/mobile` (React Native + Expo dev build), `apps/admin-web` (React + Vite), `packages/domain`, `packages/api-contract`, `packages/fixtures`.
-- Hạ tầng: Supabase (PostgreSQL 17 + pgvector, Auth, Storage). AI: Gemini `gemini-2.5-flash`, `gemini-embedding-001` (768 chiều). Push: FCM/APNs.
+- Hạ tầng: Supabase (PostgreSQL 17 + pgvector, Auth, Storage). AI: Gemini `gemini-2.5-flash`, `gemini-embedding-001` (768 chiều), model TTS cho Listening (đọc từ `system_setting` `ai.model.tts`). Push: FCM/APNs.
 - Nguồn sự thật: `docs/srs/`, `docs/architecture/`, `docs/api/openapi.yaml`, `db/migrations/`.
 
 ## 2. Source of truth & thứ tự ưu tiên
@@ -26,6 +26,7 @@ Không được thay đổi khi chưa có xác nhận rõ ràng của người d
 4. **SM-2** (BR-26): đúng → q=5, sai → q=2, EF sàn 1.3; sai 3 lần liên tiếp → EF = 1.3 và `needs_reinforcement = true`.
 5. **Star** (BR-36, BR-20): 0–5 sao/phiên (Weekly tối đa 6). Làm lại Lesson/bài nghe chỉ cộng phần tăng so với kết quả tốt nhất. Final Test 3 lượt, trượt hết thì khoá, cần 30 sao để mở 1 lượt.
 6. **Cấu hình, không hard-code** (MNT-3, MNT-4): ngưỡng, giới hạn, tên model nằm ở `system_setting`; prompt nằm ở `prompt_template`.
+7. **Listening** (BR-37, ADR 0005): Admin import file CSV theo mẫu (lời thoại + câu hỏi + đáp án); audio do Gemini TTS sinh một lần khi Admin lưu, lưu ở Storage; không còn upload audio/STT.
 
 Các lựa chọn công nghệ ở mục 1 (React Navigation, WatermelonDB, JdbcTemplate/jOOQ, Gemini…) cũng đã chốt.
 

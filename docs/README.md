@@ -13,6 +13,7 @@
 - [0001 — Chọn Google Gemini](decisions/0001-chon-gemini.md)
 - [0002 — RAG chỉ dùng cho Writing](decisions/0002-rag-chi-cho-writing.md)
 - [0003 — Offline-first với bảng outbox](decisions/0003-offline-first-outbox.md)
+- [0005 — Listening sinh audio bằng TTS](decisions/0005-listening-tts.md)
 
 ## Thứ tự ưu tiên khi mâu thuẫn
 
