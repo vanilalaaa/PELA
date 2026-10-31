@@ -6,9 +6,17 @@
 -- Id cố định để tham chiếu chéo ổn định giữa các lần chạy.
 -- Không có dữ liệu cá nhân thật. system_setting, badge, prompt_template đã có trong V1/V3.
 --
--- TODO: đề Writing (question_bank, question_purpose = 'writing_prompt') và câu hỏi Listening
---       chưa seed: question_bank.created_by NOT NULL và đề active bắt buộc có embedding
---       (chk_active_prompt_has_embedding) - chờ nhóm quyết định.
+
+-- ---------------------------------------------------------------------
+-- 0. Admin giả làm chủ nội dung seed (question_bank.created_by NOT NULL).
+--    Không có mật khẩu nên không đăng nhập được. Trigger trg_auth_user_created (V1) tạo public.users.
+-- ---------------------------------------------------------------------
+INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES
+ ('ad000000-0000-4000-8000-000000000001', 'seed-admin@pela.local', '{"full_name":"PELA Seed Admin"}')
+ON CONFLICT DO NOTHING;
+
+UPDATE users SET role = 'admin', status = 'active'
+WHERE user_id = 'ad000000-0000-4000-8000-000000000001' AND (role <> 'admin' OR status <> 'active');
 
 -- ---------------------------------------------------------------------
 -- 1. Khảo sát định hướng (UC-02) + luật map đáp án -> CEFR (AS-3)
@@ -120,7 +128,10 @@ ON CONFLICT DO NOTHING;
 --    -> job TTS sinh audio khi có ai.model.tts; app phải coi 'pending://' là chưa sẵn sàng.
 --    voice_config để '{}' cho tới khi chọn model/giọng TTS.
 -- ---------------------------------------------------------------------
-INSERT INTO listening_clip (clip_id, topic, title, cefr_level, order_index, audio_url, transcript, status) VALUES
+INSERT INTO listening_clip (clip_id, topic, title, cefr_level, order_index, audio_url, transcript, status, created_by)
+SELECT c.clip_id::uuid, c.topic, c.title, c.cefr_level, c.order_index, c.audio_url, c.transcript::jsonb, c.status,
+       'ad000000-0000-4000-8000-000000000001'::uuid
+FROM (VALUES
  ('c1100000-0000-4000-8000-000000000001', 'Travel', 'At the check-in desk', 'A2', 1, 'pending://',
   '[{"speaker":"Agent","en":"Good morning. Can I see your passport, please?","vi":"Chào buổi sáng. Cho tôi xem hộ chiếu của anh được không?"},
     {"speaker":"Traveller","en":"Sure, here you are.","vi":"Vâng, đây ạ."},
@@ -132,4 +143,68 @@ INSERT INTO listening_clip (clip_id, topic, title, cefr_level, order_index, audi
     {"speaker":"Linh","en":"Thursday works for me, but the report deadline is Wednesday.","vi":"Thứ Năm thì được, nhưng hạn nộp báo cáo là thứ Tư."},
     {"speaker":"Manager","en":"Then please send me a draft on Wednesday afternoon.","vi":"Vậy chiều thứ Tư em gửi anh bản nháp nhé."},
     {"speaker":"Linh","en":"No problem. I will share it with the whole department.","vi":"Không vấn đề gì. Em sẽ gửi cho cả phòng."}]', 'published')
+) AS c(clip_id, topic, title, cefr_level, order_index, audio_url, transcript, status)
+ON CONFLICT DO NOTHING;
+
+-- Câu hỏi MCQ của bài nghe (question_purpose = 'listening'; không cần embedding nên để active)
+INSERT INTO question_bank (question_id, clip_id, question_text, question_type, question_purpose, payload,
+                           topic, cefr_level, status, created_by) VALUES
+ ('9b000000-0000-4000-8000-000000000101', 'c1100000-0000-4000-8000-000000000001',
+  'What does the agent ask to see first?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"A ticket"},{"key":"b","text":"A passport"},{"key":"c","text":"A boarding pass"},{"key":"d","text":"A credit card"}],"answer":"b","explanation":"The agent asks to see the passport."}',
+  'Travel', 'A2', 'active', 'ad000000-0000-4000-8000-000000000001'),
+ ('9b000000-0000-4000-8000-000000000102', 'c1100000-0000-4000-8000-000000000001',
+  'How many bags does the traveller check in?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"None"},{"key":"b","text":"One"},{"key":"c","text":"Two"},{"key":"d","text":"Three"}],"answer":"b","explanation":"The traveller says: Just one bag."}',
+  'Travel', 'A2', 'active', 'ad000000-0000-4000-8000-000000000001'),
+ ('9b000000-0000-4000-8000-000000000103', 'c1100000-0000-4000-8000-000000000001',
+  'How long is the delay?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"Ten minutes"},{"key":"b","text":"Twenty minutes"},{"key":"c","text":"Thirty minutes"},{"key":"d","text":"One hour"}],"answer":"c","explanation":"The agent says there is a thirty-minute delay."}',
+  'Travel', 'A2', 'active', 'ad000000-0000-4000-8000-000000000001'),
+ ('9b000000-0000-4000-8000-000000000201', 'c1100000-0000-4000-8000-000000000002',
+  'When will the meeting take place now?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"Tomorrow"},{"key":"b","text":"Wednesday"},{"key":"c","text":"Thursday"},{"key":"d","text":"Friday"}],"answer":"c","explanation":"The manager moves the meeting to Thursday."}',
+  'Work', 'B1', 'active', 'ad000000-0000-4000-8000-000000000001'),
+ ('9b000000-0000-4000-8000-000000000202', 'c1100000-0000-4000-8000-000000000002',
+  'What is due on Wednesday?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"The report"},{"key":"b","text":"The contract"},{"key":"c","text":"The salary review"},{"key":"d","text":"The schedule"}],"answer":"a","explanation":"Linh says the report deadline is Wednesday."}',
+  'Work', 'B1', 'active', 'ad000000-0000-4000-8000-000000000001'),
+ ('9b000000-0000-4000-8000-000000000203', 'c1100000-0000-4000-8000-000000000002',
+  'Who will Linh share the draft with?', 'mcq', 'listening',
+  '{"options":[{"key":"a","text":"Only the manager"},{"key":"b","text":"A client"},{"key":"c","text":"The whole department"},{"key":"d","text":"Nobody"}],"answer":"c","explanation":"Linh will share it with the whole department."}',
+  'Work', 'B1', 'active', 'ad000000-0000-4000-8000-000000000001')
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------
+-- 4. Đề Writing: mỗi cặp topic + level 6 đề. embedding_vector NULL nên status = 'retired'
+--    (chk_active_prompt_has_embedding). Job P6 tạo embedding rồi chuyển sang 'active'.
+-- ---------------------------------------------------------------------
+INSERT INTO question_bank (question_id, question_text, question_type, question_purpose, payload,
+                           topic, cefr_level, status, created_by) VALUES
+ -- Travel A2 (50-100 từ)
+ ('9a000000-0000-4000-8000-000000000101', 'Write an email to a friend about your last holiday. Say where you went, how you travelled and what you liked most.', 'email', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"Past simple; mention place, transport and one favourite thing"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000102', 'Describe a place in your country that tourists should visit. Explain why it is special.', 'paragraph', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"Describe the place and give at least two reasons"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000103', 'Write a message to a hotel to book a room. Include the dates, the number of people and one question.', 'email', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"Polite request; dates, number of guests, one question"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000104', 'Tell the story of a problem you had on a trip, for example a delay or lost luggage. What happened and what did you do?', 'paragraph', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"Sequence words: first, then, finally"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000105', 'Do you prefer travelling by train or by plane? Give reasons for your answer.', 'paragraph', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"State a preference and compare using because and but"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000106', 'Write a short plan for a weekend trip: where you will go, what you will pack and what you will do each day.', 'paragraph', 'writing_prompt',
+  '{"min_words":50,"max_words":100,"rubric_hint":"Future with will or going to; list items to pack"}', 'Travel', 'A2', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ -- Work B1 (80-150 từ)
+ ('9a000000-0000-4000-8000-000000000201', 'Write an email to your manager asking to move a meeting. Explain why and suggest a new time.', 'email', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Formal tone; reason and an alternative time"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000202', 'Describe your ideal job. What would you do every day and why would you enjoy it?', 'essay', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Use would; give reasons and examples"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000203', 'Some people prefer working from home, others prefer the office. Which do you prefer? Give reasons.', 'essay', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Opinion with two supporting reasons and a conclusion"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000204', 'Write a short report about a project you finished. What was the goal, what went well and what was difficult?', 'paragraph', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Past tenses; clear structure: goal, success, difficulty"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000205', 'Write a cover letter for a part-time job. Describe your skills and experience.', 'email', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Formal letter; skills linked to the job"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001'),
+ ('9a000000-0000-4000-8000-000000000206', 'Give advice to a new colleague on their first week at work. What should they do and avoid?', 'paragraph', 'writing_prompt',
+  '{"min_words":80,"max_words":150,"rubric_hint":"Modal verbs: should, should not, it is a good idea to"}', 'Work', 'B1', 'retired', 'ad000000-0000-4000-8000-000000000001')
 ON CONFLICT DO NOTHING;

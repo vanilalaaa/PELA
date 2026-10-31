@@ -92,6 +92,26 @@ class DevProfileIT {
     }
 
     @Test
+    void devSeedHasWritingPromptsAndListeningQuestions() {
+        assertThat(jdbc.queryForObject("SELECT role || '/' || status FROM users WHERE email = 'seed-admin@pela.local'",
+                String.class)).isEqualTo("admin/active");
+
+        // >= 6 đề Writing mỗi cặp topic + level; chưa có embedding nên 'retired' cho tới job P6
+        assertThat(jdbc.queryForList("""
+                SELECT topic || ' ' || cefr_level || ' ' || count(*) FROM question_bank
+                WHERE question_purpose = 'writing_prompt' AND embedding_vector IS NULL AND status = 'retired'
+                GROUP BY topic, cefr_level HAVING count(*) >= 6 ORDER BY topic
+                """, String.class)).containsExactly("Travel A2 6", "Work B1 6");
+
+        assertThat(count("""
+                SELECT count(*) FROM question_bank q JOIN listening_clip c USING (clip_id)
+                WHERE q.question_purpose = 'listening' AND q.status = 'active'
+                  AND jsonb_array_length(q.payload->'options') = 4 AND q.payload ? 'answer'
+                """)).isEqualTo(6);
+        assertThat(count("SELECT count(*) FROM listening_clip WHERE created_by IS NOT NULL")).isEqualTo(2);
+    }
+
+    @Test
     void devSeedIsIdempotent() {
         String countsBefore = seedCounts();
 
@@ -117,7 +137,8 @@ class DevProfileIT {
                 SELECT (SELECT count(*) FROM survey_question) || '/' || (SELECT count(*) FROM survey_level_rule)
                     || '/' || (SELECT count(*) FROM topic) || '/' || (SELECT count(*) FROM lesson)
                     || '/' || (SELECT count(*) FROM vocabulary) || '/' || (SELECT count(*) FROM lesson_vocab)
-                    || '/' || (SELECT count(*) FROM listening_clip)
+                    || '/' || (SELECT count(*) FROM listening_clip) || '/' || (SELECT count(*) FROM question_bank)
+                    || '/' || (SELECT count(*) FROM users)
                 """, String.class);
     }
 
