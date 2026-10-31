@@ -89,7 +89,7 @@ class InMemoryUserAccounts implements UserAccountPort {
     }
 
     /** Dịch vụ thật nối với bộ nhớ này, dùng chung cho các test. */
-    static AccountStanding standing(InMemoryUserAccounts accounts, com.pela.shared.application.port.out.SystemSettingPort settings,
+    static AccountStanding standing(InMemoryUserAccounts accounts, com.pela.shared.application.port.out.SettingsPort settings,
             com.pela.shared.application.port.out.ClockPort clock) {
         return new AccountStanding(settings, new SuspensionReleaseService(accounts, clock));
     }

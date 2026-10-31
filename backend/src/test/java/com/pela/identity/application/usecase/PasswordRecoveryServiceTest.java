@@ -16,7 +16,7 @@ import com.pela.identity.application.port.out.SupabaseAuthException.Reason;
 import com.pela.identity.application.port.out.SupabaseAuthPort;
 import com.pela.identity.application.port.out.SupabaseAuthPort.LogoutScope;
 import com.pela.identity.application.port.out.SupabaseSession;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.shared.domain.exception.PelaException;
 import com.pela.shared.domain.exception.TooManyRequestsException;
 import com.pela.shared.domain.exception.UnauthorizedException;
@@ -38,7 +38,7 @@ class PasswordRecoveryServiceTest {
     private final SupabaseAuthPort auth = mock(SupabaseAuthPort.class);
     private final MutableClock clock = new MutableClock(Instant.parse("2026-11-01T08:00:00Z"));
     private final AtomicInteger tokenCounter = new AtomicInteger();
-    private final SystemSettingPort settings = key -> Optional.ofNullable(
+    private final SettingsPort settings = key -> Optional.ofNullable(
             Map.of("auth.password_reset_ttl_minutes", "10").get(key));
     private final PasswordRecoveryService service = new PasswordRecoveryService(auth,
             new InMemoryPasswordResetSessionAdapter(), () -> "reset-token-" + tokenCounter.incrementAndGet(),

@@ -16,7 +16,7 @@ import com.pela.identity.domain.LoginState;
 import com.pela.identity.domain.PasswordPolicy;
 import com.pela.identity.domain.UserAccount;
 import com.pela.shared.application.port.out.ClockPort;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -34,11 +34,11 @@ public class AuthService implements RegisterUseCase, LoginUseCase, RefreshSessio
 
     private final SupabaseAuthPort auth;
     private final UserAccountPort accounts;
-    private final SystemSettingPort settings;
+    private final SettingsPort settings;
     private final ClockPort clock;
     private final AccountStanding standing;
 
-    AuthService(SupabaseAuthPort auth, UserAccountPort accounts, SystemSettingPort settings, ClockPort clock,
+    AuthService(SupabaseAuthPort auth, UserAccountPort accounts, SettingsPort settings, ClockPort clock,
             AccountStanding standing) {
         this.auth = auth;
         this.accounts = accounts;

@@ -2,7 +2,7 @@ package com.pela.identity.application.usecase;
 
 import com.pela.identity.application.port.in.ReleaseExpiredSuspensionUseCase;
 import com.pela.identity.domain.UserAccount;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +16,10 @@ class AccountStanding {
 
     static final String DELETION_GRACE_SETTING = "account.deletion_grace_days";
 
-    private final SystemSettingPort settings;
+    private final SettingsPort settings;
     private final ReleaseExpiredSuspensionUseCase release;
 
-    AccountStanding(SystemSettingPort settings, ReleaseExpiredSuspensionUseCase release) {
+    AccountStanding(SettingsPort settings, ReleaseExpiredSuspensionUseCase release) {
         this.settings = settings;
         this.release = release;
     }

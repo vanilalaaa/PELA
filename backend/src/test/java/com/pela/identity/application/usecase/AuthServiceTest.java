@@ -19,7 +19,7 @@ import com.pela.identity.application.port.out.SupabaseSession;
 import com.pela.identity.domain.AccountStatus;
 import com.pela.identity.domain.Role;
 import com.pela.identity.domain.UserAccount;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.shared.domain.exception.ConflictException;
 import com.pela.shared.domain.exception.ForbiddenException;
 import com.pela.shared.domain.exception.LockedException;
@@ -44,7 +44,7 @@ class AuthServiceTest {
     private final SupabaseAuthPort auth = mock(SupabaseAuthPort.class);
     private final InMemoryUserAccounts accounts = new InMemoryUserAccounts();
     private final MutableClock clock = new MutableClock(Instant.parse("2026-11-01T08:00:00Z"));
-    private final SystemSettingPort settings = key -> Optional.ofNullable(Map.of(
+    private final SettingsPort settings = key -> Optional.ofNullable(Map.of(
             "auth.lockout_max_attempts", "5", "auth.lockout_window_minutes", "15", "auth.lockout_minutes", "15",
             "account.deletion_grace_days", "30").get(key));
     private final AuthService service = new AuthService(auth, accounts, settings, clock,

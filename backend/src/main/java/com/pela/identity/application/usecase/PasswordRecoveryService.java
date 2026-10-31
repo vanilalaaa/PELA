@@ -11,7 +11,7 @@ import com.pela.identity.application.port.out.SupabaseSession;
 import com.pela.identity.domain.PasswordPolicy;
 import com.pela.shared.application.port.out.ClockPort;
 import com.pela.shared.application.port.out.SecureTokenPort;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.shared.domain.exception.UnauthorizedException;
 import java.time.Duration;
 import java.util.List;
@@ -31,11 +31,11 @@ public class PasswordRecoveryService implements PasswordRecoveryUseCase {
     private final SupabaseAuthPort auth;
     private final PasswordResetSessionPort sessions;
     private final SecureTokenPort tokens;
-    private final SystemSettingPort settings;
+    private final SettingsPort settings;
     private final ClockPort clock;
 
     public PasswordRecoveryService(SupabaseAuthPort auth, PasswordResetSessionPort sessions, SecureTokenPort tokens,
-            SystemSettingPort settings, ClockPort clock) {
+            SettingsPort settings, ClockPort clock) {
         this.auth = auth;
         this.sessions = sessions;
         this.tokens = tokens;

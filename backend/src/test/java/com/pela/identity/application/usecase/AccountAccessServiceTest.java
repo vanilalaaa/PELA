@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.pela.identity.domain.AccountStatus;
 import com.pela.identity.domain.Role;
-import com.pela.shared.application.port.out.SystemSettingPort;
+import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.shared.domain.exception.ForbiddenException;
 import com.pela.shared.domain.exception.PelaException;
 import com.pela.support.MutableClock;
@@ -21,7 +21,7 @@ class AccountAccessServiceTest {
 
     private final InMemoryUserAccounts accounts = new InMemoryUserAccounts();
     private final MutableClock clock = new MutableClock(Instant.parse("2026-11-01T08:00:00Z"));
-    private final SystemSettingPort settings = key -> Optional.ofNullable(
+    private final SettingsPort settings = key -> Optional.ofNullable(
             Map.of("account.deletion_grace_days", "30").get(key));
     private final AccountAccessService service = new AccountAccessService(accounts, clock,
             InMemoryUserAccounts.standing(accounts, settings, clock));
