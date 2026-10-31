@@ -50,3 +50,11 @@ pela:
     service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
   gemini:
     api-key: ${GEMINI_API_KEY:}
+    # Tên model, ngưỡng an toàn… nằm ở system_setting (MNT-3); đây chỉ là kết nối
+    base-url: https://generativelanguage.googleapis.com/v1beta
+    connect-timeout: PT5S
+    # Chờ tối đa cho embedding/TTS; LLM dùng timeout do use case truyền vào
+    request-timeout: PT60S
+  content-filter:
+    # Danh sách từ cấm (BR-15), mỗi dòng một từ/cụm từ
+    files: classpath:content-filter/blocklist-en.txt,classpath:content-filter/blocklist-vi.txt

@@ -53,6 +53,24 @@ tasks.withType<Test> {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+// Test gọi dịch vụ thật (Gemini…) gắn @Tag("external"): không chạy trong ./gradlew build
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("external")
+    }
+}
+
+tasks.register<Test>("externalTest") {
+    description = "Chạy test gọi dịch vụ thật (@Tag(\"external\")), cần GEMINI_API_KEY"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("external")
+    }
+    shouldRunAfter(tasks.test)
+}
+
 // bootRun là lệnh chạy local: mặc định profile dev, đổi bằng biến SPRING_PROFILES_ACTIVE
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
     systemProperty("spring.profiles.active", System.getenv("SPRING_PROFILES_ACTIVE") ?: "dev")

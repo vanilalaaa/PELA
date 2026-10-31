@@ -62,6 +62,7 @@ Các lựa chọn công nghệ ở mục 1 (React Navigation, WatermelonDB, Jdbc
 - Luôn có fallback khi AI lỗi, timeout hoặc dưới ngưỡng (BR-7).
 - Lọc nội dung do AI sinh trước khi hiển thị cho người dùng (BR-15).
 - Không gọi Gemini từ client; chỉ backend gọi qua port/out.
+- Dùng port chung trong `com.pela.shared.application.port.out`: `LlmPort` (JSON có cấu trúc + Bean Validation), `EmbeddingPort` (vector đã chuẩn hoá L2), `TtsPort`, `ContentFilterPort`, `PromptTemplatePort`, `SettingsPort`. Lỗi AI là `AiCallException` (TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, RATE_LIMITED, UPSTREAM_ERROR) — use case chọn fallback theo loại.
 
 ## 7. Bảo mật
 
@@ -99,6 +100,7 @@ Backend (trong `backend/`):
 ./gradlew build          # compile + test (gồm ArchUnit) + jacoco
 ./gradlew test           # chỉ test
 ./gradlew bootRun        # chạy app, mặc định profile dev (cần biến môi trường, xem .env.example)
+./gradlew externalTest   # chỉ test @Tag("external") gọi Gemini thật (không chạy trong build), xem backend/README.md
 ```
 
 Frontend (trong `frontend/`):
