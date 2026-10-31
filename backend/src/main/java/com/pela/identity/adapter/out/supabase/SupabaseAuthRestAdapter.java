@@ -110,6 +110,11 @@ public class SupabaseAuthRestAdapter implements SupabaseAuthPort {
      * Header cho Admin API. Theo tài liệu Supabase (Guides → API keys): secret key mới {@code sb_secret_...}
      * "short strings, not JWTs" — gửi ở header {@code apikey}, không gửi ở {@code Authorization: Bearer}.
      * service_role kiểu cũ là JWT (bắt đầu bằng {@code eyJ}) thì gửi cả {@code Authorization: Bearer} như trước.
+     *
+     * <p>Đã thử trên Supabase dev (01/11/2026, service_role JWT, DELETE /admin/users/{uuid không tồn tại}):
+     * chỉ {@code apikey} → 401 {@code no_authorization}; {@code apikey} + {@code Authorization: Bearer} → 404
+     * {@code user_not_found} (được chấp nhận). Nhánh {@code sb_secret_} chưa thử thật: chạy lại phép thử khi
+     * project chuyển sang secret key mới.
      */
     static void adminKeyHeaders(HttpHeaders headers, String key) {
         headers.set("apikey", key);
