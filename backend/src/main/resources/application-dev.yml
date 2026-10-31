@@ -11,6 +11,12 @@ springdoc:
   swagger-ui:
     enabled: true
 
+# Job chạy dày hơn để thử nhanh khi dev
+pela:
+  jobs:
+    suspension-release-cron: "0 * * * * *"
+    password-reset-cleanup-delay: PT15S
+
 logging:
   level:
     # Câu SQL do JdbcTemplate chạy. Không bật TRACE cho StatementCreatorUtils: giá trị bind có thể chứa PII.

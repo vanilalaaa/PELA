@@ -36,6 +36,12 @@ springdoc:
     enabled: false
 
 pela:
+  jobs:
+    enabled: true
+    # UC-16 A2: mở khoá tài khoản có suspended_until đã qua (mặc định đầu mỗi giờ)
+    suspension-release-cron: "0 0 * * * *"
+    # Dọn reset token quá hạn và thu hồi phiên khôi phục (khoảng nghỉ giữa 2 lần chạy)
+    password-reset-cleanup-delay: PT1M
   supabase:
     url: ${SUPABASE_URL:}
     # apikey cho endpoint auth công khai (signup, token, recover, verify…)
