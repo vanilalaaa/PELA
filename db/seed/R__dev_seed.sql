@@ -1,0 +1,14 @@
+-- R__dev_seed.sql — dữ liệu mẫu cho môi trường dev. Chỉ nạp ở profile dev
+-- (application-dev.yml thêm filesystem:../db/seed vào spring.flyway.locations).
+--
+-- Đây là migration lặp lại (R__) của Flyway: không chiếm số version (V2 đã dùng cho migration thật),
+-- chạy sau mọi migration V và chạy lại mỗi khi nội dung file thay đổi.
+-- => Mọi lệnh phải chạy lại được nhiều lần: INSERT ... ON CONFLICT DO NOTHING / DO UPDATE.
+--
+-- TODO(P2): điền dữ liệu mẫu. system_setting và badge đã được seed trong V1__init.sql (mục 10).
+-- Gợi ý:
+--   1. prompt_template  — prompt chấm Writing, tạo đề Writing (có version)
+--   2. Dữ liệu học mẫu  — topic, lesson, vocabulary, lesson_vocab theo level CEFR
+--   3. Đề Writing / bài nghe mẫu (question_bank, listening_clip)
+--
+-- Không đưa dữ liệu cá nhân thật hay secret vào file này.
