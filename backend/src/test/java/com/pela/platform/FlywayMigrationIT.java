@@ -41,7 +41,11 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
     void v4AddsLockoutWindowAndSettings() {
         assertThat(columns("users")).contains("failed_login_window_started_at");
         assertThat(setting("auth.lockout_max_attempts")).isEqualTo("5");
+        assertThat(setting("auth.lockout_window_minutes")).isEqualTo("15");
         assertThat(setting("auth.lockout_minutes")).isEqualTo("15");
+        assertThat(setting("auth.password_reset_ttl_minutes")).isEqualTo("10");
+        // Đã có từ seed V1, V4 không thêm trùng
+        assertThat(setting("account.deletion_grace_days")).isEqualTo("30");
     }
 
     @Test
