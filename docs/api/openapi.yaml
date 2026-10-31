@@ -5,6 +5,10 @@ info:
   description: |
     REST API của PELA — Personalized English Learning Application.
     Mọi endpoint nằm dưới tiền tố `/v1`. `userId` luôn lấy từ JWT (SEC-4), không lấy từ body.
+
+    Mọi request đã xác thực tới `/v1/**` (trừ `POST /v1/auth/logout`) đi qua kiểm tra trạng thái tài khoản
+    từ bảng users (cache 60 giây), kể cả khi JWT còn hạn: tài khoản suspended hoặc pending_deletion nhận
+    403 theo `components.responses.AccountBlocked`.
 servers:
   - url: http://localhost:8080/v1
     description: Local
@@ -81,8 +85,9 @@ paths:
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '403':
           description: |
-            Mã EMAIL_NOT_VERIFIED, hoặc ACCOUNT_SUSPENDED kèm details {reason, suspendedUntil}
-            (suspendedUntil null = khoá vĩnh viễn).
+            Mã EMAIL_NOT_VERIFIED; ACCOUNT_SUSPENDED kèm details {reason, suspendedUntil}
+            (suspendedUntil null = khoá vĩnh viễn); hoặc ACCOUNT_PENDING_DELETION kèm details
+            {deletionScheduledAt} = deletion_requested_at + account.deletion_grace_days (BR-33).
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '423':
           description: "Tạm khoá do sai nhiều lần. Mã: ACCOUNT_LOCKED, details {lockedUntil}"
@@ -114,9 +119,7 @@ paths:
         '401':
           description: "Mã: INVALID_REFRESH_TOKEN"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
-        '403':
-          description: "Mã: ACCOUNT_SUSPENDED"
-          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
         '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
   /auth/logout:
     post:
@@ -159,6 +162,10 @@ paths:
   /auth/password/verify-otp:
     post:
       summary: Xác minh mã khôi phục, nhận reset token dùng một lần
+      description: |
+        `resetToken` là chuỗi ngẫu nhiên (256 bit, base64url) dùng một lần, hạn
+        `auth.password_reset_ttl_minutes` phút (mặc định 10). Phiên khôi phục của Supabase được backend
+        giữ phía server; client không nhận access token của phiên này. Xác minh lại sẽ huỷ token trước đó.
       operationId: verifyPasswordOtp
       tags: [identity]
       security: []
@@ -181,8 +188,8 @@ paths:
                 type: object
                 required: [resetToken, expiresIn]
                 properties:
-                  resetToken: {type: string}
-                  expiresIn: {type: integer, description: Số giây}
+                  resetToken: {type: string, minLength: 43, description: Token ngẫu nhiên dùng một lần}
+                  expiresIn: {type: integer, description: 'Số giây (auth.password_reset_ttl_minutes × 60)', examples: [600]}
         '422':
           description: "Mã sai hoặc hết hạn: INVALID_OTP; hoặc VALIDATION_FAILED"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
@@ -207,7 +214,7 @@ paths:
       responses:
         '204': {description: Đã đổi mật khẩu}
         '401':
-          description: "Mã: INVALID_RESET_TOKEN"
+          description: "Mã: INVALID_RESET_TOKEN — token không tồn tại, đã dùng hoặc đã hết hạn"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '422':
           description: "VALIDATION_FAILED, WEAK_PASSWORD hoặc SAME_PASSWORD"
@@ -225,6 +232,7 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Me'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
         '404':
           description: "Mã: USER_NOT_FOUND"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
@@ -244,7 +252,7 @@ paths:
               schema: {$ref: '#/components/schemas/Me'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403':
-          description: "Mã: ADMIN_REQUIRED"
+          description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
 
 components:
@@ -281,6 +289,12 @@ components:
       content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
     InternalError:
       description: "Lỗi không mong đợi. Mã: INTERNAL_ERROR (không lộ chi tiết nội bộ)"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    AccountBlocked:
+      description: |
+        Tài khoản không được dùng (kể cả khi JWT còn hạn). Mã:
+        ACCOUNT_SUSPENDED — details {reason, suspendedUntil}; suspendedUntil null = khoá vĩnh viễn (UC-16).
+        ACCOUNT_PENDING_DELETION — details {deletionScheduledAt} (BR-33).
       content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
     AuthProviderUnavailable:
       description: "Supabase Auth tạm thời không dùng được. Mã: AUTH_PROVIDER_UNAVAILABLE"
