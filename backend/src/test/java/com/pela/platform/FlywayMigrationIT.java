@@ -34,7 +34,14 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3");
+                .containsExactly("0.1", "1", "2", "3", "4");
+    }
+
+    @Test
+    void v4AddsLockoutWindowAndSettings() {
+        assertThat(columns("users")).contains("failed_login_window_started_at");
+        assertThat(setting("auth.lockout_max_attempts")).isEqualTo("5");
+        assertThat(setting("auth.lockout_minutes")).isEqualTo("15");
     }
 
     @Test
