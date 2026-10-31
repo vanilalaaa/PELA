@@ -29,6 +29,224 @@ paths:
                   status:
                     type: string
                     const: ok
+  /auth/register:
+    post:
+      summary: Đăng ký tài khoản email (UC-01 1.0, Auth.Register)
+      description: |
+        Mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số (Auth.Register.Validate).
+        Tài khoản tạo ở trạng thái `unverified`; Supabase gửi email xác minh (Auth.Register.Verify).
+      operationId: register
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RegisterRequest'}
+      responses:
+        '201':
+          description: Đã tạo tài khoản
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterResponse'}
+        '409':
+          description: "Email đã đăng ký (BR-1). Mã: EMAIL_ALREADY_REGISTERED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/login:
+    post:
+      summary: Đăng nhập email/mật khẩu (UC-01 2.0, Auth.Login)
+      description: |
+        Backend đếm lần sai (Auth.Login.Lockout, SEC-5): sai `auth.lockout_max_attempts` lần trong
+        `auth.lockout_minutes` phút thì khoá `auth.lockout_minutes` phút. Lý do khoá tài khoản / chưa xác minh
+        chỉ được trả khi mật khẩu đúng.
+      operationId: login
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LoginRequest'}
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TokenResponse'}
+        '401':
+          description: "Sai email hoặc mật khẩu. Mã: INVALID_CREDENTIALS"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '403':
+          description: |
+            Mã EMAIL_NOT_VERIFIED, hoặc ACCOUNT_SUSPENDED kèm details {reason, suspendedUntil}
+            (suspendedUntil null = khoá vĩnh viễn).
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '423':
+          description: "Tạm khoá do sai nhiều lần. Mã: ACCOUNT_LOCKED, details {lockedUntil}"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/refresh:
+    post:
+      summary: Làm mới phiên (Auth.Login.Session)
+      operationId: refreshSession
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: {type: string}
+      responses:
+        '200':
+          description: Phiên mới
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TokenResponse'}
+        '401':
+          description: "Mã: INVALID_REFRESH_TOKEN"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '403':
+          description: "Mã: ACCOUNT_SUSPENDED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/logout:
+    post:
+      summary: Đăng xuất (Auth.Logout)
+      description: Mặc định chỉ thiết bị hiện tại; `allDevices = true` để thoát mọi thiết bị (Auth.Logout.MultiDevice).
+      operationId: logout
+      tags: [identity]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allDevices: {type: boolean, default: false}
+      responses:
+        '204': {description: Đã đăng xuất}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /auth/password/forgot:
+    post:
+      summary: Gửi mã khôi phục 6 số (Auth.Recover.Request)
+      description: Luôn trả 202 dù email có tồn tại hay không. Mã hết hạn sau 5 phút (Auth.Recover.Expire, cấu hình ở Supabase Auth).
+      operationId: forgotPassword
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: {type: string, format: email}
+      responses:
+        '202': {description: Đã tiếp nhận}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/password/verify-otp:
+    post:
+      summary: Xác minh mã khôi phục, nhận reset token dùng một lần
+      operationId: verifyPasswordOtp
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: {type: string, format: email}
+                code: {type: string, pattern: '^\d{6}$'}
+      responses:
+        '200':
+          description: Mã đúng
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [resetToken, expiresIn]
+                properties:
+                  resetToken: {type: string}
+                  expiresIn: {type: integer, description: Số giây}
+        '422':
+          description: "Mã sai hoặc hết hạn: INVALID_OTP; hoặc VALIDATION_FAILED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/password/reset:
+    post:
+      summary: Đặt mật khẩu mới (Auth.Recover.Reset)
+      operationId: resetPassword
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resetToken, newPassword, confirmPassword]
+              properties:
+                resetToken: {type: string}
+                newPassword: {type: string, minLength: 8, maxLength: 72}
+                confirmPassword: {type: string}
+      responses:
+        '204': {description: Đã đổi mật khẩu}
+        '401':
+          description: "Mã: INVALID_RESET_TOKEN"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "VALIDATION_FAILED, WEAK_PASSWORD hoặc SAME_PASSWORD"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /me:
+    get:
+      summary: Hồ sơ của người đang đăng nhập (SEC-4)
+      operationId: getMe
+      tags: [identity]
+      responses:
+        '200':
+          description: Hồ sơ
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Me'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404':
+          description: "Mã: USER_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/me:
+    get:
+      summary: Hồ sơ Admin — Admin web gọi để xác nhận quyền (SEC-3)
+      description: |
+        Mọi `/v1/admin/**` đọc role + status từ bảng users (không tin claim JWT), cache 60 giây.
+        Không phải Admin đang hoạt động thì 403 ADMIN_REQUIRED.
+      operationId: getAdminMe
+      tags: [identity, admin]
+      responses:
+        '200':
+          description: Hồ sơ Admin
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Me'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+
 components:
   securitySchemes:
     bearerAuth:
@@ -64,6 +282,9 @@ components:
     InternalError:
       description: "Lỗi không mong đợi. Mã: INTERNAL_ERROR (không lộ chi tiết nội bộ)"
       content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    AuthProviderUnavailable:
+      description: "Supabase Auth tạm thời không dùng được. Mã: AUTH_PROVIDER_UNAVAILABLE"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
   schemas:
     Error:
       type: object
@@ -83,3 +304,45 @@ components:
             details:
               description: Thông tin bổ sung (ví dụ lỗi theo từng field)
               type: [object, array, 'null']
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, confirmPassword]
+      properties:
+        fullName: {type: string, maxLength: 100}
+        email: {type: string, format: email, maxLength: 150}
+        password: {type: string, minLength: 8, maxLength: 72, description: 'Có chữ hoa, chữ thường, chữ số'}
+        confirmPassword: {type: string}
+    RegisterResponse:
+      type: object
+      required: [userId, email, status]
+      properties:
+        userId: {type: string, format: uuid}
+        email: {type: string, format: email}
+        status: {type: string, const: unverified}
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string}
+    TokenResponse:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, tokenType]
+      properties:
+        accessToken: {type: string, description: JWT Supabase; gửi kèm header Authorization Bearer}
+        refreshToken: {type: string}
+        expiresIn: {type: integer, description: Số giây tới khi access token hết hạn}
+        tokenType: {type: string, const: bearer}
+    Me:
+      type: object
+      required: [userId, email, fullName, role, status, timezone]
+      properties:
+        userId: {type: string, format: uuid}
+        email: {type: string, format: email}
+        fullName: {type: string}
+        username: {type: [string, 'null']}
+        avatarUrl: {type: [string, 'null']}
+        role: {type: string, enum: [learner, admin]}
+        status: {type: string, enum: [unverified, active, suspended, pending_deletion]}
+        cefrLevel: {type: [string, 'null'], enum: [A1, A2, B1, B2, C1, C2, null]}
+        timezone: {type: string}

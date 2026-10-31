@@ -36,5 +36,11 @@ springdoc:
     enabled: false
 
 pela:
+  supabase:
+    url: ${SUPABASE_URL:}
+    # apikey cho endpoint auth công khai (signup, token, recover, verify…)
+    anon-key: ${SUPABASE_ANON_KEY:}
+    # Chỉ dùng cho Admin API của Supabase Auth (xoá user)
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
   gemini:
     api-key: ${GEMINI_API_KEY:}
