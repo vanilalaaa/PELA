@@ -76,7 +76,9 @@ Các lựa chọn công nghệ ở mục 1 (React Navigation, WatermelonDB, Jdbc
 - Java: package `com.pela.<module>.<layer>`, class `PascalCase`, method/field `camelCase`, hằng `UPPER_SNAKE_CASE`. Use case: `XxxUseCase` (port/in) + `XxxService` (usecase).
 - TypeScript: strict; file `camelCase.ts`, component `PascalCase.tsx`, hook `useXxx`.
 - Không hard-code chuỗi hiển thị: dùng i18next (vi/en). Không hard-code màu: dùng theme token.
-- Lỗi API theo khuôn: `{"error":{"code":"UPPER_SNAKE_CASE","message":"...","details":...}}` (`components.schemas.Error` trong OpenAPI).
+- Lỗi API theo khuôn: `{"error":{"code":"UPPER_SNAKE_CASE","message":"...","details":...}}` (`components.schemas.Error` trong OpenAPI). Ném exception trong `com.pela.shared.domain.exception` (`NotFound` 404, `Conflict` 409, `Forbidden` 403, `Locked` 423, `TooManyRequests` 429, `ValidationFailed` 422); `GlobalExceptionHandler` lo việc map. Không tự dựng `ResponseEntity` lỗi trong controller.
+- userId của người gọi: tham số `@CurrentUserId UUID userId` trong controller (lấy từ claim `sub` của JWT).
+- Thời gian và id do server sinh: inject `ClockPort` / `IdGeneratorPort`; không gọi `Instant.now()`, `LocalDate.now()`, `UUID.randomUUID()` trong domain/application (ArchUnit chặn).
 - Đổi API → cập nhật `docs/api/openapi.yaml` trong cùng PR.
 - Logic dùng chung client/server (SM-2, Star, sinh câu hỏi, đếm từ) phải có test vector trong `frontend/packages/fixtures`, dùng cho cả Vitest và JUnit.
 
@@ -95,7 +97,7 @@ Backend (trong `backend/`):
 ```bash
 ./gradlew build          # compile + test (gồm ArchUnit) + jacoco
 ./gradlew test           # chỉ test
-./gradlew bootRun        # chạy app (cần biến môi trường, xem .env.example)
+./gradlew bootRun        # chạy app, mặc định profile dev (cần biến môi trường, xem .env.example)
 ```
 
 Frontend (trong `frontend/`):

@@ -139,6 +139,8 @@ Kiểm tra `GET http://localhost:8080/v1/health` → `{"status":"ok"}`.
 
 Flyway đọc migration từ `filesystem:../db/migrations` (đổi bằng biến `FLYWAY_LOCATIONS`). Chạy app từ thư mục `backend/`.
 
+`./gradlew bootRun` mặc định bật profile **dev** (`application-dev.yml`): log câu SQL của JdbcTemplate ở mức DEBUG và nạp thêm seed `db/seed/R__dev_seed.sql`. Seed là migration lặp lại (`R__`) nên không chiếm số version; mọi lệnh trong đó phải chạy lại được (`ON CONFLICT`). Chạy không có profile dev: `SPRING_PROFILES_ACTIVE=default ./gradlew bootRun`.
+
 Migration **chỉ chạy bằng Flyway**. Không dùng `supabase db push` / `supabase migration` của Supabase CLI.
 
 ### 3. Supabase
@@ -276,7 +278,8 @@ export function makeSubmitReview(deps: { outbox: OutboxPort; clock: ClockPort })
 
 - **Bắt buộc** unit test cho domain + application, mục tiêu độ phủ **≥ 70%** (PER-7). Báo cáo JaCoCo: `backend/build/reports/jacoco/`.
 - **Test vector dùng chung**: logic có ở cả client và server (SM-2, Star, sinh câu hỏi, đếm từ) phải có case trong `frontend/packages/fixtures/*.json`, chạy ở cả Vitest và JUnit.
-- **Repository**: Testcontainers với image `pgvector/pgvector:pg17` cho repository dùng pgvector / SQL đặc thù.
+- **Repository / tích hợp**: kế thừa `com.pela.support.PostgresIntegrationTest` (Spring context + container `pgvector/pgvector:pg17` dùng chung cho cả lần chạy). Không dùng image `postgres` thường: không có extension `vector` nên V1 lỗi. Máy không có Docker thì các test này được bỏ qua; CI luôn chạy.
+- **Bộ nhớ khi build**: `backend/gradle.properties` giới hạn Gradle (`-Xmx1g`, 2 worker), test JVM tối đa 768 MB và Mockito được nạp bằng `-javaagent` (không spawn tiến trình attach). Đừng tăng các giới hạn này nếu chưa thống nhất.
 - **Stub Supabase khi test**: `schema.sql` tham chiếu `auth.users` (`id`, `email`, `raw_user_meta_data`), `auth.uid()`, role `authenticated` và `anon` — những thứ chỉ Supabase có. Vì vậy test chạy thêm `backend/src/test/resources/db/stub/V0_1__supabase_auth_stub.sql` (trước V1) để giả lập. Schema dùng thêm đối tượng Supabase nào khác thì bổ sung vào file stub này, không sửa migration thật.
 - **Kiến trúc**: `ArchitectureTest` (ArchUnit) và `pnpm depcruise` chạy trong CI.
 - **E2E**: Detox (mobile) và Playwright (admin web) cho các luồng chính trước buổi demo.
