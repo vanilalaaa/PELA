@@ -72,8 +72,10 @@ class GeminiEmbeddingAndTtsAdapterTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("x-goog-api-key", "test-key"))
                 .andExpect(jsonPath("$.content.parts[0].text").value("Write about your last holiday"))
-                .andExpect(jsonPath("$.embedContentConfig.taskType").value("RETRIEVAL_DOCUMENT"))
-                .andExpect(jsonPath("$.embedContentConfig.outputDimensionality").value(768))
+                .andExpect(jsonPath("$.taskType").value("RETRIEVAL_DOCUMENT"))
+                .andExpect(jsonPath("$.outputDimensionality").value(768))
+                // embedContentConfig bị API thật bỏ qua (trả 3072 chiều) nên không được dùng
+                .andExpect(jsonPath("$.embedContentConfig").doesNotExist())
                 .andRespond(withSuccess(embeddingResponse(768, 0.5), MediaType.APPLICATION_JSON));
 
         float[] vector = embedding.embed("Write about your last holiday", TaskType.RETRIEVAL_DOCUMENT);

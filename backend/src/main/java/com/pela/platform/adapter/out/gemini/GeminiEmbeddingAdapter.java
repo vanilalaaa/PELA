@@ -12,9 +12,13 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 /**
- * Embedding qua Gemini {@code models/{model}:embedContent}. Cấu hình task/số chiều đặt trong
- * {@code embedContentConfig} (các trường cùng tên ở cấp ngoài đã deprecated theo API reference). Ở số chiều
- * khác 3072, Gemini không chuẩn hoá vector nên adapter chuẩn hoá L2 trước khi trả.
+ * Embedding qua Gemini {@code models/{model}:embedContent}. Ở số chiều khác 3072, Gemini không chuẩn hoá
+ * vector nên adapter chuẩn hoá L2 trước khi trả.
+ *
+ * <p>{@code taskType} và {@code outputDimensionality} đặt ở cấp ngoài cùng của body. API reference ghi hai
+ * trường này deprecated và khuyên dùng {@code embedContentConfig}, nhưng đã thử với API thật (01/11/2026,
+ * gemini-embedding-001): {@code embedContentConfig} (camelCase lẫn snake_case) bị bỏ qua và trả 3072 chiều;
+ * chỉ trường ở cấp ngoài trả đúng 768 chiều (norm ≈ 0.59, chưa chuẩn hoá). Kiểm lại khi đổi model.
  */
 public class GeminiEmbeddingAdapter implements EmbeddingPort {
 
@@ -42,9 +46,8 @@ public class GeminiEmbeddingAdapter implements EmbeddingPort {
 
         ObjectNode body = json.createObjectNode();
         body.putObject("content").putArray("parts").addObject().put("text", text);
-        ObjectNode config = body.putObject("embedContentConfig");
-        config.put("taskType", taskType.name());
-        config.put("outputDimensionality", dimensions);
+        body.put("taskType", taskType.name());
+        body.put("outputDimensionality", dimensions);
 
         JsonNode response = GeminiHttp.call("embedContent", timeout, () -> client.post()
                 .uri("/models/{model}:embedContent", model)
