@@ -1,0 +1,21 @@
+flowchart LR
+    L(["Learner<br/>(Mobile App User)"])
+    A(["Admin<br/>(Web Portal User)"])
+    P["Personalized English Learning<br/>Application (PELA)<br/>Release 1.0"]
+    G(["LLM Provider API<br/>(Google Gemini: Flash, Embedding,<br/>Text-to-Speech)"])
+    S[("Supabase Platform<br/>PostgreSQL + pgvector + Auth + Storage")]
+    GO(["Google Sign-In<br/>(via Supabase Auth)"])
+    N(["Push Notification Service<br/>(FCM / APNs)"])
+    E(["Email Service<br/>(verification, reset code, suspension)"])
+    SP(["Speech API (Azure Speech)<br/>deferred to a future release"])
+    L <-->|"register / sign in, survey, placement and level-up tests,<br/>lessons, challenges, writing, listening, reports"| P
+    A <-->|"accounts, reports, roadmap CSV import,<br/>listening CSV and writing import, dashboard, audit log"| P
+    P <-->|"Writing grading, Writing prompt generation,<br/>content extraction, listening audio (TTS), embeddings"| G
+    P <-->|"auth, CRUD data, vector similarity search, files"| S
+    L -.->|"Google account"| GO
+    GO -.-> S
+    P -->|"reminders, streak at risk, friend requests,<br/>Writing feedback ready"| N
+    P -->|"emails"| E
+    P -.- SP
+    style P fill:#FFF4DD,stroke:#B8860B,stroke-width:2px
+    style SP fill:#f4f4f4,stroke:#999,stroke-dasharray: 5 5,color:#777

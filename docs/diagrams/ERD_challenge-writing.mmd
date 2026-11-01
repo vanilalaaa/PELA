@@ -1,0 +1,191 @@
+erDiagram
+    USERS {
+        uuid user_id PK
+        varchar full_name
+        varchar username
+        varchar email
+        varchar avatar_url
+        varchar role
+        varchar status
+        timestamptz full_name_changed_at
+        timestamptz username_changed_at
+        timestamptz deletion_requested_at
+        varchar native_language
+        varchar cefr_level
+        varchar timezone
+        int failed_login_count
+        timestamptz locked_until
+        timestamptz suspended_until
+        varchar suspend_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    VOCABULARY {
+        uuid vocab_id PK
+        varchar word
+        text meaning
+        varchar part_of_speech
+        varchar ipa
+        text example_sentence
+        text example_meaning
+        varchar audio_url
+        varchar image_url
+        varchar topic
+        varchar cefr_level
+        varchar source
+        uuid owner_user_id FK
+    }
+    REVIEW_CARD {
+        uuid card_id PK
+        uuid user_id FK
+        uuid vocab_id FK
+        numeric easiness_factor
+        int interval_days
+        int repetition_count
+        int error_count
+        date next_review_date
+        timestamptz last_reviewed_at
+        varchar status
+        int consecutive_incorrect_count
+        boolean needs_reinforcement
+        varchar origin
+        boolean in_pool
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    QUESTION_BANK {
+        uuid question_id PK
+        uuid clip_id FK
+        text question_text
+        varchar question_type
+        varchar question_purpose
+        jsonb payload
+        vector embedding_vector
+        varchar embedding_model
+        varchar topic
+        varchar cefr_level
+        varchar status
+        uuid import_job_id FK
+        uuid created_by FK
+        timestamptz retired_at
+        timestamptz created_at
+    }
+    RAG_QUESTION_CACHE {
+        uuid cache_id PK
+        vector query_embedding
+        varchar topic
+        varchar cefr_level
+        varchar question_type
+        jsonb generated_question
+        uuid source_template_id FK
+        int hit_count
+        timestamptz created_at
+        timestamptz last_hit_at
+        timestamptz expires_at
+        varchar status
+    }
+    CHALLENGE_SESSION {
+        uuid challenge_id PK
+        uuid user_id FK
+        varchar challenge_type
+        date challenge_date
+        varchar status
+        int stars_earned
+        timestamptz generated_at
+        timestamptz completed_at
+    }
+    CHALLENGE_ITEM {
+        uuid item_id PK
+        uuid challenge_id FK
+        uuid vocab_id FK
+        varchar question_type
+        boolean is_correct
+        int position
+        varchar source
+        jsonb question_payload
+        jsonb user_answer
+        timestamptz answered_at
+    }
+    WRITING_SUBMISSION {
+        uuid submission_id PK
+        uuid user_id FK
+        uuid prompt_question_id FK
+        varchar prompt_source
+        uuid rag_cache_id FK
+        text prompt_text
+        text submitted_text
+        int word_count
+        varchar grading_status
+        int score
+        jsonb criteria_scores
+        int stars_earned
+        jsonb ai_feedback
+        int prompt_version
+        varchar model
+        int grading_attempts
+        timestamptz next_retry_at
+        timestamptz created_at
+        timestamptz submitted_at
+        timestamptz graded_at
+    }
+    WRITING_ISSUE {
+        uuid issue_id PK
+        uuid submission_id FK
+        int sentence_index
+        int start_offset
+        int end_offset
+        text original
+        text suggestion
+        varchar category
+        varchar severity
+        text explanation_vi
+        varchar detected_by
+    }
+    WRITING_VOCAB_SUGGESTION {
+        uuid suggestion_id PK
+        uuid submission_id FK
+        uuid user_id FK
+        uuid issue_id FK
+        varchar learner_form
+        varchar word
+        varchar reason
+        text meaning_vi
+        text example_sentence
+        varchar cefr_level
+        uuid vocab_id FK
+        varchar status
+        uuid review_card_id FK
+        timestamptz created_at
+    }
+    ANSWER_LOG {
+        uuid answer_id PK
+        uuid user_id FK
+        varchar context_type
+        uuid context_id
+        uuid vocab_id FK
+        uuid question_id FK
+        int attempt_no
+        boolean is_correct
+        timestamptz answered_at
+        timestamptz received_at
+    }
+    USERS ||--o{ VOCABULARY : "owner_user_id"
+    USERS ||--o{ REVIEW_CARD : "user_id"
+    VOCABULARY ||--o{ REVIEW_CARD : "vocab_id"
+    USERS ||--o{ QUESTION_BANK : "created_by"
+    QUESTION_BANK ||--o{ RAG_QUESTION_CACHE : "source_template_id"
+    USERS ||--o{ CHALLENGE_SESSION : "user_id"
+    CHALLENGE_SESSION ||--o{ CHALLENGE_ITEM : "challenge_id"
+    VOCABULARY ||--o{ CHALLENGE_ITEM : "vocab_id"
+    USERS ||--o{ WRITING_SUBMISSION : "user_id"
+    QUESTION_BANK ||--o{ WRITING_SUBMISSION : "prompt_question_id"
+    RAG_QUESTION_CACHE ||--o{ WRITING_SUBMISSION : "rag_cache_id"
+    WRITING_SUBMISSION ||--o{ WRITING_ISSUE : "submission_id"
+    WRITING_SUBMISSION ||--o{ WRITING_VOCAB_SUGGESTION : "submission_id"
+    USERS ||--o{ WRITING_VOCAB_SUGGESTION : "user_id"
+    WRITING_ISSUE ||--o{ WRITING_VOCAB_SUGGESTION : "issue_id"
+    VOCABULARY ||--o{ WRITING_VOCAB_SUGGESTION : "vocab_id"
+    REVIEW_CARD ||--o{ WRITING_VOCAB_SUGGESTION : "review_card_id"
+    USERS ||--o{ ANSWER_LOG : "user_id"
+    VOCABULARY ||--o{ ANSWER_LOG : "vocab_id"
+    QUESTION_BANK ||--o{ ANSWER_LOG : "question_id"
