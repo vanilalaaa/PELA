@@ -1,5 +1,7 @@
 package com.pela.platform.adapter.out.gemini;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pela.shared.application.port.out.AiCallException;
 import com.pela.shared.application.port.out.AiCallException.Kind;
 import java.net.SocketTimeoutException;
@@ -24,6 +26,8 @@ final class GeminiHttp {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiHttp.class);
     private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final int MAX_UPSTREAM_TEXT = 300;
 
     private GeminiHttp() {
     }
@@ -53,7 +57,12 @@ final class GeminiHttp {
             Kind kind = status == 429 ? Kind.RATE_LIMITED
                     : status == 408 || status == 504 ? Kind.TIMEOUT
                     : Kind.UPSTREAM_ERROR;
-            return failure(operation, kind, "HTTP " + status, http);
+            String upstream = upstreamError(http);
+            // Lý do ngắn của Gemini chỉ đi vào message của TTS (Admin cần biết vì sao sinh audio lỗi);
+            // các thao tác khác chỉ ghi vào log.
+            String message = "HTTP " + status + (upstream.isEmpty() || !operation.equals("tts") ? "" : " - " + upstream);
+            log.warn("Gemini {} upstream error: HTTP {} {}", operation, status, upstream);
+            return failure(operation, kind, message, http);
         }
         if (error instanceof ResourceAccessException io && isTimeout(io)) {
             return failure(operation, Kind.TIMEOUT, "I/O timeout", io);
@@ -63,7 +72,29 @@ final class GeminiHttp {
 
     static AiCallException failure(String operation, Kind kind, String detail, Throwable cause) {
         log.warn("Gemini {} failed: kind={}, {}", operation, kind, detail);
-        return new AiCallException(kind, "Gemini " + operation + " failed: " + kind, cause);
+        String message = "Gemini " + operation + " failed: " + kind;
+        // TTS: nêu lý do ngắn để Admin hiểu lỗi (không chứa lời thoại hay key)
+        return new AiCallException(kind, operation.equals("tts") ? message + " (" + detail + ")" : message, cause);
+    }
+
+    /**
+     * Rút {@code error.status: error.message} từ body lỗi của Gemini, cắt ngắn. Không log nguyên body vì lời gọi
+     * LLM có thể mang bài viết của người học; key đi qua header nên không nằm trong body.
+     */
+    static String upstreamError(RestClientResponseException http) {
+        String body = http.getResponseBodyAsString();
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        try {
+            JsonNode error = MAPPER.readTree(body).path("error");
+            String status = error.path("status").asText("");
+            String message = error.path("message").asText("");
+            String text = (status + " " + message).trim();
+            return text.length() > MAX_UPSTREAM_TEXT ? text.substring(0, MAX_UPSTREAM_TEXT) + "..." : text;
+        } catch (Exception e) {
+            return "(unparseable error body)";
+        }
     }
 
     private static boolean isTimeout(Throwable error) {

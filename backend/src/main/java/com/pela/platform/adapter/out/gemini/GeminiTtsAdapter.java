@@ -28,15 +28,32 @@ public class GeminiTtsAdapter implements TtsPort {
     static final String MODEL_SETTING = "ai.model.tts";
     static final int MAX_SPEAKERS = 2;
 
+    /**
+     * Hai cách đặt giọng trong {@code generation_config} đang chờ xác nhận bằng test external; xoá biến thể sai
+     * (và property {@code pela.gemini.tts-variant}) sau khi có kết quả.
+     */
+    public enum Variant {
+        /** Theo trang hướng dẫn: {@code speech_config} là mảng {@code [{voice}]} (1 người) hoặc {@code {speakers:[...]}} (2 người). */
+        SPEECH_CONFIG,
+        /** Theo tham chiếu API: {@code structured_speech_config: {speakers:[{speaker, voice}]}} cho mọi số người nói. */
+        STRUCTURED_SPEECH_CONFIG
+    }
+
     private final RestClient client;
     private final SettingsPort settings;
     private final Duration timeout;
+    private final Variant variant;
     private final ObjectMapper json = new ObjectMapper();
 
     public GeminiTtsAdapter(RestClient client, SettingsPort settings, Duration timeout) {
+        this(client, settings, timeout, Variant.SPEECH_CONFIG);
+    }
+
+    public GeminiTtsAdapter(RestClient client, SettingsPort settings, Duration timeout, Variant variant) {
         this.client = client;
         this.settings = settings;
         this.timeout = timeout;
+        this.variant = variant;
     }
 
     @Override
@@ -108,7 +125,12 @@ public class GeminiTtsAdapter implements TtsPort {
         format.put("sample_rate", sampleRate);
 
         ObjectNode generationConfig = body.putObject("generation_config");
-        if (multiSpeaker) {
+        if (variant == Variant.STRUCTURED_SPEECH_CONFIG) {
+            ArrayNode speakerConfigs = generationConfig.putObject("structured_speech_config").putArray("speakers");
+            for (String speaker : speakers) {
+                speakerConfigs.addObject().put("speaker", speaker).put("voice", voices.get(speaker));
+            }
+        } else if (multiSpeaker) {
             ArrayNode speakerConfigs = generationConfig.putObject("speech_config").putArray("speakers");
             for (String speaker : speakers) {
                 speakerConfigs.addObject().put("speaker", speaker).put("voice", voices.get(speaker));

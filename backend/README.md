@@ -24,13 +24,18 @@ Windows PowerShell dùng `.\gradlew.bat` thay cho `./gradlew`.
 
 1. Có Gemini API key: biến môi trường `GEMINI_API_KEY`, hoặc dòng `GEMINI_API_KEY=` trong `backend/.env`. Test không in key ra.
 2. Tuỳ chọn đổi model (mặc định theo seed V3): `GEMINI_TEXT_MODEL`, `GEMINI_EMBEDDING_MODEL`.
-3. Kiểm TTS cần chỉ định model, vì `ai.model.tts` chưa chọn: `GEMINI_TTS_MODEL` (vd một model trong bảng "supported models" của trang [Speech generation](https://ai.google.dev/gemini-api/docs/speech-generation)). Không đặt thì test TTS được bỏ qua, hai test còn lại vẫn chạy.
-4. Chạy:
+3. Kiểm TTS cần đặt `GEMINI_TTS_MODEL` (model mặc định của hệ thống là `gemini-3.8-flash-tts`, seed ở migration V5; `gemini-3.8-flash-tts-lite` là dự phòng). Không đặt thì test TTS được bỏ qua, hai test còn lại vẫn chạy.
+4. Hai biến thể request TTS đang chờ xác nhận: `GEMINI_TTS_VARIANT` = `SPEECH_CONFIG` (mặc định, theo hướng dẫn) hoặc `STRUCTURED_SPEECH_CONFIG` (theo tham chiếu). Chạy cả hai rồi gửi kết quả; biến thể sai sẽ bị xoá.
+5. Chạy trên Windows (PowerShell, trong thư mục `backend/`):
 
 ```powershell
-$env:GEMINI_TTS_MODEL = "<tts-model>"   # tuỳ chọn
-.\gradlew.bat externalTest
+$env:GEMINI_API_KEY = "<key>"            # bỏ qua nếu đã có trong backend\.env
+$env:GEMINI_TTS_MODEL = "gemini-3.8-flash-tts"
+$env:GEMINI_TTS_VARIANT = "SPEECH_CONFIG"   # rồi chạy lại với STRUCTURED_SPEECH_CONFIG
+.\gradlew.bat externalTest --rerun-tasks
 ```
+
+`--rerun-tasks` để Gradle không bỏ qua vì "up-to-date" khi chỉ đổi biến môi trường. Lỗi từ Gemini được log dạng `HTTP <mã> <status> <message>` (không log key, không log nội dung bài viết).
 
 File audio sinh ra được lưu ở `backend/build/external-test-tts.wav` để nghe thử.
 

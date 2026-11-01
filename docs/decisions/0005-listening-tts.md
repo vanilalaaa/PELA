@@ -12,7 +12,7 @@ Schema v1.3 thiết kế Listening theo luồng Admin upload file audio → STT 
 - Admin import **file CSV theo mẫu**: lời thoại (theo người nói), câu hỏi và đáp án. `import_job.kind = 'listening_csv'`.
 - Khi Admin lưu, backend gọi **Gemini TTS một lần** để sinh audio, lưu vào Supabase Storage và ghi `listening_clip.audio_url`. Không sinh lại mỗi lần learner nghe.
 - `listening_clip.voice_config` ghi giọng đã dùng cho từng người nói, `tts_model` và `audio_format` ghi model/định dạng để biết khi nào cần sinh lại.
-- Cấu hình nằm ở `system_setting`: `ai.model.tts` (chưa chọn model), `ai.tts.sample_rate`, `ai.tts.style_by_level`, `listening.max_speakers` (2), `listening.max_chars` (3000).
+- Cấu hình nằm ở `system_setting`: `ai.model.tts` (`gemini-3.8-flash-tts` từ V5; `gemini-3.8-flash-tts-lite` là phương án dự phòng), `ai.tts.sample_rate`, `ai.tts.style_by_level`, `listening.max_speakers` (2), `listening.max_chars` (3000).
 - Không còn upload audio/STT. Giữ giá trị `listening_audio` của `import_job.kind` và setting `import.max_audio_mb` để không phá dữ liệu cũ; luồng mới không dùng.
 
 ## Hệ quả
@@ -21,4 +21,5 @@ Schema v1.3 thiết kế Listening theo luồng Admin upload file audio → STT 
 - Chất lượng giọng phụ thuộc model TTS; số người nói bị giới hạn bởi khả năng multi-speaker của model.
 - Bài nghe chưa sinh xong audio (`audio_url = 'pending://'`) không được phát cho learner.
 - Đổi model TTS thì cần job sinh lại audio cho các clip có `tts_model` cũ.
-- Cần chọn model TTS và điền `ai.model.tts` trước khi bật luồng import.
+- Lỗi TTS được quy về `UPSTREAM_ERROR` (hoặc TIMEOUT/RATE_LIMITED); message kèm lý do ngắn để Admin biết nguyên nhân.
+- Cách đặt giọng trong request (`speech_config` hay `structured_speech_config`) chờ xác nhận bằng test external; xem property `pela.gemini.tts-variant`.

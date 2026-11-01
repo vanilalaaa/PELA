@@ -26,6 +26,12 @@ class BlocklistContentFilterAdapterTest {
             "Mua hai lon bia và một ổ bánh mì.",
             "Chúng tôi đi du lịch Đà Nẵng.",
             "Khốn khó không làm anh nản lòng.",
+            "The analysis of the data shows a clear trend.",
+            "Analysts use class assessments to assess each student.",
+            "Hôm nay trời đẹp, chúng ta đi học nhé.",
+            "Bà tôi nấu canh chua rất ngon.",
+            "Em muốn đặt một cuốn sách về lịch sử Việt Nam.",
+            "Anh ấy làm việc ở công ty phần mềm.",
             "",
     })
     void allowsNormalTextContainingBlockedSubstrings(String text) {

@@ -16,7 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Migrate sạch stub → V1 → V2 → V3 (không có seed dev). Test ghi dữ liệu đều rollback. */
+/** Migrate sạch stub → V1 → … → V5 (không có seed dev). Test ghi dữ liệu đều rollback. */
 class FlywayMigrationIT extends PostgresIntegrationTest {
 
     @Autowired
@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4");
+                .containsExactly("0.1", "1", "2", "3", "4", "5");
     }
 
     @Test
@@ -125,7 +125,9 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 "star.writing_bands", "ai.safety.block_threshold");
 
         assertThat(setting("ai.model.text")).isEqualTo("\"gemini-2.5-flash\"");
-        assertThat(setting("ai.model.tts")).isEqualTo("\"\"");
+        assertThat(setting("ai.model.tts")).isEqualTo("\"gemini-3.8-flash-tts\"");
+        assertThat(jdbc.queryForObject("SELECT description FROM system_setting WHERE setting_key = 'ai.model.tts'", String.class))
+                .contains("gemini-3.8-flash-tts-lite");
         assertThat(setting("ai.embedding.dimensions")).isEqualTo("768");
         assertThat(jdbc.queryForObject(
                 "SELECT value->'B1' #>> '{}' FROM system_setting WHERE setting_key = 'ai.tts.style_by_level'", String.class))

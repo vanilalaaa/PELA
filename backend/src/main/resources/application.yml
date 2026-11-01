@@ -52,6 +52,8 @@ pela:
     api-key: ${GEMINI_API_KEY:}
     # Tên model, ngưỡng an toàn… nằm ở system_setting (MNT-3); đây chỉ là kết nối
     base-url: https://generativelanguage.googleapis.com/v1beta
+    # TTS: speech_config (theo hướng dẫn) hoặc structured_speech_config (theo tham chiếu); tạm thời, chờ test external
+    tts-variant: ${GEMINI_TTS_VARIANT:SPEECH_CONFIG}
     connect-timeout: PT5S
     # Chờ tối đa cho embedding/TTS; LLM dùng timeout do use case truyền vào
     request-timeout: PT60S

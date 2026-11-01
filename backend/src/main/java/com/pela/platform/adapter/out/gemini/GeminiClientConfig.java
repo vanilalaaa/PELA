@@ -42,6 +42,6 @@ class GeminiClientConfig {
 
     @Bean
     GeminiTtsAdapter geminiTtsAdapter(RestClient geminiRestClient, SettingsPort settings, GeminiProperties properties) {
-        return new GeminiTtsAdapter(geminiRestClient, settings, properties.requestTimeout());
+        return new GeminiTtsAdapter(geminiRestClient, settings, properties.requestTimeout(), properties.ttsVariant());
     }
 }

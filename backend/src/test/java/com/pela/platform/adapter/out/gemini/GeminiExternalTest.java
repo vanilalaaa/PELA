@@ -97,10 +97,11 @@ class GeminiExternalTest {
     }
 
     @Test
-    void synthesizesTwoSpeakerDialogue() throws IOException {
+    void synthesizesTwoSpeakerDialogue() throws Exception {
         Assumptions.assumeTrue(!settings.requiredString("ai.model.tts").isBlank(),
                 "Set GEMINI_TTS_MODEL to run the TTS check");
-        var adapter = new GeminiTtsAdapter(client, settings, Duration.ofSeconds(90));
+        var variant = GeminiTtsAdapter.Variant.valueOf(config("GEMINI_TTS_VARIANT", "SPEECH_CONFIG"));
+        var adapter = new GeminiTtsAdapter(client, settings, Duration.ofSeconds(90), variant);
 
         var audio = adapter.synthesize(
                 List.of(new SpeechLine("Agent", "Good morning. Can I see your passport, please?"),

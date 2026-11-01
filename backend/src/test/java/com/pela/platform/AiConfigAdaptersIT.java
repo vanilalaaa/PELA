@@ -42,7 +42,7 @@ class AiConfigAdaptersIT extends PostgresIntegrationTest {
         assertThat(settings.requiredDouble("rag.retrieval.min_similarity")).isEqualTo(0.65);
         assertThat(settings.requiredString("ai.safety.block_threshold")).isEqualTo("BLOCK_LOW_AND_ABOVE");
         assertThat(settings.requiredJson("ai.tts.style_by_level", Map.class)).containsEntry("A1", "Speak slowly and clearly");
-        assertThat(settings.string("ai.model.tts")).contains("");
+        assertThat(settings.string("ai.model.tts")).contains("gemini-3.8-flash-tts");
     }
 
     @Test

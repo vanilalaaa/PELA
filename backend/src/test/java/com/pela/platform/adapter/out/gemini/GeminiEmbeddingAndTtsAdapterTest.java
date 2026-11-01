@@ -173,6 +173,36 @@ class GeminiEmbeddingAndTtsAdapterTest {
     }
 
     @Test
+    void structuredVariantUsesStructuredSpeechConfigForOneAndTwoSpeakers() {
+        var structured = new GeminiTtsAdapter(RestClient.create(), settings, Duration.ofSeconds(2),
+                GeminiTtsAdapter.Variant.STRUCTURED_SPEECH_CONFIG);
+        var two = List.of(new SpeechLine("Agent", "Hi"), new SpeechLine("Traveller", "Hello"));
+
+        var body = structured.requestBody("m", two, Map.of("Agent", "Kore", "Traveller", "Puck"), null, 24000);
+        assertThat(body.path("generation_config").has("speech_config")).isFalse();
+        assertThat(body.at("/generation_config/structured_speech_config/speakers/0/speaker").asText()).isEqualTo("Agent");
+        assertThat(body.at("/generation_config/structured_speech_config/speakers/1/voice").asText()).isEqualTo("Puck");
+
+        var one = structured.requestBody("m", List.of(new SpeechLine("N", "Hi")), Map.of("N", "Kore"), null, 24000);
+        assertThat(one.at("/generation_config/structured_speech_config/speakers/0/voice").asText()).isEqualTo("Kore");
+    }
+
+    @Test
+    void ttsHttpErrorMessageCarriesShortUpstreamReason() {
+        server.expect(requestTo(BASE + "/interactions")).andRespond(withStatus(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\":{\"code\":400,\"status\":\"INVALID_ARGUMENT\",\"message\":\"Unknown name speech_config\"}}"));
+
+        assertThatThrownBy(() -> tts.synthesize(List.of(new SpeechLine("A", "Hello")), Map.of("A", "Kore"), null, 24000))
+                .isInstanceOf(AiCallException.class)
+                .satisfies(e -> assertThat(((AiCallException) e).kind()).isEqualTo(Kind.UPSTREAM_ERROR))
+                .hasMessageContaining("HTTP 400")
+                .hasMessageContaining("INVALID_ARGUMENT Unknown name speech_config")
+                .hasMessageNotContaining("test-key")
+                .hasMessageNotContaining("Hello");
+    }
+
+    @Test
     void moreThanTwoSpeakersOrMissingVoiceIsRejectedWithoutCallingApi() {
         var three = List.of(new SpeechLine("A", "1"), new SpeechLine("B", "2"), new SpeechLine("C", "3"));
 
