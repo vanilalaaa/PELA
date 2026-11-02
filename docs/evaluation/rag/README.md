@@ -13,6 +13,27 @@ Bộ công cụ đo phần truy hồi và sinh đề Writing bằng RAG. Các b�
 Mục 3 và mục sinh đề của mục 4 cần pipeline UC-24 (RAG.Generate, RAG.Cache), hiện chưa có. Việc còn lại đã ghi ở
 `docs/backlog.md` (mục RAG, P7).
 
+## Nguồn đề Writing và seed dev
+
+- Nguồn: `docs/content/writing/Writing-Prompts-<A1..C2>.txt` (138 đề), dòng dạng
+  `N. [Topic - type] Nội dung đề. (~min-max words)`. Bài nghe: `docs/content/listening/PELA-Listening-Import.csv`.
+- Sinh lại seed khi file `.txt` đổi (chạy từ thư mục gốc repo, chỉ cần Python 3):
+
+  ```bash
+  python3 tools/content/gen_writing_seed.py
+  ```
+
+  Lệnh kiểm tra từng dòng (topic thuộc danh sách, type là email/paragraph/essay, `20 <= min < max <= 300`, không trùng
+  chữ đề, số đề khớp dòng đầu file) và báo lỗi theo file + số dòng. Có lỗi thì không ghi file. Đầu ra là
+  `db/seed/R__dev_seed_writing_prompts.sql`, không sửa tay.
+- **Quy ước id:** `9b000000-0000-4000-8000-0LLNNN000000`, `LL` = 01..06 (A1..C2), `NNN` = số thứ tự trong file. Dải
+  này không trùng `9a000000-…` (đề seed cũ) và `9b000000-…0101…` (câu hỏi nghe) của `R__dev_seed.sql`.
+- **Chạy lại seed:** đề không đổi thì không bị đụng tới. Đề đổi `question_text` hoặc `payload` thì bị xoá embedding,
+  về `retired`, để backfill embed lại. Đổi topic, level hay type của một đề đã seed **không** được áp dụng: dùng số
+  thứ tự mới (id mới) hoặc xoá đề cũ.
+- Đề mới nạp ở `retired` chưa có vector; chạy backfill (mục Chuẩn bị) để chuyển sang `active`.
+- Test: `DevWritingPromptSeedIT` (138 đề, chạy lại không trùng, đề đổi bị xoá vector).
+
 ## An toàn dữ liệu
 
 - Các test không dựng Spring context nên Flyway không chạy, không đổi schema.
@@ -49,17 +70,18 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 
 ### 1. Ngưỡng truy hồi (AS-7)
 
-- `queries.csv` có 45 truy vấn (cột `topic,level,query,expected`): 30 `on_topic` và 15 `off_topic`, lấy theo hai cặp
-  có trong seed (Travel/A2, Work/B1). Truy vấn `off_topic` vẫn lọc theo topic + level nhưng nội dung lạc đề, mô phỏng
-  việc truy hồi không tìm được đề phù hợp.
+- `queries.csv` có 133 truy vấn (cột `topic,level,query,expected`): 96 `on_topic` và 37 `off_topic`, phủ đủ 24 cặp
+  topic + level của bộ 138 đề (mỗi cặp ít nhất 2 `on_topic` và 1 `off_topic`). 45 dòng đầu là của hai cặp Travel/A2 và
+  Work/B1; 88 dòng sau thêm cho 22 cặp còn lại. Truy vấn `off_topic` vẫn lọc theo topic + level nhưng nội dung lạc đề,
+  mô phỏng việc truy hồi không tìm được đề phù hợp. Nhãn do người duyệt, không để AI gắn.
 - `threshold.csv`: similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
 - Phần in ra gồm phân bố (min/p25/median/p75/max) của từng nhóm, giá trị `rag.retrieval.min_similarity` hiện tại và
   **ngưỡng đề xuất**:
   - hai nhóm tách hẳn (`separable=true`): lấy điểm giữa max(off_topic) và min(on_topic);
   - hai nhóm chồng nhau: chọn ngưỡng có độ chính xác cao nhất; nếu hoà thì chọn ngưỡng loại ít đề on_topic hơn (đề
     bị loại vẫn có BR-7 dự phòng). Phần in ra ghi rõ số đề bị phân loại sai.
-- **Ngưỡng đo trên seed hiện tại (12 đề, 2 cặp topic/level) chỉ để tham khảo.** AS-7 yêu cầu hiệu chỉnh lại trên
-  toàn bộ đề Writing trước khi test người dùng. Khi đó cần thêm truy vấn cho mọi cặp topic/level vào `queries.csv`.
+- **Travel/A2 và Work/B1 có ~11 đề** (5 của bộ 138 đề + 6 đề seed cũ `9a000000-…` của `R__dev_seed.sql`), nhiều hơn
+  các cặp khác (5–13 đề), nên kết quả AS-7 ở hai cặp này lệch nhẹ. Đây là dữ liệu dev, không phải kho đề thật.
 
 ### 2. Recall@5 của HNSW (COM-3)
 

@@ -44,3 +44,91 @@ Work,B1,Write a poem about the sea,off_topic
 Work,B1,Your favourite season and why,off_topic
 Work,B1,Explain how plants grow from seeds,off_topic
 Work,B1,Describe a birthday party you enjoyed,off_topic
+Travel,A1,Tell a friend where you want to go on your next trip,on_topic
+Travel,A1,Write about a place you like to visit in your city,on_topic
+Travel,A1,How do you usually travel to another city?,on_topic
+Travel,A1,Write about your favourite food and why you like it,off_topic
+Work,A1,Write an email to your teacher to say you are absent,on_topic
+Work,A1,Describe what you do every day at your job or school,on_topic
+Work,A1,Ask a coworker to help you finish a task today,on_topic
+Work,A1,Write about your pet and what it likes to do,off_topic
+Technology,A1,Write about your favourite app on your phone,on_topic
+Technology,A1,Ask a friend to help you fix your phone,on_topic
+Technology,A1,A gadget you want to buy and why you want it,on_topic
+Technology,A1,Write about the weather in your city this week,off_topic
+Daily Life,A1,Write about your daily routine from morning to night,on_topic
+Daily Life,A1,Invite a friend to your birthday party,on_topic
+Daily Life,A1,Describe a shop you often go to,on_topic
+Daily Life,A1,Write an email to your boss about a meeting,off_topic
+Work,A2,Ask your manager for a day off next week,on_topic
+Work,A2,Describe your first day at a new job,on_topic
+Work,A2,Ask a colleague to cover your shift on Monday,on_topic
+Work,A2,Describe your best holiday at the beach,off_topic
+Technology,A2,A time when your computer stopped working,on_topic
+Technology,A2,Write about an app or website you use every day,on_topic
+Technology,A2,Write to a shop about a product that is broken,on_topic
+Technology,A2,Describe the clothes you like to wear in winter,off_topic
+Daily Life,A2,Describe a typical weekend for you,on_topic
+Daily Life,A2,Write about a time you were sick and what you did,on_topic
+Daily Life,A2,Invite a friend to cook dinner at your home,on_topic
+Daily Life,A2,Write an email to a hotel about room prices,off_topic
+Travel,B1,Do you prefer travelling alone or in a group?,on_topic
+Travel,B1,Describe your dream holiday and what you would do there,on_topic
+Travel,B1,Write to a travel agency about a family tour,on_topic
+Travel,B1,Explain how to cook a traditional dish step by step,off_topic
+Technology,B1,Do smartphones make our lives easier or more complicated?,on_topic
+Technology,B1,How has technology changed the way families communicate?,on_topic
+Technology,B1,An app that changed how you do something every day,on_topic
+Technology,B1,Describe your favourite sport and why everyone should try it,off_topic
+Daily Life,B1,Is fast food bad for people's health?,on_topic
+Daily Life,B1,Describe a tradition in your country that is important to keep,on_topic
+Daily Life,B1,Should young people volunteer in their community?,on_topic
+Daily Life,B1,Write an email to a company about an internship,off_topic
+Technology,B2,Does social media do more harm than good?,on_topic
+Technology,B2,How might artificial intelligence change work in the next ten years?,on_topic
+Technology,B2,Should self-driving cars be allowed before they are fully safe?,on_topic
+Technology,B2,Describe your favourite local dish and how to cook it,off_topic
+Work,B2,Do the advantages of working from home outweigh the disadvantages?,on_topic
+Work,B2,Write a formal email to HR asking for flexible hours,on_topic
+Work,B2,Should companies introduce a four-day work week?,on_topic
+Work,B2,Describe a beautiful beach you visited,off_topic
+Society,B2,Should cars be banned from city centres?,on_topic
+Society,B2,Should advertising aimed at children be banned?,on_topic
+Society,B2,Does tourism bring more benefits than problems to a city?,on_topic
+Society,B2,Explain how to change a flat tyre on a bicycle,off_topic
+Environment,B2,What can individuals do to reduce plastic waste?,on_topic
+Environment,B2,Should governments give money to households for renewable energy?,on_topic
+Environment,B2,Is eating less meat a good way to help the environment?,on_topic
+Environment,B2,Describe your first day at a new job,off_topic
+Work,C1,To what extent should employers protect the mental health of workers?,on_topic
+Work,C1,Write a formal email proposing a four-day work week,on_topic
+Work,C1,Should promotions depend on performance rather than seniority?,on_topic
+Work,C1,Discuss the history of the Olympic Games,off_topic
+Environment,C1,Can individual action make a difference to climate change?,on_topic
+Environment,C1,Should corporations pay for environmental damage in their supply chains?,on_topic
+Environment,C1,Write to the local council about reducing traffic jams,on_topic
+Environment,C1,Describe your favourite film and its characters,off_topic
+Technology,C1,Discuss the ethics of using artificial intelligence in hiring,on_topic
+Technology,C1,Are recommendation algorithms good or bad for users?,on_topic
+Technology,C1,Should governments regulate how companies use personal data?,on_topic
+Technology,C1,Describe the architecture of an old historic city,off_topic
+Society,C1,Should university education be free for everyone?,on_topic
+Society,C1,Should historic buildings be preserved or redeveloped for housing?,on_topic
+Society,C1,Should voting be compulsory for adult citizens?,on_topic
+Society,C1,Write about a time you solved a problem at work,off_topic
+Society,C2,Should economic growth stop being the main measure of national success?,on_topic
+Society,C2,Is international cooperation enough to solve global problems?,on_topic
+Society,C2,Is a universal basic income better than targeted welfare?,on_topic
+Society,C2,Write an email to a friend about your weekend plans,off_topic
+Technology,C2,Does artificial intelligence threaten human jobs?,on_topic
+Technology,C2,Is surveillance technology acceptable for public safety?,on_topic
+Technology,C2,Who is morally responsible for the decisions of a self-driving car?,on_topic
+Technology,C2,Describe your favourite season and what you do in it,off_topic
+Work,C2,Should automation be embraced in the workplace?,on_topic
+Work,C2,Is the gig economy flexible or insecure for workers?,on_topic
+Work,C2,Should lifelong reskilling be expected from employees?,on_topic
+Work,C2,Describe a trip you took with your family,off_topic
+Education,C2,Is standardised testing a fair measure of student ability?,on_topic
+Education,C2,Should financial literacy be taught in every school?,on_topic
+Education,C2,Do elite universities improve social mobility or increase inequality?,on_topic
+Education,C2,Describe the weather in your city in summer,off_topic
