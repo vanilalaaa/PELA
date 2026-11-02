@@ -86,19 +86,17 @@ class EvalHelpersTest {
                 .containsExactly("Travel", "A2", "Bus or car, which is better?", "on_topic");
     }
 
-    /** 138 đề Writing = 24 cặp topic + level (A1–B1: 4 chủ đề; B2–C2: 4 chủ đề). Mỗi cặp cần cả hai nhóm truy vấn. */
+    /**
+     * 138 đề Writing = 24 cặp topic + level. Mỗi cặp cần cả hai nhóm truy vấn: on_topic (sở thích liên quan hoặc không có)
+     * và off_topic (sở thích xa topic). Truy vấn thật dựng bằng RagQueryBuilder từ topic + level + sở thích.
+     */
     @Test
     void queriesFileCoversAll24TopicLevelPairs() throws Exception {
         List<String> rows = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
                 c -> c.get(0) + "/" + c.get(1) + "/" + c.get(3));
 
-        assertThat(rows).filteredOn(r -> r.endsWith("/on_topic")).hasSize(96);
-        assertThat(rows).filteredOn(r -> r.endsWith("/off_topic")).hasSize(37);
-
-        // kho_gap: truy vấn on_topic mà kho Writing chưa có đề gần (xem README); loại khỏi phần tính ngưỡng
-        List<String> notes = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
-                c -> c.size() > 4 ? c.get(4).trim() : "");
-        assertThat(notes).filteredOn("kho_gap"::equals).hasSize(1);
+        assertThat(rows).filteredOn(r -> r.endsWith("/on_topic")).hasSize(72);
+        assertThat(rows).filteredOn(r -> r.endsWith("/off_topic")).hasSize(48);
 
         List<String> pairs = rows.stream().map(r -> r.substring(0, r.lastIndexOf('/'))).distinct().toList();
         assertThat(pairs).hasSize(24);
@@ -108,5 +106,19 @@ class EvalHelpersTest {
             assertThat(rows.stream().filter(r -> r.equals(pair + "/off_topic")).count())
                     .as("off_topic of %s", pair).isGreaterThanOrEqualTo(1);
         }
+    }
+
+    @Test
+    void queryRowsUseOnlyTheLearnerProfileInterestsAndBuildTheRealQuery() throws Exception {
+        List<RagEvalSupport.QueryRow> queries = RagEvalSupport.readQueries();
+        java.util.Set<String> allowed = java.util.Set.of("family", "school", "travel", "food", "sport", "music", "movie",
+                "tech", "animal", "health");
+
+        assertThat(queries).hasSize(120);
+        assertThat(queries.stream().flatMap(q -> q.interests().stream())).isNotEmpty().allMatch(allowed::contains);
+        assertThat(queries.get(0).text()).isEqualTo("Writing prompt. Topic: Travel. CEFR level: A1.");
+        assertThat(queries.get(2).text())
+                .isEqualTo("Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: travel, food.");
+        assertThat(queries).noneMatch(RagEvalSupport.QueryRow::khoGap); // chưa có truy vấn nào đánh dấu kho_gap
     }
 }

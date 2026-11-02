@@ -19,40 +19,34 @@ import org.junit.jupiter.api.Test;
 @Tag("external")
 class RagThresholdCalibrationTest {
 
-    private static final String KHO_GAP = "kho_gap";
-
-    record Query(String topic, String level, String text, boolean onTopic, String note) {
-    }
-
     @Test
     void calibrateRetrievalThreshold() throws Exception {
         try (RagEvalSupport support = RagEvalSupport.connect()) {
             EmbeddingPort embedding = support.embedding();
-            List<Query> queries = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
-                    c -> new Query(c.get(0), c.get(1), c.get(2), c.get(3).trim().equals("on_topic"),
-                            c.size() > 4 ? c.get(4).trim() : ""));
+            List<RagEvalSupport.QueryRow> queries = RagEvalSupport.readQueries();
             String current = support.settings.rawJson("rag.retrieval.min_similarity").orElse("?");
 
             List<Double> on = new ArrayList<>();
             List<Double> off = new ArrayList<>();
             List<String> khoGap = new ArrayList<>();
             List<String> rows = new ArrayList<>();
-            rows.add("topic,level,expected,query,top1_question_id,top1_similarity,note");
-            for (Query q : queries) {
+            rows.add("topic,level,interests,expected,query,top1_question_id,top1_similarity,note");
+            for (RagEvalSupport.QueryRow q : queries) {
+                // Truy vấn dựng bằng RagQueryBuilder: đúng hàm UC-24 dùng (RAG.Embed.Input)
                 float[] vector = embedding.embed(q.text(), TaskType.RETRIEVAL_QUERY);
                 List<SimilarWritingPrompt> top = support.readOnly(
                         () -> support.vectors.nearest(vector, q.topic(), q.level(), 1));
                 assertThat(top).as("no active Writing prompt for %s/%s: run the embedding backfill first", q.topic(),
                         q.level()).isNotEmpty();
                 double similarity = top.get(0).similarity();
-                if (KHO_GAP.equals(q.note())) {
+                if (q.khoGap()) {
                     // Kho thiếu đề cho truy vấn này: fallback BR-7 là hành vi đúng, không dùng để chỉnh ngưỡng
                     khoGap.add(String.format(Locale.ROOT, "%.3f %s/%s | %s", similarity, q.topic(), q.level(), q.text()));
                 } else {
                     (q.onTopic() ? on : off).add(similarity);
                 }
                 rows.add(String.join(",", RagEvalSupport.csvCell(q.topic()), q.level(),
-                        q.onTopic() ? "on_topic" : "off_topic", RagEvalSupport.csvCell(q.text()),
+                        RagEvalSupport.csvCell(String.join("|", q.interests())), q.onTopic() ? "on_topic" : "off_topic", RagEvalSupport.csvCell(q.text()),
                         top.get(0).questionId().toString(), String.format(Locale.ROOT, "%.4f", similarity),
                         RagEvalSupport.csvCell(q.note())));
             }
