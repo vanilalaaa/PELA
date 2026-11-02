@@ -1,0 +1,134 @@
+topic,level,expected,query,top1_question_id,top1_similarity
+Travel,A2,on_topic,Write about a holiday you went on last year,9b000000-0000-4000-8000-002001000000,0.8110
+Travel,A2,on_topic,An email to a friend telling them about your trip,9a000000-0000-4000-8000-000000000101,0.7776
+Travel,A2,on_topic,Describe a famous place for tourists in your city,9a000000-0000-4000-8000-000000000102,0.7772
+Travel,A2,on_topic,Book a hotel room for your family by email,9a000000-0000-4000-8000-000000000103,0.7939
+Travel,A2,on_topic,A problem you had at the airport,9a000000-0000-4000-8000-000000000104,0.7648
+Travel,A2,on_topic,Is it better to travel by bus or by car? Give reasons,9a000000-0000-4000-8000-000000000105,0.7128
+Travel,A2,on_topic,Plan a weekend visit to the beach,9a000000-0000-4000-8000-000000000106,0.7547
+Travel,A2,on_topic,What do you pack in your bag for a short trip?,9a000000-0000-4000-8000-000000000106,0.7239
+Travel,A2,on_topic,Tell a friend about the best city you have visited,9b000000-0000-4000-8000-002022000000,0.7215
+Travel,A2,on_topic,Write about your lost suitcase on a holiday,9a000000-0000-4000-8000-000000000104,0.7416
+Travel,A2,on_topic,Recommend a place in Vietnam for foreign visitors,9a000000-0000-4000-8000-000000000102,0.6859
+Travel,A2,on_topic,Ask a hotel about breakfast and parking,9a000000-0000-4000-8000-000000000103,0.6974
+Travel,A2,on_topic,Your favourite way to travel and why,9a000000-0000-4000-8000-000000000105,0.7353
+Travel,A2,on_topic,A day trip to the mountains with your friends,9b000000-0000-4000-8000-002021000000,0.7126
+Travel,A2,on_topic,A delayed train on your journey and what you did,9a000000-0000-4000-8000-000000000104,0.7318
+Work,B1,on_topic,Write to your boss to change the time of a meeting,9a000000-0000-4000-8000-000000000201,0.8260
+Work,B1,on_topic,Describe the job you would love to have in the future,9b000000-0000-4000-8000-003002000000,0.8083
+Work,B1,on_topic,Working from home or working in an office: which is better?,9a000000-0000-4000-8000-000000000203,0.7773
+Work,B1,on_topic,A report about a team project you completed,9a000000-0000-4000-8000-000000000204,0.7644
+Work,B1,on_topic,Apply for a part-time job in a café,9a000000-0000-4000-8000-000000000205,0.7376
+Work,B1,on_topic,Tips for a new employee in their first days at the company,9a000000-0000-4000-8000-000000000206,0.7422
+Work,B1,on_topic,An email to your manager asking for a day off,9a000000-0000-4000-8000-000000000201,0.7251
+Work,B1,on_topic,What makes a good workplace? Explain your opinion,9b000000-0000-4000-8000-003009000000,0.7085
+Work,B1,on_topic,Describe your skills and experience for a job application,9a000000-0000-4000-8000-000000000205,0.6998
+Work,B1,on_topic,Tell about a difficult task at work and how you solved it,9a000000-0000-4000-8000-000000000204,0.7347
+Work,B1,on_topic,Advice for someone looking for their first job,9a000000-0000-4000-8000-000000000206,0.7086
+Work,B1,on_topic,Should companies let employees work flexible hours?,9a000000-0000-4000-8000-000000000203,0.6814
+Work,B1,on_topic,A letter applying for a summer internship,9b000000-0000-4000-8000-003018000000,0.7089
+Work,B1,on_topic,Describe a typical day in your dream career,9a000000-0000-4000-8000-000000000202,0.7803
+Work,B1,on_topic,Write to a colleague to plan a meeting next week,9a000000-0000-4000-8000-000000000201,0.7464
+Travel,A2,off_topic,Write a recipe for your favourite soup,9b000000-0000-4000-8000-002001000000,0.6005
+Travel,A2,off_topic,Describe your pet and what it likes to eat,9b000000-0000-4000-8000-002001000000,0.6318
+Travel,A2,off_topic,Why is it important to drink water every day?,9b000000-0000-4000-8000-002019000000,0.5521
+Travel,A2,off_topic,Your favourite football team and its best player,9b000000-0000-4000-8000-002021000000,0.5909
+Travel,A2,off_topic,How to study English vocabulary at home,9a000000-0000-4000-8000-000000000106,0.5808
+Travel,A2,off_topic,Describe the weather in winter in your country,9a000000-0000-4000-8000-000000000102,0.6057
+Travel,A2,off_topic,Write about your family members,9b000000-0000-4000-8000-002021000000,0.6766
+Travel,A2,off_topic,Explain the rules of a board game,9a000000-0000-4000-8000-000000000106,0.5802
+Work,B1,off_topic,Write a recipe for a chocolate cake,9a000000-0000-4000-8000-000000000204,0.6173
+Work,B1,off_topic,Describe your favourite film and its story,9a000000-0000-4000-8000-000000000202,0.6058
+Work,B1,off_topic,How to take care of a garden in summer,9a000000-0000-4000-8000-000000000204,0.5283
+Work,B1,off_topic,Write a poem about the sea,9a000000-0000-4000-8000-000000000204,0.5977
+Work,B1,off_topic,Your favourite season and why,9a000000-0000-4000-8000-000000000203,0.6150
+Work,B1,off_topic,Explain how plants grow from seeds,9b000000-0000-4000-8000-003014000000,0.5327
+Work,B1,off_topic,Describe a birthday party you enjoyed,9a000000-0000-4000-8000-000000000204,0.6595
+Travel,A1,on_topic,Tell a friend where you want to go on your next trip,9b000000-0000-4000-8000-001001000000,0.7715
+Travel,A1,on_topic,Write about a place you like to visit in your city,9b000000-0000-4000-8000-001006000000,0.8627
+Travel,A1,on_topic,How do you usually travel to another city?,9b000000-0000-4000-8000-001023000000,0.7452
+Travel,A1,off_topic,Write about your favourite food and why you like it,9b000000-0000-4000-8000-001006000000,0.6880
+Work,A1,on_topic,Write an email to your teacher to say you are absent,9b000000-0000-4000-8000-001003000000,0.8558
+Work,A1,on_topic,Describe what you do every day at your job or school,9b000000-0000-4000-8000-001008000000,0.8326
+Work,A1,on_topic,Ask a coworker to help you finish a task today,9b000000-0000-4000-8000-001025000000,0.8008
+Work,A1,off_topic,Write about your pet and what it likes to do,9b000000-0000-4000-8000-001008000000,0.6920
+Technology,A1,on_topic,Write about your favourite app on your phone,9b000000-0000-4000-8000-001004000000,0.8258
+Technology,A1,on_topic,Ask a friend to help you fix your phone,9b000000-0000-4000-8000-001009000000,0.7940
+Technology,A1,on_topic,A gadget you want to buy and why you want it,9b000000-0000-4000-8000-001028000000,0.8525
+Technology,A1,off_topic,Write about the weather in your city this week,9b000000-0000-4000-8000-001004000000,0.6177
+Daily Life,A1,on_topic,Write about your daily routine from morning to night,9b000000-0000-4000-8000-001002000000,0.7931
+Daily Life,A1,on_topic,Invite a friend to your birthday party,9b000000-0000-4000-8000-001007000000,0.7471
+Daily Life,A1,on_topic,Describe a shop you often go to,9b000000-0000-4000-8000-001011000000,0.8588
+Daily Life,A1,off_topic,Write an email to your boss about a meeting,9b000000-0000-4000-8000-001013000000,0.6970
+Work,A2,on_topic,Ask your manager for a day off next week,9b000000-0000-4000-8000-002002000000,0.8261
+Work,A2,on_topic,Describe your first day at a new job,9b000000-0000-4000-8000-002005000000,0.8032
+Work,A2,on_topic,Ask a colleague to cover your shift on Monday,9b000000-0000-4000-8000-002010000000,0.8404
+Work,A2,off_topic,Describe your best holiday at the beach,9b000000-0000-4000-8000-002005000000,0.6029
+Technology,A2,on_topic,A time when your computer stopped working,9b000000-0000-4000-8000-002004000000,0.7896
+Technology,A2,on_topic,Write about an app or website you use every day,9b000000-0000-4000-8000-002008000000,0.8880
+Technology,A2,on_topic,Write to a shop about a product that is broken,9b000000-0000-4000-8000-002023000000,0.8509
+Technology,A2,off_topic,Describe the clothes you like to wear in winter,9b000000-0000-4000-8000-002025000000,0.6493
+Daily Life,A2,on_topic,Describe a typical weekend for you,9b000000-0000-4000-8000-002003000000,0.8549
+Daily Life,A2,on_topic,Write about a time you were sick and what you did,9b000000-0000-4000-8000-002012000000,0.8563
+Daily Life,A2,on_topic,Invite a friend to cook dinner at your home,9b000000-0000-4000-8000-002018000000,0.7748
+Daily Life,A2,off_topic,Write an email to a hotel about room prices,9b000000-0000-4000-8000-002013000000,0.6535
+Travel,B1,on_topic,Do you prefer travelling alone or in a group?,9b000000-0000-4000-8000-003001000000,0.7950
+Travel,B1,on_topic,Describe your dream holiday and what you would do there,9b000000-0000-4000-8000-003006000000,0.8043
+Travel,B1,on_topic,Write to a travel agency about a family tour,9b000000-0000-4000-8000-003023000000,0.8312
+Travel,B1,off_topic,Explain how to cook a traditional dish step by step,9b000000-0000-4000-8000-003021000000,0.5604
+Technology,B1,on_topic,Do smartphones make our lives easier or more complicated?,9b000000-0000-4000-8000-003004000000,0.8316
+Technology,B1,on_topic,How has technology changed the way families communicate?,9b000000-0000-4000-8000-003008000000,0.8392
+Technology,B1,on_topic,An app that changed how you do something every day,9b000000-0000-4000-8000-003025000000,0.7952
+Technology,B1,off_topic,Describe your favourite sport and why everyone should try it,9b000000-0000-4000-8000-003025000000,0.6021
+Daily Life,B1,on_topic,Is fast food bad for people's health?,9b000000-0000-4000-8000-003011000000,0.7916
+Daily Life,B1,on_topic,Describe a tradition in your country that is important to keep,9b000000-0000-4000-8000-003017000000,0.8592
+Daily Life,B1,on_topic,Should young people volunteer in their community?,9b000000-0000-4000-8000-003013000000,0.8323
+Daily Life,B1,off_topic,Write an email to a company about an internship,9b000000-0000-4000-8000-003013000000,0.5646
+Technology,B2,on_topic,Does social media do more harm than good?,9b000000-0000-4000-8000-004001000000,0.7606
+Technology,B2,on_topic,How might artificial intelligence change work in the next ten years?,9b000000-0000-4000-8000-004008000000,0.8392
+Technology,B2,on_topic,Should self-driving cars be allowed before they are fully safe?,9b000000-0000-4000-8000-004019000000,0.7987
+Technology,B2,off_topic,Describe your favourite local dish and how to cook it,9b000000-0000-4000-8000-004018000000,0.5659
+Work,B2,on_topic,Do the advantages of working from home outweigh the disadvantages?,9b000000-0000-4000-8000-004002000000,0.8040
+Work,B2,on_topic,Write a formal email to HR asking for flexible hours,9b000000-0000-4000-8000-004017000000,0.8857
+Work,B2,on_topic,Should companies introduce a four-day work week?,9b000000-0000-4000-8000-004016000000,0.7898
+Work,B2,off_topic,Describe a beautiful beach you visited,9b000000-0000-4000-8000-004006000000,0.5540
+Society,B2,on_topic,Should cars be banned from city centres?,9b000000-0000-4000-8000-004009000000,0.7866
+Society,B2,on_topic,Should advertising aimed at children be banned?,9b000000-0000-4000-8000-004011000000,0.7791
+Society,B2,on_topic,Does tourism bring more benefits than problems to a city?,9b000000-0000-4000-8000-004005000000,0.8185
+Society,B2,off_topic,Explain how to change a flat tyre on a bicycle,9b000000-0000-4000-8000-004009000000,0.5286
+Environment,B2,on_topic,What can individuals do to reduce plastic waste?,9b000000-0000-4000-8000-004004000000,0.8075
+Environment,B2,on_topic,Should governments give money to households for renewable energy?,9b000000-0000-4000-8000-004007000000,0.7963
+Environment,B2,on_topic,Is eating less meat a good way to help the environment?,9b000000-0000-4000-8000-004020000000,0.7423
+Environment,B2,off_topic,Describe your first day at a new job,9b000000-0000-4000-8000-004015000000,0.5646
+Work,C1,on_topic,To what extent should employers protect the mental health of workers?,9b000000-0000-4000-8000-005001000000,0.8182
+Work,C1,on_topic,Write a formal email proposing a four-day work week,9b000000-0000-4000-8000-005017000000,0.8570
+Work,C1,on_topic,Should promotions depend on performance rather than seniority?,9b000000-0000-4000-8000-005007000000,0.8386
+Work,C1,off_topic,Discuss the history of the Olympic Games,9b000000-0000-4000-8000-005007000000,0.5860
+Environment,C1,on_topic,Can individual action make a difference to climate change?,9b000000-0000-4000-8000-005002000000,0.7636
+Environment,C1,on_topic,Should corporations pay for environmental damage in their supply chains?,9b000000-0000-4000-8000-005014000000,0.8567
+Environment,C1,on_topic,Write to the local council about reducing traffic jams,9b000000-0000-4000-8000-005010000000,0.7896
+Environment,C1,off_topic,Describe your favourite film and its characters,9b000000-0000-4000-8000-005016000000,0.5330
+Technology,C1,on_topic,Discuss the ethics of using artificial intelligence in hiring,9b000000-0000-4000-8000-005003000000,0.8548
+Technology,C1,on_topic,Are recommendation algorithms good or bad for users?,9b000000-0000-4000-8000-005008000000,0.7739
+Technology,C1,on_topic,Should governments regulate how companies use personal data?,9b000000-0000-4000-8000-005009000000,0.7970
+Technology,C1,off_topic,Describe the architecture of an old historic city,9b000000-0000-4000-8000-005009000000,0.5267
+Society,C1,on_topic,Should university education be free for everyone?,9b000000-0000-4000-8000-005004000000,0.7719
+Society,C1,on_topic,Should historic buildings be preserved or redeveloped for housing?,9b000000-0000-4000-8000-005018000000,0.8527
+Society,C1,on_topic,Should voting be compulsory for adult citizens?,9b000000-0000-4000-8000-005019000000,0.7887
+Society,C1,off_topic,Write about a time you solved a problem at work,9b000000-0000-4000-8000-005012000000,0.5611
+Society,C2,on_topic,Should economic growth stop being the main measure of national success?,9b000000-0000-4000-8000-006001000000,0.7878
+Society,C2,on_topic,Is international cooperation enough to solve global problems?,9b000000-0000-4000-8000-006009000000,0.7772
+Society,C2,on_topic,Is a universal basic income better than targeted welfare?,9b000000-0000-4000-8000-006012000000,0.5817
+Society,C2,off_topic,Write an email to a friend about your weekend plans,9b000000-0000-4000-8000-006016000000,0.5455
+Technology,C2,on_topic,Does artificial intelligence threaten human jobs?,9b000000-0000-4000-8000-006002000000,0.7516
+Technology,C2,on_topic,Is surveillance technology acceptable for public safety?,9b000000-0000-4000-8000-006008000000,0.7922
+Technology,C2,on_topic,Who is morally responsible for the decisions of a self-driving car?,9b000000-0000-4000-8000-006017000000,0.7725
+Technology,C2,off_topic,Describe your favourite season and what you do in it,9b000000-0000-4000-8000-006013000000,0.5285
+Work,C2,on_topic,Should automation be embraced in the workplace?,9b000000-0000-4000-8000-006004000000,0.7946
+Work,C2,on_topic,Is the gig economy flexible or insecure for workers?,9b000000-0000-4000-8000-006003000000,0.7734
+Work,C2,on_topic,Should lifelong reskilling be expected from employees?,9b000000-0000-4000-8000-006020000000,0.7753
+Work,C2,off_topic,Describe a trip you took with your family,9b000000-0000-4000-8000-006004000000,0.5523
+Education,C2,on_topic,Is standardised testing a fair measure of student ability?,9b000000-0000-4000-8000-006005000000,0.7636
+Education,C2,on_topic,Should financial literacy be taught in every school?,9b000000-0000-4000-8000-006007000000,0.7698
+Education,C2,on_topic,Do elite universities improve social mobility or increase inequality?,9b000000-0000-4000-8000-006011000000,0.7735
+Education,C2,off_topic,Describe the weather in your city in summer,9b000000-0000-4000-8000-006006000000,0.4895
