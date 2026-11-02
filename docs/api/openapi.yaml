@@ -263,7 +263,7 @@ paths:
         đồng dưới ngưỡng, AI quá hạn/lỗi/bị chặn, đề sai dạng, hết lượt AI trong ngày `writing.ai_prompt_daily_limit`) thì
         trả một đề có sẵn cùng topic + trình độ mà learner chưa làm: `promptSource = bank` kèm `questionId` và
         `fallbackReason` (BELOW_THRESHOLD, TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, FILTERED, DAILY_LIMIT, NO_EMBEDDING,
-        INVALID_OUTPUT, UPSTREAM_ERROR). Toàn chuỗi nằm trong ngân sách `ai.question_gen_p95_budget_ms`.
+        INVALID_OUTPUT, UPSTREAM_ERROR, BUDGET_EXHAUSTED: còn ít hơn `rag.generation.min_llm_ms` của ngân sách thì không gọi AI). Toàn chuỗi nằm trong ngân sách `ai.question_gen_p95_budget_ms`.
         Nộp bài (`POST /practice/writing/submissions`) gửi lại đúng `promptSource` và `ragCacheId` hoặc
         `promptQuestionId`. `taskType` tuỳ chọn: không gửi thì AI giữ dạng bài của đề mẫu gần nhất.
         Đề AI chỉ nộp được bởi chính learner đã nhận nó.
@@ -586,7 +586,7 @@ components:
         cacheHit: {type: boolean, description: Đề AI lấy từ cache thay vì mới tạo}
         fallbackReason:
           type: [string, 'null']
-          enum: [BELOW_THRESHOLD, TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, FILTERED, DAILY_LIMIT, NO_EMBEDDING, INVALID_OUTPUT, UPSTREAM_ERROR, null]
+          enum: [BELOW_THRESHOLD, TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, FILTERED, DAILY_LIMIT, NO_EMBEDDING, INVALID_OUTPUT, UPSTREAM_ERROR, BUDGET_EXHAUSTED, null]
           description: Có khi đề bank được phát vì không tạo được đề AI (BR-7)
     WritingBankPrompt:
       type: object

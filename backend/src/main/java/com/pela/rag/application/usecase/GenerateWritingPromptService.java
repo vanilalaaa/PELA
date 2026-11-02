@@ -63,6 +63,7 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
     static final String CACHE_DEDUPE_DAYS_SETTING = "rag.cache.dedupe_days";
     static final String CACHE_TTL_DAYS_SETTING = "rag.cache.ttl_days";
     static final String MAX_BANK_SIMILARITY_SETTING = "rag.generation.max_bank_similarity";
+    static final String MIN_LLM_MS_SETTING = "rag.generation.min_llm_ms";
 
     private static final Logger log = LoggerFactory.getLogger(GenerateWritingPromptService.class);
 
@@ -196,12 +197,18 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
         }
     }
 
-    /** LLM chỉ được chờ trong thời gian còn lại của ngân sách (ai.question_gen_p95_budget_ms). */
+    /**
+     * LLM chỉ được chờ trong thời gian còn lại của ngân sách (ai.question_gen_p95_budget_ms). Còn ít hơn
+     * rag.generation.min_llm_ms thì chắc chắn quá hạn: không gọi (không tốn hạn mức Gemini), phát đề có sẵn ngay.
+     */
     private GeneratedPrompt callLlm(Map<String, String> vars, LatencyBudget budget) {
-        ensureTimeLeft(budget);
+        Duration remaining = budget.remaining(clock.now());
+        if (remaining.toMillis() < settings.requiredInt(MIN_LLM_MS_SETTING)) {
+            throw new Fallback(FallbackReason.BUDGET_EXHAUSTED);
+        }
         try {
             LlmResult<GeneratedPromptResponse> result = llm.generateJson(TEMPLATE, vars, GeneratedPromptResponse.class,
-                    budget.remaining(clock.now()));
+                    remaining);
             return result.value().toDomain();
         } catch (AiCallException e) {
             throw new Fallback(switch (e.kind()) {

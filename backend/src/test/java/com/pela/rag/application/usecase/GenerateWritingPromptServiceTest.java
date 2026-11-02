@@ -88,6 +88,7 @@ class GenerateWritingPromptServiceTest {
         when(settings.requiredInt("rag.cache.dedupe_days")).thenReturn(14);
         when(settings.requiredInt("rag.cache.ttl_days")).thenReturn(30);
         when(settings.requiredDouble("rag.generation.max_bank_similarity")).thenReturn(0.95);
+        when(settings.requiredInt("rag.generation.min_llm_ms")).thenReturn(2000);
         when(cache.countServedBetween(any(), any(), any())).thenReturn(0);
         when(cache.findHit(any())).thenReturn(Optional.empty());
         when(embedding.embed(anyString(), eq(TaskType.RETRIEVAL_QUERY))).thenReturn(QUERY_VECTOR);
@@ -292,9 +293,29 @@ class GenerateWritingPromptServiceTest {
             return QUERY_VECTOR;
         });
 
-        assertFallback(run(), FallbackReason.TIMEOUT);
+        assertFallback(run(), FallbackReason.BUDGET_EXHAUSTED);
 
         verifyNoInteractions(llm);
+    }
+
+    @Test
+    void lessThanTheMinimumLlmTimeLeftSkipsTheLlmEvenIfTheBudgetIsNotYetOver() {
+        clock.advance(Duration.ofMillis(2001)); // còn 1999 ms < 2000 ms
+
+        assertFallback(run(), FallbackReason.BUDGET_EXHAUSTED);
+
+        verifyNoInteractions(llm);
+    }
+
+    @Test
+    void exactlyTheMinimumLlmTimeLeftStillCallsTheLlm() {
+        clock.advance(Duration.ofMillis(2000)); // còn đúng 2000 ms
+
+        assertThat(run()).isInstanceOf(Generated.class);
+
+        ArgumentCaptor<Duration> timeout = ArgumentCaptor.forClass(Duration.class);
+        verify(llm).generateJson(anyString(), any(), eq(GeneratedPromptResponse.class), timeout.capture());
+        assertThat(timeout.getValue()).isEqualTo(Duration.ofMillis(2000));
     }
 
     @Test
