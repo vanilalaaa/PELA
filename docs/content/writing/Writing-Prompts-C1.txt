@@ -1,0 +1,42 @@
+PELA Writing Prompts - Level C1
+(20 prompts - for Admin upload test, UC-19 Writing import flow)
+
+1. [Work - essay] To what extent should companies be responsible for their employees' mental health and well-being? Discuss. (~180-250 words)
+
+2. [Environment - essay] Some argue that individual actions cannot make a meaningful impact on climate change, and only government policy can. To what extent do you agree? (~180-250 words)
+
+3. [Technology - essay] Discuss the ethical implications of using artificial intelligence to make hiring decisions. (~180-250 words)
+
+4. [Society - essay] Some believe that university education should be free for everyone. Discuss the arguments for and against this view. (~180-250 words)
+
+5. [Society - essay] Discuss the impact of remote work on urban development and local economies. (~180-250 words)
+
+6. [Work - email] Write a formal email to your manager proposing a new policy to improve team productivity, explaining the main benefit and how it would be measured. (~180-250 words)
+
+7. [Work - essay] To what extent should promotions be based on seniority rather than performance? Discuss. (~180-250 words)
+
+8. [Technology - essay] Discuss the advantages and disadvantages of relying on algorithms to recommend content to users. (~180-250 words)
+
+9. [Technology - essay] To what extent should governments regulate the collection and sale of personal data by technology companies? Discuss. (~180-250 words)
+
+10. [Environment - email] Write a formal email to your local council proposing a new initiative to reduce traffic congestion. (~180-250 words)
+
+11. [Technology - essay] To what extent do social media platforms bear responsibility for the spread of misinformation? Discuss. (~180-250 words)
+
+12. [Society - essay] Discuss the economic and social arguments for and against stricter immigration policies. (~180-250 words)
+
+13. [Technology - essay] To what extent should parents limit their children's use of technology? Discuss. (~180-250 words)
+
+14. [Environment - essay] To what extent should corporations be held financially responsible for the environmental damage caused by their supply chains? Discuss. (~180-250 words)
+
+15. [Environment - essay] To what extent should governments restrict industrial fishing practices to protect marine ecosystems? Discuss. (~180-250 words)
+
+16. [Environment - essay] Discuss the impact of fast fashion on both the economy and the environment. (~180-250 words)
+
+17. [Work - email] Write a formal email to senior management suggesting a trial of a four-day work week, addressing likely objections. (~180-250 words)
+
+18. [Society - essay] To what extent should historic buildings be preserved versus redeveloped for modern housing needs? (~180-250 words)
+
+19. [Society - essay] To what extent should voting be made compulsory for all adult citizens? Discuss the arguments for and against. (~180-250 words)
+
+20. [Work - essay] Discuss whether employers should hire based on skills assessments rather than university degrees. (~180-250 words)
