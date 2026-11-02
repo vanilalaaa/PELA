@@ -4,3 +4,4 @@ Test vector JSON dùng chung cho `packages/domain` (Vitest) và backend Java (JU
 Khoá JSON dùng `snake_case`. Khi đổi luật nghiệp vụ, sửa fixture trước rồi cho cả hai phía pass.
 
 - `sm2-cases.json` — SM-2 (BR-26)
+- `word-count-cases.json` — đếm từ Writing (UC-10): `countWords` (TS) và `TextAnalysis.countWords` (Java)
