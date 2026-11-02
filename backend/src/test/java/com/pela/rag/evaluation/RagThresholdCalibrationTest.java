@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Test;
 @Tag("external")
 class RagThresholdCalibrationTest {
 
-    record Query(String topic, String level, String text, boolean onTopic) {
+    private static final String KHO_GAP = "kho_gap";
+
+    record Query(String topic, String level, String text, boolean onTopic, String note) {
     }
 
     @Test
@@ -27,13 +29,15 @@ class RagThresholdCalibrationTest {
         try (RagEvalSupport support = RagEvalSupport.connect()) {
             EmbeddingPort embedding = support.embedding();
             List<Query> queries = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
-                    c -> new Query(c.get(0), c.get(1), c.get(2), c.get(3).trim().equals("on_topic")));
+                    c -> new Query(c.get(0), c.get(1), c.get(2), c.get(3).trim().equals("on_topic"),
+                            c.size() > 4 ? c.get(4).trim() : ""));
             String current = support.settings.rawJson("rag.retrieval.min_similarity").orElse("?");
 
             List<Double> on = new ArrayList<>();
             List<Double> off = new ArrayList<>();
+            List<String> khoGap = new ArrayList<>();
             List<String> rows = new ArrayList<>();
-            rows.add("topic,level,expected,query,top1_question_id,top1_similarity");
+            rows.add("topic,level,expected,query,top1_question_id,top1_similarity,note");
             for (Query q : queries) {
                 float[] vector = embedding.embed(q.text(), TaskType.RETRIEVAL_QUERY);
                 List<SimilarWritingPrompt> top = support.readOnly(
@@ -41,10 +45,16 @@ class RagThresholdCalibrationTest {
                 assertThat(top).as("no active Writing prompt for %s/%s: run the embedding backfill first", q.topic(),
                         q.level()).isNotEmpty();
                 double similarity = top.get(0).similarity();
-                (q.onTopic() ? on : off).add(similarity);
+                if (KHO_GAP.equals(q.note())) {
+                    // Kho thiếu đề cho truy vấn này: fallback BR-7 là hành vi đúng, không dùng để chỉnh ngưỡng
+                    khoGap.add(String.format(Locale.ROOT, "%.3f %s/%s | %s", similarity, q.topic(), q.level(), q.text()));
+                } else {
+                    (q.onTopic() ? on : off).add(similarity);
+                }
                 rows.add(String.join(",", RagEvalSupport.csvCell(q.topic()), q.level(),
                         q.onTopic() ? "on_topic" : "off_topic", RagEvalSupport.csvCell(q.text()),
-                        top.get(0).questionId().toString(), String.format(Locale.ROOT, "%.4f", similarity)));
+                        top.get(0).questionId().toString(), String.format(Locale.ROOT, "%.4f", similarity),
+                        RagEvalSupport.csvCell(q.note())));
             }
 
             EvalStats.Suggestion s = EvalStats.suggestThreshold(on, off);
@@ -52,6 +62,7 @@ class RagThresholdCalibrationTest {
             System.out.println("AS-7 threshold calibration -> " + out);
             System.out.println("  on_topic : " + EvalStats.distribution(on));
             System.out.println("  off_topic: " + EvalStats.distribution(off));
+            System.out.println("  kho_gap (loại khỏi phần tính ngưỡng, n=" + khoGap.size() + "): " + khoGap);
             System.out.println("  current rag.retrieval.min_similarity = " + current);
             System.out.printf(Locale.ROOT, "  suggested threshold = %.3f (separable=%s, accuracy=%.3f, on_topic below=%d,"
                     + " off_topic at/above=%d). NOT applied: update system_setting manually if agreed%n",

@@ -1,0 +1,42 @@
+PELA Writing Prompts - Level C2
+(20 prompts - for Admin upload test, UC-19 Writing import flow)
+
+1. [Society - essay] Analyze the argument that economic growth should no longer be the primary measure of a nation's success. What alternative measures might be more appropriate, and why? (~230-300 words)
+
+2. [Technology - essay] Critically evaluate the claim that artificial intelligence poses an existential threat to human employment. Consider counterarguments in your response. (~230-300 words)
+
+3. [Work - essay] Critically evaluate the claim that the gig economy offers workers genuine flexibility rather than disguised insecurity. (~230-300 words)
+
+4. [Work - essay] To what extent should automation be embraced in the workplace, given its potential to both increase efficiency and displace workers? Present a balanced argument. (~230-300 words)
+
+5. [Education - essay] Evaluate the proposition that standardized testing is an inadequate measure of student ability and potential. (~230-300 words)
+
+6. [Education - essay] Discuss the argument that the preservation of endangered languages is essential to maintaining cultural diversity, even when it comes at an economic cost. (~230-300 words)
+
+7. [Education - essay] Evaluate the argument that financial literacy should be a mandatory part of the school curriculum, given its long-term impact on individual and societal well-being. (~230-300 words)
+
+8. [Technology - essay] Analyze the ethical and societal implications of widespread surveillance technology in the name of public safety. (~230-300 words)
+
+9. [Society - essay] Discuss whether international cooperation is sufficient to address global challenges such as climate change and pandemics, or whether national interests will always take precedence. (~230-300 words)
+
+10. [Work - email] Write a formal email to senior management analyzing the long-term risks and benefits of restructuring the company's remote work policy, and recommending next steps. (~230-300 words)
+
+11. [Education - essay] Critically assess the argument that elite universities perpetuate social inequality more than they promote social mobility. (~230-300 words)
+
+12. [Society - essay] Analyze the argument that open-border immigration policies would ultimately benefit both sending and receiving economies. (~230-300 words)
+
+13. [Technology - essay] Discuss the tension between scientific innovation and the precautionary principle, using specific examples such as gene editing or AI. (~230-300 words)
+
+14. [Society - essay] Evaluate the proposition that international law is fundamentally powerless without the backing of major world powers. (~230-300 words)
+
+15. [Education - essay] Discuss whether the increasing specialization of academic disciplines is undermining students' ability to think across disciplines and solve complex real-world problems. (~230-300 words)
+
+16. [Society - essay] Analyze the argument that car-centric urban design has done more long-term harm than good to modern cities. (~230-300 words)
+
+17. [Technology - essay] Discuss whether moral responsibility can meaningfully be assigned to an autonomous system, such as a self-driving car or an AI decision-maker. (~230-300 words)
+
+18. [Work - essay] Evaluate the argument that unpaid internships are an exploitative barrier to entry into professional careers. (~230-300 words)
+
+19. [Technology - essay] Critically evaluate the claim that open-source development offers a more sustainable model of innovation than proprietary software. (~230-300 words)
+
+20. [Work - essay] Analyze the argument that lifelong reskilling should become a standard expectation of employment, given the accelerating pace of technological change in the workplace. (~230-300 words)

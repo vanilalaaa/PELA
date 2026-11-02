@@ -27,3 +27,9 @@ Việc đã biết phải làm nhưng chưa tới lượt. Khi bắt đầu mộ
   `RagLatencyTest` (P95 generate ≤ 4 s — PER-3; P95 cache hit ≤ 300 ms không tính embed — PER-9) và
   `RagGenerationSampleTest` (sinh 50 đề ra `generated.csv`), bỏ `@Disabled("Chờ UC-24 (P7)")`, chạy trên Supabase dev,
   rồi cho 2 người chấm và chạy `RagRatingReportTest`. Xem `docs/evaluation/rag/README.md`.
+- **P7 hàm dựng truy vấn duy nhất và đo lại ngưỡng (AS-7):** SRS `RAG.Embed.Input` dựng truy vấn từ topic + level +
+  sở thích của người học. UC-24 phải có **một** hàm dựng truy vấn duy nhất; `RagThresholdCalibrationTest` phải gọi đúng
+  hàm đó; `docs/evaluation/rag/queries.csv` đổi sang cột `topic,level,interests,expected,note` (`off_topic` = sở thích
+  xa topic, ví dụ Work/A1 với sở thích "cooking, pets"). Chốt `rag.retrieval.min_similarity` sau khi đo lại theo định
+  dạng này; nếu đổi thì tạo migration mới trong nhánh P7, description ghi ngày đo và đường dẫn file kết quả. Mốc hiện
+  tại: giữ 0.65. Kết quả câu tự do 03/11/2026 chỉ để tham khảo (`docs/evaluation/results/2026-11-03-content/`).
