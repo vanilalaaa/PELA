@@ -1,0 +1,46 @@
+topic,level,expected,query,top1_question_id,top1_similarity
+Travel,A2,on_topic,Write about a holiday you went on last year,9a000000-0000-4000-8000-000000000101,0.7733
+Travel,A2,on_topic,An email to a friend telling them about your trip,9a000000-0000-4000-8000-000000000101,0.7776
+Travel,A2,on_topic,Describe a famous place for tourists in your city,9a000000-0000-4000-8000-000000000102,0.7772
+Travel,A2,on_topic,Book a hotel room for your family by email,9a000000-0000-4000-8000-000000000103,0.7939
+Travel,A2,on_topic,A problem you had at the airport,9a000000-0000-4000-8000-000000000104,0.7648
+Travel,A2,on_topic,Is it better to travel by bus or by car? Give reasons,9a000000-0000-4000-8000-000000000105,0.7128
+Travel,A2,on_topic,Plan a weekend visit to the beach,9a000000-0000-4000-8000-000000000106,0.7547
+Travel,A2,on_topic,What do you pack in your bag for a short trip?,9a000000-0000-4000-8000-000000000106,0.7239
+Travel,A2,on_topic,Tell a friend about the best city you have visited,9a000000-0000-4000-8000-000000000101,0.7044
+Travel,A2,on_topic,Write about your lost suitcase on a holiday,9a000000-0000-4000-8000-000000000104,0.7416
+Travel,A2,on_topic,Recommend a place in Vietnam for foreign visitors,9a000000-0000-4000-8000-000000000102,0.6859
+Travel,A2,on_topic,Ask a hotel about breakfast and parking,9a000000-0000-4000-8000-000000000103,0.6974
+Travel,A2,on_topic,Your favourite way to travel and why,9a000000-0000-4000-8000-000000000105,0.7353
+Travel,A2,on_topic,A day trip to the mountains with your friends,9a000000-0000-4000-8000-000000000106,0.6807
+Travel,A2,on_topic,A delayed train on your journey and what you did,9a000000-0000-4000-8000-000000000104,0.7318
+Work,B1,on_topic,Write to your boss to change the time of a meeting,9a000000-0000-4000-8000-000000000201,0.8260
+Work,B1,on_topic,Describe the job you would love to have in the future,9a000000-0000-4000-8000-000000000202,0.7765
+Work,B1,on_topic,Working from home or working in an office: which is better?,9a000000-0000-4000-8000-000000000203,0.7773
+Work,B1,on_topic,A report about a team project you completed,9a000000-0000-4000-8000-000000000204,0.7644
+Work,B1,on_topic,Apply for a part-time job in a café,9a000000-0000-4000-8000-000000000205,0.7376
+Work,B1,on_topic,Tips for a new employee in their first days at the company,9a000000-0000-4000-8000-000000000206,0.7422
+Work,B1,on_topic,An email to your manager asking for a day off,9a000000-0000-4000-8000-000000000201,0.7251
+Work,B1,on_topic,What makes a good workplace? Explain your opinion,9a000000-0000-4000-8000-000000000202,0.6931
+Work,B1,on_topic,Describe your skills and experience for a job application,9a000000-0000-4000-8000-000000000205,0.6998
+Work,B1,on_topic,Tell about a difficult task at work and how you solved it,9a000000-0000-4000-8000-000000000204,0.7347
+Work,B1,on_topic,Advice for someone looking for their first job,9a000000-0000-4000-8000-000000000206,0.7086
+Work,B1,on_topic,Should companies let employees work flexible hours?,9a000000-0000-4000-8000-000000000203,0.6814
+Work,B1,on_topic,A letter applying for a summer internship,9a000000-0000-4000-8000-000000000205,0.6746
+Work,B1,on_topic,Describe a typical day in your dream career,9a000000-0000-4000-8000-000000000202,0.7803
+Work,B1,on_topic,Write to a colleague to plan a meeting next week,9a000000-0000-4000-8000-000000000201,0.7464
+Travel,A2,off_topic,Write a recipe for your favourite soup,9a000000-0000-4000-8000-000000000101,0.5866
+Travel,A2,off_topic,Describe your pet and what it likes to eat,9a000000-0000-4000-8000-000000000102,0.6028
+Travel,A2,off_topic,Why is it important to drink water every day?,9a000000-0000-4000-8000-000000000106,0.5409
+Travel,A2,off_topic,Your favourite football team and its best player,9a000000-0000-4000-8000-000000000102,0.5791
+Travel,A2,off_topic,How to study English vocabulary at home,9a000000-0000-4000-8000-000000000106,0.5808
+Travel,A2,off_topic,Describe the weather in winter in your country,9a000000-0000-4000-8000-000000000102,0.6057
+Travel,A2,off_topic,Write about your family members,9a000000-0000-4000-8000-000000000101,0.6310
+Travel,A2,off_topic,Explain the rules of a board game,9a000000-0000-4000-8000-000000000106,0.5802
+Work,B1,off_topic,Write a recipe for a chocolate cake,9a000000-0000-4000-8000-000000000204,0.6173
+Work,B1,off_topic,Describe your favourite film and its story,9a000000-0000-4000-8000-000000000202,0.6058
+Work,B1,off_topic,How to take care of a garden in summer,9a000000-0000-4000-8000-000000000204,0.5283
+Work,B1,off_topic,Write a poem about the sea,9a000000-0000-4000-8000-000000000204,0.5977
+Work,B1,off_topic,Your favourite season and why,9a000000-0000-4000-8000-000000000203,0.6150
+Work,B1,off_topic,Explain how plants grow from seeds,9a000000-0000-4000-8000-000000000204,0.5259
+Work,B1,off_topic,Describe a birthday party you enjoyed,9a000000-0000-4000-8000-000000000204,0.6595

@@ -1,0 +1,46 @@
+topic,level,query,expected
+Travel,A2,Write about a holiday you went on last year,on_topic
+Travel,A2,An email to a friend telling them about your trip,on_topic
+Travel,A2,Describe a famous place for tourists in your city,on_topic
+Travel,A2,Book a hotel room for your family by email,on_topic
+Travel,A2,A problem you had at the airport,on_topic
+Travel,A2,Is it better to travel by bus or by car? Give reasons,on_topic
+Travel,A2,Plan a weekend visit to the beach,on_topic
+Travel,A2,What do you pack in your bag for a short trip?,on_topic
+Travel,A2,Tell a friend about the best city you have visited,on_topic
+Travel,A2,Write about your lost suitcase on a holiday,on_topic
+Travel,A2,Recommend a place in Vietnam for foreign visitors,on_topic
+Travel,A2,Ask a hotel about breakfast and parking,on_topic
+Travel,A2,Your favourite way to travel and why,on_topic
+Travel,A2,A day trip to the mountains with your friends,on_topic
+Travel,A2,A delayed train on your journey and what you did,on_topic
+Work,B1,Write to your boss to change the time of a meeting,on_topic
+Work,B1,Describe the job you would love to have in the future,on_topic
+Work,B1,Working from home or working in an office: which is better?,on_topic
+Work,B1,A report about a team project you completed,on_topic
+Work,B1,Apply for a part-time job in a café,on_topic
+Work,B1,Tips for a new employee in their first days at the company,on_topic
+Work,B1,An email to your manager asking for a day off,on_topic
+Work,B1,What makes a good workplace? Explain your opinion,on_topic
+Work,B1,Describe your skills and experience for a job application,on_topic
+Work,B1,Tell about a difficult task at work and how you solved it,on_topic
+Work,B1,Advice for someone looking for their first job,on_topic
+Work,B1,Should companies let employees work flexible hours?,on_topic
+Work,B1,A letter applying for a summer internship,on_topic
+Work,B1,Describe a typical day in your dream career,on_topic
+Work,B1,Write to a colleague to plan a meeting next week,on_topic
+Travel,A2,Write a recipe for your favourite soup,off_topic
+Travel,A2,Describe your pet and what it likes to eat,off_topic
+Travel,A2,Why is it important to drink water every day?,off_topic
+Travel,A2,Your favourite football team and its best player,off_topic
+Travel,A2,How to study English vocabulary at home,off_topic
+Travel,A2,Describe the weather in winter in your country,off_topic
+Travel,A2,Write about your family members,off_topic
+Travel,A2,Explain the rules of a board game,off_topic
+Work,B1,Write a recipe for a chocolate cake,off_topic
+Work,B1,Describe your favourite film and its story,off_topic
+Work,B1,How to take care of a garden in summer,off_topic
+Work,B1,Write a poem about the sea,off_topic
+Work,B1,Your favourite season and why,off_topic
+Work,B1,Explain how plants grow from seeds,off_topic
+Work,B1,Describe a birthday party you enjoyed,off_topic

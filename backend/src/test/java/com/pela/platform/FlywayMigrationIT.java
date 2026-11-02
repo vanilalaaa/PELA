@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }
 
     @Test

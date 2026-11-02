@@ -39,4 +39,17 @@ class VectorMathTest {
         assertThatThrownBy(() -> VectorMath.l2Normalize(new float[] {1f, Float.NaN})).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> VectorMath.l2Normalize(new float[] {Float.POSITIVE_INFINITY})).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void cosineSimilarityMatchesPgvectorDefinition() {
+        assertThat(VectorMath.cosineSimilarity(new float[] {1, 0}, new float[] {2, 0}))
+                .isCloseTo(1.0, within(1e-9));
+        assertThat(VectorMath.cosineSimilarity(new float[] {1, 0}, new float[] {1, 1}))
+                .isCloseTo(Math.sqrt(0.5), within(1e-6));
+        assertThat(VectorMath.cosineSimilarity(new float[] {1, 0}, new float[] {0, 0}))
+                .isZero();
+        assertThatThrownBy(
+                () -> VectorMath.cosineSimilarity(new float[] {1}, new float[] {1, 0}))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }
