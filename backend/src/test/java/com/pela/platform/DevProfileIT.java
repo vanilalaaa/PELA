@@ -96,10 +96,12 @@ class DevProfileIT {
         assertThat(jdbc.queryForObject("SELECT role || '/' || status FROM users WHERE email = 'seed-admin@pela.local'",
                 String.class)).isEqualTo("admin/active");
 
-        // >= 6 đề Writing mỗi cặp topic + level; chưa có embedding nên 'retired' cho tới job P6
+        // >= 6 đề Writing (seed 9a…) mỗi cặp topic + level; chưa có embedding nên 'retired' cho tới job P6.
+        // Bộ 138 đề của R__dev_seed_writing_prompts.sql (9b…) được kiểm ở DevWritingPromptSeedIT.
         assertThat(jdbc.queryForList("""
                 SELECT topic || ' ' || cefr_level || ' ' || count(*) FROM question_bank
                 WHERE question_purpose = 'writing_prompt' AND embedding_vector IS NULL AND status = 'retired'
+                  AND question_id::text LIKE '9a000000-%'
                 GROUP BY topic, cefr_level HAVING count(*) >= 6 ORDER BY topic
                 """, String.class)).containsExactly("Travel A2 6", "Work B1 6");
 
