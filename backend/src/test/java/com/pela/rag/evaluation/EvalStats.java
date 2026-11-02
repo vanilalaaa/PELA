@@ -72,6 +72,30 @@ final class EvalStats {
         return best;
     }
 
+    /**
+     * Ngưỡng ưu tiên KHÔNG loại nhầm người học: giá trị lớn nhất mà ít nhất {@code minPassRate} (vd 0.99) dòng on_topic có
+     * similarity >= ngưỡng. Làm tròn xuống 3 chữ số để không loại thêm.
+     */
+    static double thresholdKeepingOnTopic(List<Double> onTopic, double minPassRate) {
+        if (onTopic.isEmpty()) {
+            throw new IllegalArgumentException("Need on_topic values");
+        }
+        List<Double> sorted = new ArrayList<>(onTopic);
+        Collections.sort(sorted);
+        int allowedLoss = (int) Math.floor((1 - minPassRate) * sorted.size() + 1e-9);
+        return Math.floor(sorted.get(Math.min(allowedLoss, sorted.size() - 1)) * 1000) / 1000.0;
+    }
+
+    /** Tỉ lệ giá trị >= ngưỡng (số dòng đi qua ngưỡng, tức là được AI tạo đề). 1.0 khi danh sách rỗng. */
+    static double passRate(List<Double> values, double threshold) {
+        return values.isEmpty() ? 1.0 : (double) values.stream().filter(v -> v >= threshold).count() / values.size();
+    }
+
+    /** Tỉ lệ giá trị < ngưỡng (số dòng bị chặn, chuyển sang đề có sẵn). 1.0 khi danh sách rỗng. */
+    static double blockedRate(List<Double> values, double threshold) {
+        return values.isEmpty() ? 1.0 : 1.0 - passRate(values, threshold);
+    }
+
     private static double round(double v) {
         return Math.round(v * 1000) / 1000.0;
     }

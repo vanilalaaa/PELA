@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.pela.identity.application.port.in.GetCurrentUserUseCase;
 import com.pela.identity.domain.UserAccount;
+import com.pela.rag.application.port.in.GetServedPromptUseCase;
+import com.pela.rag.application.port.in.ServedPrompt;
 import com.pela.roadmap.application.port.in.VocabularyCatalogUseCase;
 import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.shared.domain.exception.ConflictException;
@@ -50,6 +52,7 @@ class WritingSubmissionServiceTest {
     private final GetCurrentUserUseCase users = mock(GetCurrentUserUseCase.class);
     private final VocabularyCatalogUseCase vocabulary = mock(VocabularyCatalogUseCase.class);
     private final ReviewQueueUseCase reviewQueue = mock(ReviewQueueUseCase.class);
+    private final GetServedPromptUseCase servedPrompts = mock(GetServedPromptUseCase.class);
     private final SettingsPort settings = key -> key.equals("writing.daily_limit") ? Optional.of("5") : Optional.empty();
 
     private WritingSubmissionService service;
@@ -57,7 +60,7 @@ class WritingSubmissionServiceTest {
     @BeforeEach
     void setUp() {
         service = new WritingSubmissionService(submissions, prompts, trigger, users, vocabulary, reviewQueue, settings,
-                () -> NOW);
+                () -> NOW, servedPrompts);
         UserAccount learner = mock(UserAccount.class);
         when(learner.timezone()).thenReturn("Asia/Ho_Chi_Minh");
         when(users.currentUser(USER)).thenReturn(learner);
@@ -67,7 +70,7 @@ class WritingSubmissionServiceTest {
     }
 
     private static SubmitCommand freeform(UUID id, String text) {
-        return new SubmitCommand(id, "freeform", null, text);
+        return new SubmitCommand(id, "freeform", null, null, text);
     }
 
     @Test
@@ -120,22 +123,56 @@ class WritingSubmissionServiceTest {
         UUID q = UUID.randomUUID();
         when(prompts.activePrompt(q)).thenReturn(Optional.of(new BankPrompt(q, "Describe your house.", 30, 120, null)));
 
-        assertThatThrownBy(() -> service.submit(USER, new SubmitCommand(UUID.randomUUID(), "bank", q, TEXT_25_WORDS)))
+        assertThatThrownBy(() -> service.submit(USER, new SubmitCommand(UUID.randomUUID(), "bank", q, null, TEXT_25_WORDS)))
                 .isInstanceOf(ValidationFailedException.class);
-        assertThat(service.submit(USER, new SubmitCommand(UUID.randomUUID(), "bank", q, "word ".repeat(40))).status())
+        assertThat(service.submit(USER, new SubmitCommand(UUID.randomUUID(), "bank", q, null, "word ".repeat(40))).status())
                 .isEqualTo("pending");
     }
 
     @Test
-    void unknownBankPromptAndAiGeneratedAreRejected() {
+    void unknownBankPromptIsRejected() {
         when(prompts.activePrompt(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.submit(USER,
-                new SubmitCommand(UUID.randomUUID(), "bank", UUID.randomUUID(), TEXT_25_WORDS)))
+                new SubmitCommand(UUID.randomUUID(), "bank", UUID.randomUUID(), null, TEXT_25_WORDS)))
                 .isInstanceOf(NotFoundException.class).hasFieldOrPropertyWithValue("code", "PROMPT_NOT_FOUND");
+    }
+
+    @Test
+    void aiPromptServedToTheLearnerIsStoredWithItsCacheIdAndNarrowsTheWordRange() {
+        UUID cacheId = UUID.randomUUID();
+        when(servedPrompts.servedTo(USER, cacheId)).thenReturn(Optional.of(
+                new ServedPrompt(cacheId, "Write an email to a hotel.", "email", 30, 120)));
+
         assertThatThrownBy(() -> service.submit(USER,
-                new SubmitCommand(UUID.randomUUID(), "ai_generated", null, TEXT_25_WORDS)))
-                .hasFieldOrPropertyWithValue("code", "PROMPT_SOURCE_NOT_SUPPORTED");
+                new SubmitCommand(UUID.randomUUID(), "ai_generated", null, cacheId, TEXT_25_WORDS)))
+                .hasFieldOrPropertyWithValue("code", "WORD_COUNT_OUT_OF_RANGE");
+        UUID id = UUID.randomUUID();
+        assertThat(service.submit(USER, new SubmitCommand(id, "ai_generated", null, cacheId, "word ".repeat(40)))
+                .status()).isEqualTo("pending");
+
+        ArgumentCaptor<NewSubmission> stored = ArgumentCaptor.forClass(NewSubmission.class);
+        verify(submissions).insert(stored.capture());
+        assertThat(stored.getValue().promptSource()).isEqualTo("ai_generated");
+        assertThat(stored.getValue().ragCacheId()).isEqualTo(cacheId);
+        assertThat(stored.getValue().promptQuestionId()).isNull();
+        assertThat(stored.getValue().promptText()).isEqualTo("Write an email to a hotel."); // snapshot đề
+    }
+
+    @Test
+    void aiPromptThatWasNotServedToTheLearnerIsRejected() {
+        when(servedPrompts.servedTo(any(), any())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.submit(USER,
+                new SubmitCommand(UUID.randomUUID(), "ai_generated", null, UUID.randomUUID(), TEXT_25_WORDS)))
+                .isInstanceOf(NotFoundException.class).hasFieldOrPropertyWithValue("code", "PROMPT_NOT_FOUND");
+    }
+
+    @Test
+    void aiPromptWithoutACacheIdIsAValidationError() {
+        assertThatThrownBy(() -> service.submit(USER,
+                new SubmitCommand(UUID.randomUUID(), "ai_generated", null, null, TEXT_25_WORDS)))
+                .isInstanceOf(ValidationFailedException.class);
     }
 
     @Test
@@ -186,11 +223,11 @@ class WritingSubmissionServiceTest {
         // 23:59:59 ngày 01/11 giờ Việt Nam (UTC+7) → cửa sổ 01/11; 1 giây sau → cửa sổ 02/11
         Instant beforeMidnight = Instant.parse("2026-11-01T16:59:59Z");
         new WritingSubmissionService(submissions, prompts, trigger, users, vocabulary, reviewQueue, settings,
-                () -> beforeMidnight).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
+                () -> beforeMidnight, servedPrompts).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
         verify(submissions).quotaUsage(USER, Instant.parse("2026-10-31T17:00:00Z"), Instant.parse("2026-11-01T17:00:00Z"));
 
         new WritingSubmissionService(submissions, prompts, trigger, users, vocabulary, reviewQueue, settings,
-                () -> beforeMidnight.plusSeconds(1)).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
+                () -> beforeMidnight.plusSeconds(1), servedPrompts).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
         verify(submissions).quotaUsage(USER, Instant.parse("2026-11-01T17:00:00Z"), Instant.parse("2026-11-02T17:00:00Z"));
     }
 

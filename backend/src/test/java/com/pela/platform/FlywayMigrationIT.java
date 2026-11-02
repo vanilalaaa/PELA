@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
     }
 
     @Test
@@ -80,8 +80,24 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
         List<String> active = jdbc.queryForList(
                 "SELECT name FROM prompt_template WHERE is_active AND version = 1 AND body = 'TODO v1' ORDER BY name",
                 String.class);
-        // writing_grading v1 bị V7 thay bằng v2
-        assertThat(active).containsExactly("rag_question_generation", "writing_file_extraction");
+        // writing_grading v1 bị V7 thay bằng v2; rag_question_generation v1 bị V10 thay bằng v2
+        assertThat(active).containsExactly("writing_file_extraction");
+    }
+
+    @Test
+    void v10ActivatesRagQuestionGenerationV2AndAddsGenerationLog() {
+        assertThat(jdbc.queryForList(
+                "SELECT version FROM prompt_template WHERE name = 'rag_question_generation' AND is_active",
+                Integer.class)).containsExactly(2);
+        assertThat(jdbc.queryForObject("""
+                SELECT temperature::text || '/' || (response_schema->'required')::text
+                FROM prompt_template WHERE name = 'rag_question_generation' AND version = 2
+                """, String.class)).isEqualTo("0.80/[\"prompt_text\", \"task_type\", \"min_words\", \"max_words\"]");
+        assertThat(jdbc.queryForObject(
+                "SELECT value::text FROM system_setting WHERE setting_key = 'rag.generation.max_bank_similarity'",
+                String.class)).isEqualTo("0.95");
+        assertThat(columns("rag_generation_log")).containsExactlyInAnyOrder("log_id", "user_id", "topic", "cefr_level",
+                "outcome", "reason", "top1_similarity", "latency_ms", "created_at");
     }
 
     @Test

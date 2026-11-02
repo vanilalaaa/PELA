@@ -11,8 +11,12 @@ public interface SubmitWritingUseCase {
      */
     SubmitResult submit(UUID userId, SubmitCommand command);
 
-    /** @param promptSource bank | ai_generated | freeform */
-    record SubmitCommand(UUID submissionId, String promptSource, UUID promptQuestionId, String text) {
+    /**
+     * @param promptSource     bank | ai_generated | freeform
+     * @param promptQuestionId đề kho (promptSource = bank)
+     * @param ragCacheId       đề AI đã phát cho chính learner này (promptSource = ai_generated, UC-24)
+     */
+    record SubmitCommand(UUID submissionId, String promptSource, UUID promptQuestionId, UUID ragCacheId, String text) {
 
         @Override
         public String toString() {

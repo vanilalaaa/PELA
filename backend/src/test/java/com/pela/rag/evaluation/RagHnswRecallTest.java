@@ -28,8 +28,11 @@ class RagHnswRecallTest {
     void hnswRecallAt5IsAtLeast90Percent() throws Exception {
         try (RagEvalSupport support = RagEvalSupport.connect()) {
             EmbeddingPort embedding = support.embedding();
-            List<String[]> queries = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
-                    c -> new String[] {c.get(0), c.get(1), c.get(2)});
+            // Truy vấn dựng bằng RagQueryBuilder: đúng hàm UC-24 dùng (RAG.Embed.Input)
+            List<String[]> queries = new ArrayList<>();
+            for (RagEvalSupport.QueryRow row : RagEvalSupport.readQueries()) {
+                queries.add(new String[] {row.filterTopic(), row.level(), row.text()});
+            }
             int activePrompts = support.readOnly(() -> support.jdbc.queryForObject(
                     "SELECT count(*) FROM question_bank WHERE status = 'active' AND question_purpose = 'writing_prompt'",
                     Integer.class));

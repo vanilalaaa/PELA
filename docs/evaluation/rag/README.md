@@ -7,11 +7,13 @@ Bộ công cụ đo phần truy hồi và sinh đề Writing bằng RAG. Các b�
 | --- | --- | --- | --- | --- |
 | 1 | Hiệu chỉnh ngưỡng truy hồi | AS-7, BR-8 | `RagThresholdCalibrationTest` + `queries.csv` | Chạy được |
 | 2 | Recall@5 của HNSW ≥ 0.90 | COM-3 | `RagHnswRecallTest` | Chạy được |
-| 3 | P95 sinh đề ≤ 4 s; P95 cache hit ≤ 300 ms (không tính embed) | PER-3, PER-9 | `RagLatencyTest` | `@Disabled("Chờ UC-24 (P7)")` |
-| 4 | ≥ 90% đề sinh ra đúng chủ đề và đúng trình độ (mẫu 50 đề, 2 người chấm) | PER-3 | `RagGenerationSampleTest`, `RagRatingReportTest`, `generated.csv` | Sinh đề: chờ UC-24. Script chấm: chạy được |
+| 3 | P95 sinh đề ≤ 4 s; P95 cache hit ≤ 300 ms (không tính embed) | PER-3, PER-9 | `RagLatencyTest` | Chạy được (UC-24 đã có) |
+| 4 | ≥ 90% đề sinh ra đúng chủ đề và đúng trình độ (mẫu 50 đề, 2 người chấm) | PER-3 | `RagGenerationSampleTest`, `RagRatingReportTest`, `generated.csv` | Sinh đề và script chấm đều chạy được |
 
-Mục 3 và mục sinh đề của mục 4 cần pipeline UC-24 (RAG.Generate, RAG.Cache), hiện chưa có. Việc còn lại đã ghi ở
-`docs/backlog.md` (mục RAG, P7).
+Mục 3 và mục sinh đề của mục 4 chạy trên pipeline UC-24 thật (`GenerateWritingPromptService` nối với DB Supabase dev và
+Gemini). Chúng chạy trong **một transaction ghi rồi rollback** (không để lại cache, lần phát hay nhật ký) và dùng learner
+seed `ad000000-…-0001` của `R__dev_seed.sql` làm người nhận; chỉ giới hạn "đề AI mỗi ngày" được nâng lên để đo liên tục.
+Mục 1 và 2 chỉ đọc. Chốt ngưỡng: xem `docs/backlog.md` (mục RAG).
 
 ## Nguồn đề Writing và seed dev
 
@@ -60,8 +62,14 @@ Trong `backend/` (Windows dùng `.\gradlew.bat`):
 ```bash
 ./gradlew externalTest --tests "com.pela.rag.evaluation.RagThresholdCalibrationTest"
 ./gradlew externalTest --tests "com.pela.rag.evaluation.RagHnswRecallTest"
+./gradlew externalTest --tests "com.pela.rag.evaluation.RagLatencyTest"
+./gradlew externalTest --tests "com.pela.rag.evaluation.RagGenerationSampleTest"
 ./gradlew externalTest --tests "com.pela.rag.evaluation.RagRatingReportTest"
 ```
+
+`RagLatencyTest` và `RagGenerationSampleTest` gọi Gemini thật (tốn quota): `RagLatencyTest` mặc định 20 truy vấn
+on_topic (đổi bằng `RAG_LATENCY_SAMPLES`), `RagGenerationSampleTest` sinh 50 đề. Cần `GEMINI_API_KEY` và learner seed
+(chạy profile dev ít nhất một lần).
 
 Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra stdout; xem bằng `--info` hoặc trong
 `build/reports/tests/externalTest`.
@@ -70,25 +78,35 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 
 ### 1. Ngưỡng truy hồi (AS-7)
 
-- `queries.csv` có 133 truy vấn (cột `topic,level,query,expected,note`): 96 `on_topic` và 37 `off_topic`, phủ đủ 24
-  cặp topic + level của bộ 138 đề (mỗi cặp ít nhất 2 `on_topic` và 1 `off_topic`). 45 dòng đầu là của hai cặp
-  Travel/A2 và Work/B1; 88 dòng sau thêm cho 22 cặp còn lại. Truy vấn `off_topic` vẫn lọc theo topic + level nhưng nội
-  dung lạc đề, mô phỏng việc truy hồi không tìm được đề phù hợp. Nhãn do người duyệt, không để AI gắn.
+- `queries.csv` (cột `topic,level,interests,filter_topic,expected,note`) có 168 dòng, phủ đủ 24 cặp topic + level của bộ
+  138 đề, mỗi cặp 7 dòng. **Truy vấn không phải câu tự do**: bài đo dựng truy vấn bằng
+  `RagQueryBuilder.build(topic, level, interests)`, đúng hàm UC-24 dùng (SRS `RAG.Embed.Input`), còn truy hồi lọc theo
+  `filter_topic` + level (cột trống = `topic`). Cột `interests` là các sở thích của `learner_profile.interests` (family,
+  school, travel, food, sport, music, movie, tech, animal, health) ngăn bằng `|`; rỗng = không có sở thích.
+  - **`on_topic` (5 dòng/cặp)**: yêu cầu bình thường, hệ thống nên tạo đề bằng AI: không có sở thích, hoặc sở thích liên quan
+    topic (3 dòng), hoặc sở thích xa topic (2 dòng, `note = interest_far`). Sở thích chỉ để cá nhân hoá đề; learner đã tự
+    chọn topic, nên truy hồi luôn lọc đúng topic + level và người thích động vật chọn topic Work vẫn là yêu cầu bình thường.
+    Dòng `interest_far` được thống kê riêng để xem ảnh hưởng của sở thích.
+  - **`off_topic` (2 dòng/cặp)**: truy vấn của topic A nhưng kho lọc theo topic B cùng level (`filter_topic` ≠ `topic`),
+    mô phỏng **kho không có đề sát yêu cầu**. Đây là trường hợp ngưỡng phải chặn để chuyển sang đề có sẵn (BR-7).
+  - Nhãn, sở thích và `filter_topic` do người duyệt, không để AI gắn.
 - **Cột `note`:** `kho_gap` đánh dấu truy vấn đúng nhãn nhưng **kho Writing chưa có đề gần chủ đề đó**, nên similarity
-  thấp và fallback BR-7 (trả đề có sẵn cùng topic + level) là hành vi đúng, không phải lỗi ngưỡng. Dòng `kho_gap` vẫn
-  được đo và ghi vào `threshold.csv`, nhưng **loại khỏi phần tính ngưỡng đề xuất** (in riêng một dòng). Ví dụ hiện có:
-  `Society,C2,Is a universal basic income better than targeted welfare?` (0.582): kho Writing không có đề nào về
-  thu nhập cơ bản phổ quát (chủ đề này chỉ có trong bài nghe `C2-SOC-03`).
-- **Truy vấn tự do chỉ để tham khảo.** SRS (`RAG.Embed.Input`) dựng truy vấn thật từ topic + level + sở thích của
-  người học, không phải câu tự do như `queries.csv` hiện tại. Kết quả đo bằng câu tự do (mốc 03/11/2026:
-  `docs/evaluation/results/2026-11-03-content/`) không dùng để chốt ngưỡng. Chốt ngưỡng sau khi UC-24 (P7) có hàm
-  dựng truy vấn duy nhất và bài đo gọi lại đúng hàm đó (xem `docs/backlog.md`, mục RAG).
-- `threshold.csv`: similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
+  thấp và fallback BR-7 là hành vi đúng, không phải lỗi ngưỡng. Dòng `kho_gap` vẫn được đo và ghi vào `threshold.csv`,
+  nhưng **loại khỏi phần tính ngưỡng đề xuất** (in riêng một dòng). Hiện chưa có dòng nào đánh dấu. Ví dụ từ bộ truy vấn
+  câu tự do cũ (03/11/2026): "universal basic income" ở Society/C2 (0.582), vì chủ đề đó chỉ có trong bài nghe
+  `C2-SOC-03`, không có đề Writing nào.
+- **Kết quả đo bằng câu tự do (mốc 03/11/2026)** nằm ở `docs/evaluation/results/2026-11-03-content/`, chỉ để tham khảo,
+  không dùng để chốt ngưỡng vì truy vấn khác hẳn truy vấn thật của UC-24.
+- `threshold.csv` (cột `topic,level,interests,expected,query,top1_question_id,top1_similarity,note`): similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
 - Phần in ra gồm phân bố (min/p25/median/p75/max) của từng nhóm, giá trị `rag.retrieval.min_similarity` hiện tại và
   **ngưỡng đề xuất**:
-  - hai nhóm tách hẳn (`separable=true`): lấy điểm giữa max(off_topic) và min(on_topic);
-  - hai nhóm chồng nhau: chọn ngưỡng có độ chính xác cao nhất; nếu hoà thì chọn ngưỡng loại ít đề on_topic hơn (đề
-    bị loại vẫn có BR-7 dự phòng). Phần in ra ghi rõ số đề bị phân loại sai.
+  - phân bố riêng cho on_topic thường, `interest_far` và off_topic;
+  - bảng ở các mức 0.60, 0.65, 0.68, 0.70: tỉ lệ on_topic được tạo đề, tỉ lệ `interest_far` được tạo đề, tỉ lệ off_topic bị
+    chặn;
+  - **ngưỡng đề xuất ưu tiên không chặn nhầm người học**: giá trị lớn nhất mà ≥ 99% dòng on_topic (gồm `interest_far`) vẫn
+    được tạo đề, kèm tỉ lệ off_topic bị chặn ở ngưỡng đó. Bị chặn nhầm nghĩa là learner nhận đề có sẵn thay vì đề AI
+    (không mất gì nhiều), còn đề AI lệch chủ đề thì không có bước nào chặn lại, nên ưu tiên chặn được off_topic nhưng không
+    đánh đổi bằng việc chặn yêu cầu bình thường.
 - **Travel/A2 và Work/B1 có ~11 đề** (5 của bộ 138 đề + 6 đề seed cũ `9a000000-…` của `R__dev_seed.sql`), nhiều hơn
   các cặp khác (5–13 đề), nên kết quả AS-7 ở hai cặp này lệch nhẹ. Đây là dữ liệu dev, không phải kho đề thật.
 
@@ -100,18 +118,25 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 - Phần in ra có `HNSW index used`. Với ít đề, planner thường quét tuần tự nên recall luôn bằng 1, tức là chưa đo được
   gì. COM-3 nhắm tới 10.000 đề, nên cần chạy lại khi kho đề đủ lớn.
 
-### 3. Độ trễ (PER-3, PER-9): chờ UC-24
+### 3. Độ trễ (PER-3, PER-9)
 
-Khi có UC-24, `RagLatencyTest` sẽ đo:
+`RagLatencyTest` đo trên một mẫu truy vấn on_topic rải đều các cặp topic + level:
 
-- P95 thời gian sinh đề end-to-end, gồm cả fallback BR-7: phải ≤ 4 s;
-- P95 nhánh cache hit, không tính bước embed truy vấn: phải ≤ 300 ms.
+- `generateP95IsWithin4Seconds`: thời gian end-to-end của UC-24 (embed, cache, truy hồi, LLM, kiểm tra, lưu cache), gồm cả
+  chọn đề dự phòng BR-7 khi pipeline báo cần fallback; P95 phải ≤ 4 s. Ghi `latency-generate.csv`
+  (`topic,level,interests,branch,millis`; `branch` = generated, cache_hit hoặc fallback:<lý do>) và in số lượt theo nhánh.
+- `cacheHitP95IsWithin300MillisExcludingEmbedding`: dựng trước một entry cache cho mỗi truy vấn mẫu, rồi đo tra cache +
+  ghi lần phát, **không tính** bước embed truy vấn; P95 phải ≤ 300 ms và mọi truy vấn phải trúng entry của chính nó. Ghi
+  `latency-cache-hit.csv`.
 
-Kết quả ghi ra `latency.csv`.
+Bảng `rag_generation_log` (mỗi lần UC-24 chạy ghi outcome, lý do fallback, top-1 similarity, latency) dùng để thống kê tỉ lệ
+fallback và cache hit trên dữ liệu thật; các bài đo ở đây rollback nên không ghi vào bảng này. **Lưu ý khi đọc số liệu:**
+`latency_ms` trong bảng đó được ghi ở cuối chuỗi `rag`, nên **chưa gồm bước chọn đề có sẵn (BR-7)** khi fallback; số đo đầy
+đủ end-to-end là của `RagLatencyTest`.
 
 ### 4. Chất lượng đề sinh ra (PER-3): CẦN NGƯỜI CHẤM
 
-1. (Chờ UC-24) `RagGenerationSampleTest` sinh 50 đề vào `generated.csv` với cột
+1. `RagGenerationSampleTest` sinh 50 đề do AI mới tạo (xen kẽ các cặp topic + level và các sở thích) vào `generated.csv` với cột
    `id,topic,level,prompt_text,on_topic_r1,right_level_r1,on_topic_r2,right_level_r2`; 4 cột cuối để trống.
 2. **Hai người chấm độc lập** điền `y`/`n` vào cột của mình (`_r1` hoặc `_r2`), không xem cột của người kia:
    - `on_topic`: đề đúng chủ đề được yêu cầu;
@@ -125,4 +150,5 @@ Kết quả ghi ra `latency.csv`.
      (dưới khoảng 0.6) nghĩa là hai người hiểu tiêu chí khác nhau, nên thống nhất lại tiêu chí rồi chấm lại trước
      khi kết luận.
 
-Hiện `generated.csv` chỉ có dòng tiêu đề, nên `RagRatingReportTest` sẽ skip.
+Kết quả sinh đề nằm ở `backend/build/evaluation/rag/generated.csv`; chép sang `docs/evaluation/rag/generated.csv` (hoặc đặt
+`RAG_RATED_CSV`) để hai người chấm. `generated.csv` trong repo chỉ có dòng tiêu đề cho tới khi có bản đã chấm.

@@ -42,6 +42,8 @@ pela:
     suspension-release-cron: "0 0 * * * *"
     # Dọn reset token quá hạn và thu hồi phiên khôi phục (khoảng nghỉ giữa 2 lần chạy)
     password-reset-cleanup-delay: PT1M
+    # BR-25: hết hạn cache đề Writing do AI tạo quá 30 ngày (mặc định 03:30 mỗi ngày)
+    rag-cache-expiry-cron: "0 30 3 * * *"
   supabase:
     url: ${SUPABASE_URL:}
     # apikey cho endpoint auth công khai (signup, token, recover, verify…)

@@ -47,4 +47,14 @@ class ArchitectureTest {
             .orShould().callMethod(System.class, "currentTimeMillis")
             .orShould().callMethod(UUID.class, "randomUUID")
             .allowEmptyShould(true);
+
+    /**
+     * rag không gọi writing, tránh vòng phụ thuộc rag <-> writing. UC-24 do writing điều phối: gọi rag, rồi chọn đề có sẵn
+     * (BR-7) khi rag báo NeedsFallback.
+     */
+    @ArchTest
+    static final ArchRule ragDoesNotDependOnWriting = noClasses()
+            .that().resideInAPackage("com.pela.rag..")
+            .should().dependOnClassesThat().resideInAPackage("com.pela.writing..")
+            .allowEmptyShould(true);
 }
