@@ -95,6 +95,8 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
   nhưng **loại khỏi phần tính ngưỡng đề xuất** (in riêng một dòng). Hiện chưa có dòng nào đánh dấu. Ví dụ từ bộ truy vấn
   câu tự do cũ (03/11/2026): "universal basic income" ở Society/C2 (0.582), vì chủ đề đó chỉ có trong bài nghe
   `C2-SOC-03`, không có đề Writing nào.
+- **Kết quả đo bằng `RagQueryBuilder` (03/11/2026, 168 truy vấn)** nằm ở `docs/evaluation/results/2026-11-03-query-builder/`
+  (bảng phân bố, bảng theo ngưỡng, AUC, kết luận giữ `rag.retrieval.min_similarity = 0.65`).
 - **Kết quả đo bằng câu tự do (mốc 03/11/2026)** nằm ở `docs/evaluation/results/2026-11-03-content/`, chỉ để tham khảo,
   không dùng để chốt ngưỡng vì truy vấn khác hẳn truy vấn thật của UC-24.
 - `threshold.csv` (cột `topic,level,interests,expected,query,top1_question_id,top1_similarity,note`): similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
