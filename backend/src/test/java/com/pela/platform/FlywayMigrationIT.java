@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6");
     }
 
     @Test
@@ -124,10 +124,12 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 "ai.tts.sample_rate", "ai.tts.style_by_level", "listening.max_speakers", "listening.max_chars",
                 "star.writing_bands", "ai.safety.block_threshold");
 
-        assertThat(setting("ai.model.text")).isEqualTo("\"gemini-2.5-flash\"");
+        // V6 đổi model text; V5 chọn model TTS, V6 sửa tên model dự phòng trong mô tả
+        assertThat(setting("ai.model.text")).isEqualTo("\"gemini-3.8-flash\"");
         assertThat(setting("ai.model.tts")).isEqualTo("\"gemini-3.8-flash-tts\"");
         assertThat(jdbc.queryForObject("SELECT description FROM system_setting WHERE setting_key = 'ai.model.tts'", String.class))
-                .contains("gemini-3.8-flash-tts-lite");
+                .contains("gemini-3.8-flash-lite-tts")
+                .doesNotContain("gemini-3.8-flash-tts-lite");
         assertThat(setting("ai.embedding.dimensions")).isEqualTo("768");
         assertThat(jdbc.queryForObject(
                 "SELECT value->'B1' #>> '{}' FROM system_setting WHERE setting_key = 'ai.tts.style_by_level'", String.class))

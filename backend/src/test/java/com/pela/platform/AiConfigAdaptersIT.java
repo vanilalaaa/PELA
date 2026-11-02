@@ -36,7 +36,7 @@ class AiConfigAdaptersIT extends PostgresIntegrationTest {
 
     @Test
     void readsTypedSettingsSeededByMigrations() {
-        assertThat(settings.requiredString("ai.model.text")).isEqualTo("gemini-2.5-flash");
+        assertThat(settings.requiredString("ai.model.text")).isEqualTo("gemini-3.8-flash");
         assertThat(settings.requiredString("ai.model.embedding")).isEqualTo("gemini-embedding-001");
         assertThat(settings.requiredInt("ai.embedding.dimensions")).isEqualTo(768);
         assertThat(settings.requiredDouble("rag.retrieval.min_similarity")).isEqualTo(0.65);

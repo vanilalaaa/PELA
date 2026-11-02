@@ -56,7 +56,7 @@ class GeminiExternalTest {
         factory.setReadTimeout(Duration.ofSeconds(90));
         client = RestClient.builder().baseUrl(BASE_URL).requestFactory(factory).defaultHeader("x-goog-api-key", apiKey).build();
         Map<String, String> raw = Map.of(
-                "ai.model.text", quote(config("GEMINI_TEXT_MODEL", "gemini-2.5-flash")),
+                "ai.model.text", quote(config("GEMINI_TEXT_MODEL", "gemini-3.8-flash")),
                 "ai.model.embedding", quote(config("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")),
                 "ai.embedding.dimensions", "768",
                 "ai.model.tts", quote(config("GEMINI_TTS_MODEL", "")),
