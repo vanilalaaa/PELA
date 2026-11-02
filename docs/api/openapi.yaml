@@ -5,6 +5,10 @@ info:
   description: |
     REST API của PELA — Personalized English Learning Application.
     Mọi endpoint nằm dưới tiền tố `/v1`. `userId` luôn lấy từ JWT (SEC-4), không lấy từ body.
+
+    Mọi request đã xác thực tới `/v1/**` (trừ `POST /v1/auth/logout`) đi qua kiểm tra trạng thái tài khoản
+    từ bảng users (cache 60 giây), kể cả khi JWT còn hạn: tài khoản suspended hoặc pending_deletion nhận
+    403 theo `components.responses.AccountBlocked`.
 servers:
   - url: http://localhost:8080/v1
     description: Local
@@ -29,6 +33,339 @@ paths:
                   status:
                     type: string
                     const: ok
+  /auth/register:
+    post:
+      summary: Đăng ký tài khoản email (UC-01 1.0, Auth.Register)
+      description: |
+        Mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số (Auth.Register.Validate).
+        Tài khoản tạo ở trạng thái `unverified`; Supabase gửi email xác minh (Auth.Register.Verify).
+      operationId: register
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RegisterRequest'}
+      responses:
+        '201':
+          description: Đã tạo tài khoản
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterResponse'}
+        '409':
+          description: "Email đã đăng ký (BR-1). Mã: EMAIL_ALREADY_REGISTERED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/login:
+    post:
+      summary: Đăng nhập email/mật khẩu (UC-01 2.0, Auth.Login)
+      description: |
+        Backend đếm lần sai (Auth.Login.Lockout, SEC-5): sai `auth.lockout_max_attempts` lần trong
+        `auth.lockout_minutes` phút thì khoá `auth.lockout_minutes` phút. Lý do khoá tài khoản / chưa xác minh
+        chỉ được trả khi mật khẩu đúng.
+      operationId: login
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LoginRequest'}
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TokenResponse'}
+        '401':
+          description: "Sai email hoặc mật khẩu. Mã: INVALID_CREDENTIALS"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '403':
+          description: |
+            Mã EMAIL_NOT_VERIFIED; ACCOUNT_SUSPENDED kèm details {reason, suspendedUntil}
+            (suspendedUntil null = khoá vĩnh viễn); hoặc ACCOUNT_PENDING_DELETION kèm details
+            {deletionScheduledAt} = deletion_requested_at + account.deletion_grace_days (BR-33).
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '423':
+          description: "Tạm khoá do sai nhiều lần. Mã: ACCOUNT_LOCKED, details {lockedUntil}"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/refresh:
+    post:
+      summary: Làm mới phiên (Auth.Login.Session)
+      operationId: refreshSession
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: {type: string}
+      responses:
+        '200':
+          description: Phiên mới
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TokenResponse'}
+        '401':
+          description: "Mã: INVALID_REFRESH_TOKEN"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/logout:
+    post:
+      summary: Đăng xuất (Auth.Logout)
+      description: Mặc định chỉ thiết bị hiện tại; `allDevices = true` để thoát mọi thiết bị (Auth.Logout.MultiDevice).
+      operationId: logout
+      tags: [identity]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allDevices: {type: boolean, default: false}
+      responses:
+        '204': {description: Đã đăng xuất}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /auth/password/forgot:
+    post:
+      summary: Gửi mã khôi phục 6 số (Auth.Recover.Request)
+      description: Luôn trả 202 dù email có tồn tại hay không. Mã hết hạn sau 5 phút (Auth.Recover.Expire, cấu hình ở Supabase Auth).
+      operationId: forgotPassword
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: {type: string, format: email}
+      responses:
+        '202': {description: Đã tiếp nhận}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/password/verify-otp:
+    post:
+      summary: Xác minh mã khôi phục, nhận reset token dùng một lần
+      description: |
+        `resetToken` là chuỗi ngẫu nhiên (256 bit, base64url) dùng một lần, hạn
+        `auth.password_reset_ttl_minutes` phút (mặc định 10). Phiên khôi phục của Supabase được backend
+        giữ phía server; client không nhận access token của phiên này. Xác minh lại sẽ huỷ token trước đó.
+      operationId: verifyPasswordOtp
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: {type: string, format: email}
+                code: {type: string, pattern: '^\d{6}$'}
+      responses:
+        '200':
+          description: Mã đúng
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [resetToken, expiresIn]
+                properties:
+                  resetToken: {type: string, minLength: 43, description: Token ngẫu nhiên dùng một lần}
+                  expiresIn: {type: integer, description: 'Số giây (auth.password_reset_ttl_minutes × 60)', examples: [600]}
+        '422':
+          description: "Mã sai hoặc hết hạn: INVALID_OTP; hoặc VALIDATION_FAILED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /auth/password/reset:
+    post:
+      summary: Đặt mật khẩu mới (Auth.Recover.Reset)
+      operationId: resetPassword
+      tags: [identity]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resetToken, newPassword, confirmPassword]
+              properties:
+                resetToken: {type: string}
+                newPassword: {type: string, minLength: 8, maxLength: 72}
+                confirmPassword: {type: string}
+      responses:
+        '204': {description: Đã đổi mật khẩu}
+        '401':
+          description: "Mã: INVALID_RESET_TOKEN — token không tồn tại, đã dùng hoặc đã hết hạn"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "VALIDATION_FAILED, WEAK_PASSWORD hoặc SAME_PASSWORD"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '503': {$ref: '#/components/responses/AuthProviderUnavailable'}
+  /me:
+    get:
+      summary: Hồ sơ của người đang đăng nhập (SEC-4)
+      operationId: getMe
+      tags: [identity]
+      responses:
+        '200':
+          description: Hồ sơ
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Me'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Mã: USER_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/me:
+    get:
+      summary: Hồ sơ Admin — Admin web gọi để xác nhận quyền (SEC-3)
+      description: |
+        Mọi `/v1/admin/**` đọc role + status từ bảng users (không tin claim JWT), cache 60 giây.
+        Không phải Admin đang hoạt động thì 403 ADMIN_REQUIRED.
+      operationId: getAdminMe
+      tags: [identity, admin]
+      responses:
+        '200':
+          description: Hồ sơ Admin
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Me'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/submissions:
+    post:
+      summary: Nộp bài Writing để chấm (UC-10, Writing.Submit, BR-29)
+      description: |
+        `submissionId` do client sinh (UUID) để gửi lại an toàn: gửi lại cùng id trả trạng thái hiện tại, không
+        nộp lần hai. Server tự đếm từ (20–300 từ, hoặc khoảng hẹp hơn của đề `min_words`/`max_words`).
+        Bài được chấm bất đồng bộ (UC-23); client hỏi `GET /practice/writing/submissions/{submissionId}`.
+        Lượt chấm (`writing.daily_limit`/ngày theo múi giờ learner) chỉ bị trừ khi chấm thành công; bài đang chờ
+        chấm cũng được tính để không nộp vượt. Hết lượt → 429, bài được giữ dưới dạng nháp (`draft`), nộp lại
+        cùng `submissionId` vào ngày sau.
+      operationId: submitWriting
+      tags: [writing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WritingSubmitRequest'}
+      responses:
+        '202':
+          description: Đã nhận, đang chờ chấm (hoặc trạng thái hiện tại nếu gửi lại cùng id)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingSubmitResult'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Đề trong kho không có hoặc đã ngừng dùng. Mã: PROMPT_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "submissionId đã được người khác dùng. Mã: SUBMISSION_ID_CONFLICT"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: |
+            WORD_COUNT_OUT_OF_RANGE — details {wordCount, minWords, maxWords};
+            PROMPT_SOURCE_NOT_SUPPORTED — đề do AI tạo (UC-24) chưa hỗ trợ; hoặc VALIDATION_FAILED.
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '429':
+          description: |
+            Hết lượt chấm hôm nay. Mã: WRITING_QUOTA_EXCEEDED, details {submissionId, status: draft, dailyLimit,
+            resetsAt}. Bài đã được lưu nháp.
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    get:
+      summary: Lịch sử bài viết và xu hướng điểm (Writing.History.List)
+      operationId: listWritingSubmissions
+      tags: [writing]
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 50, default: 20}
+      responses:
+        '200':
+          description: Bài mới nhất trước; scoreTrend theo thời gian chấm, cũ → mới
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingHistory'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+  /practice/writing/submissions/{submissionId}:
+    get:
+      summary: Kết quả chấm một bài (Writing.Grade.Output, UC-23)
+      description: |
+        `status`: draft | pending | retry_queued (AI lỗi/timeout 2 lần, job chấm lại lúc `nextRetryAt`) |
+        graded | failed (hết số lần thử, không trừ lượt). Điểm và sao do server tính từ 4 tiêu chí (BR-18).
+        Vị trí lỗi (`startOffset`, `endOffset`) là chỉ số ký tự trong `submittedText`, do server tính.
+        Nội dung AI sinh đã qua bộ lọc BR-15.
+      operationId: getWritingSubmission
+      tags: [writing]
+      parameters:
+        - {name: submissionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Bài viết
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingSubmission'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Không có hoặc không phải bài của người gọi. Mã: SUBMISSION_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/vocab-suggestions/{suggestionId}/add:
+    post:
+      summary: Thêm "từ đáng học" vào hàng ôn SM-2 (BR-30, BR-9)
+      description: |
+        Từ chưa có trong kho chung được thêm vào kho riêng của learner, rồi đưa vào hàng ôn hôm nay.
+        Từ có sẵn trong kho chung đã được tự thêm khi chấm (`auto_added`). Gọi lại trả trạng thái hiện tại.
+      operationId: addWritingVocabSuggestion
+      tags: [writing]
+      parameters:
+        - {name: suggestionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Đã thêm
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [suggestionId, status, vocabId]
+                properties:
+                  suggestionId: {type: string, format: uuid}
+                  status: {type: string, enum: [added, auto_added]}
+                  vocabId: {type: string, format: uuid}
+                  reviewCardId: {type: [string, 'null'], format: uuid}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Mã: SUGGESTION_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "Learner đã bỏ qua từ này. Mã: SUGGESTION_DISMISSED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+
 components:
   securitySchemes:
     bearerAuth:
@@ -36,6 +373,43 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Access token do Supabase Auth cấp.
+  responses:
+    BadRequest:
+      description: "Request sai cú pháp. Mã: MALFORMED_REQUEST, BAD_REQUEST"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Unauthorized:
+      description: "Thiếu hoặc sai access token. Mã: UNAUTHENTICATED, INVALID_TOKEN. Có header WWW-Authenticate: Bearer"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Forbidden:
+      description: "Không có quyền. Mã mặc định: FORBIDDEN"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    NotFound:
+      description: "Không tìm thấy. Mã mặc định: NOT_FOUND"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Conflict:
+      description: "Xung đột trạng thái. Mã mặc định: CONFLICT"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    ValidationFailed:
+      description: "Dữ liệu không hợp lệ hoặc vi phạm luật nghiệp vụ. Mã: VALIDATION_FAILED; details là danh sách {field, message}"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    Locked:
+      description: "Tài nguyên bị khoá (tài khoản, Final Test…). Mã mặc định: LOCKED"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    TooManyRequests:
+      description: "Vượt giới hạn số lần. Mã mặc định: TOO_MANY_REQUESTS"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    InternalError:
+      description: "Lỗi không mong đợi. Mã: INTERNAL_ERROR (không lộ chi tiết nội bộ)"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    AccountBlocked:
+      description: |
+        Tài khoản không được dùng (kể cả khi JWT còn hạn). Mã:
+        ACCOUNT_SUSPENDED — details {reason, suspendedUntil}; suspendedUntil null = khoá vĩnh viễn (UC-16).
+        ACCOUNT_PENDING_DELETION — details {deletionScheduledAt} (BR-33).
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    AuthProviderUnavailable:
+      description: "Supabase Auth tạm thời không dùng được. Mã: AUTH_PROVIDER_UNAVAILABLE"
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
   schemas:
     Error:
       type: object
@@ -55,3 +429,147 @@ components:
             details:
               description: Thông tin bổ sung (ví dụ lỗi theo từng field)
               type: [object, array, 'null']
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, confirmPassword]
+      properties:
+        fullName: {type: string, maxLength: 100}
+        email: {type: string, format: email, maxLength: 150}
+        password: {type: string, minLength: 8, maxLength: 72, description: 'Có chữ hoa, chữ thường, chữ số'}
+        confirmPassword: {type: string}
+    RegisterResponse:
+      type: object
+      required: [userId, email, status]
+      properties:
+        userId: {type: string, format: uuid}
+        email: {type: string, format: email}
+        status: {type: string, const: unverified}
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string}
+    TokenResponse:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, tokenType]
+      properties:
+        accessToken: {type: string, description: JWT Supabase; gửi kèm header Authorization Bearer}
+        refreshToken: {type: string}
+        expiresIn: {type: integer, description: Số giây tới khi access token hết hạn}
+        tokenType: {type: string, const: bearer}
+    Me:
+      type: object
+      required: [userId, email, fullName, role, status, timezone]
+      properties:
+        userId: {type: string, format: uuid}
+        email: {type: string, format: email}
+        fullName: {type: string}
+        username: {type: [string, 'null']}
+        avatarUrl: {type: [string, 'null']}
+        role: {type: string, enum: [learner, admin]}
+        status: {type: string, enum: [unverified, active, suspended, pending_deletion]}
+        cefrLevel: {type: [string, 'null'], enum: [A1, A2, B1, B2, C1, C2, null]}
+        timezone: {type: string}
+    WritingSubmitRequest:
+      type: object
+      required: [submissionId, promptSource, text]
+      properties:
+        submissionId: {type: string, format: uuid, description: Do client sinh; gửi lại cùng id là an toàn}
+        promptSource: {type: string, enum: [bank, ai_generated, freeform], description: 'ai_generated chưa hỗ trợ (UC-24)'}
+        promptQuestionId: {type: [string, 'null'], format: uuid, description: Bắt buộc khi promptSource = bank}
+        text: {type: string, maxLength: 5000}
+    WritingSubmitResult:
+      type: object
+      required: [submissionId, status]
+      properties:
+        submissionId: {type: string, format: uuid}
+        status: {type: string, enum: [pending, retry_queued, graded, failed]}
+    WritingIssue:
+      type: object
+      required: [issueId, sentenceIndex, startOffset, endOffset, original, suggestion, category, severity, explanationVi]
+      properties:
+        issueId: {type: string, format: uuid}
+        sentenceIndex: {type: integer, minimum: 0}
+        startOffset: {type: integer, minimum: 0}
+        endOffset: {type: integer, description: Không gồm ký tự tại vị trí này}
+        original: {type: string}
+        suggestion: {type: string, description: Rỗng = nên xoá đoạn này}
+        category: {type: string, enum: [grammar, spelling, word_choice, repetition, punctuation, style]}
+        severity: {type: string, enum: [error, suggestion], description: style luôn là suggestion (không trừ điểm)}
+        explanationVi: {type: string}
+    WritingVocabSuggestion:
+      type: object
+      required: [suggestionId, learnerForm, word, reason, meaningVi, status]
+      properties:
+        suggestionId: {type: string, format: uuid}
+        learnerForm: {type: string}
+        word: {type: string}
+        reason: {type: string, enum: [misspelled, misused, wrong_form, better_alternative]}
+        meaningVi: {type: string}
+        cefrLevel: {type: [string, 'null'], enum: [A1, A2, B1, B2, C1, C2, null]}
+        status: {type: string, enum: [suggested, added, dismissed, auto_added]}
+    WritingSubmission:
+      type: object
+      required: [submissionId, status, promptSource, submittedText, wordCount, rewrites, issues, vocabSuggestions]
+      properties:
+        submissionId: {type: string, format: uuid}
+        status: {type: string, enum: [draft, pending, retry_queued, graded, failed]}
+        promptSource: {type: string, enum: [bank, ai_generated, freeform]}
+        promptText: {type: [string, 'null']}
+        submittedText: {type: string}
+        wordCount: {type: integer}
+        score: {type: [integer, 'null'], minimum: 0, maximum: 100}
+        starsEarned: {type: [integer, 'null'], minimum: 0, maximum: 5}
+        criteria:
+          type: [object, 'null']
+          description: Mỗi tiêu chí 0–25
+          properties:
+            task_achievement: {type: integer}
+            coherence: {type: integer}
+            vocabulary: {type: integer}
+            grammar: {type: integer}
+        comment: {type: [string, 'null'], description: null nếu bị bộ lọc BR-15 chặn}
+        rewrites: {type: array, items: {type: string}}
+        issues: {type: array, items: {$ref: '#/components/schemas/WritingIssue'}}
+        vocabSuggestions: {type: array, items: {$ref: '#/components/schemas/WritingVocabSuggestion'}}
+        submittedAt: {type: [string, 'null'], format: date-time}
+        gradedAt: {type: [string, 'null'], format: date-time}
+        nextRetryAt: {type: [string, 'null'], format: date-time}
+    WritingHistory:
+      type: object
+      required: [items, scoreTrend, topIssueCategories]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [submissionId, status, promptSource, wordCount]
+            properties:
+              submissionId: {type: string, format: uuid}
+              status: {type: string, enum: [draft, pending, retry_queued, graded, failed]}
+              promptSource: {type: string, enum: [bank, ai_generated, freeform]}
+              promptText: {type: [string, 'null']}
+              wordCount: {type: integer}
+              score: {type: [integer, 'null']}
+              starsEarned: {type: [integer, 'null']}
+              submittedAt: {type: [string, 'null'], format: date-time}
+              gradedAt: {type: [string, 'null'], format: date-time}
+        scoreTrend:
+          type: array
+          items:
+            type: object
+            required: [submissionId, gradedAt, score]
+            properties:
+              submissionId: {type: string, format: uuid}
+              gradedAt: {type: string, format: date-time}
+              score: {type: integer}
+        topIssueCategories:
+          type: array
+          description: Tối đa 3 loại lỗi (severity error) gặp nhiều nhất
+          items:
+            type: object
+            required: [category, count]
+            properties:
+              category: {type: string}
+              count: {type: integer}

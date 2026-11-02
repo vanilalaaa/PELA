@@ -7,6 +7,7 @@
 | [`diagrams/`](diagrams/) | Sơ đồ Mermaid (`*.mmd`): use case, ERD, sequence, … |
 | [`api/openapi.yaml`](api/openapi.yaml) | Hợp đồng REST API `/v1` (OpenAPI 3.1) |
 | [`decisions/`](decisions/) | Architecture Decision Records (ADR) |
+| [`backlog.md`](backlog.md) | Việc đã biết, chưa làm |
 
 ## ADR
 
@@ -14,6 +15,9 @@
 - [0002 — RAG chỉ dùng cho Writing](decisions/0002-rag-chi-cho-writing.md)
 - [0003 — Offline-first với bảng outbox](decisions/0003-offline-first-outbox.md)
 - [0004 — WatermelonDB 0.28.0 trên Android: bật BuildConfig, tạm tắt JSI](decisions/0004-watermelondb-android-buildconfig.md)
+- [0005 — Listening sinh audio bằng TTS](decisions/0005-listening-tts.md)
+- [0006 — Lưu phiên khôi phục mật khẩu trong bộ nhớ backend](decisions/0006-password-recovery-store.md)
+
 
 ## Thứ tự ưu tiên khi mâu thuẫn
 

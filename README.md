@@ -37,7 +37,7 @@ flowchart LR
         ST["Storage"]
     end
 
-    GEM["Google Gemini<br/>gemini-2.5-flash<br/>gemini-embedding-001"]
+    GEM["Google Gemini<br/>gemini-3.8-flash<br/>gemini-embedding-001"]
     PUSH["FCM / APNs"]
 
     M -- "sync lô đáp án (UUID)" --> API
@@ -61,7 +61,7 @@ flowchart LR
 | Admin web | React + TypeScript (Vite), TanStack Query, React Router, Zustand, React Hook Form + Zod |
 | Frontend chung | pnpm workspace, `@pela/domain`, `@pela/api-contract`, `@pela/fixtures`, Vitest, dependency-cruiser, oxlint |
 | Hạ tầng | Supabase: PostgreSQL 17 + pgvector, Auth, Storage |
-| AI | Google Gemini: `gemini-2.5-flash`, `gemini-embedding-001` (768 chiều) |
+| AI | Google Gemini: `gemini-3.8-flash` (text), `gemini-embedding-001` (768 chiều), `gemini-3.8-flash-tts` (TTS) |
 | Push | FCM / APNs |
 | CI | GitHub Actions |
 

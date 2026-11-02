@@ -1,0 +1,11 @@
+sentence,expected_issues
+"She go to school by bus every morning.",grammar:go
+"I recieved a letter from my grandmother yesterday.",spelling:recieved
+"He is very good in playing football.",word_choice:in
+"My brother have two cats and a dog.",grammar:have
+"There is many people in the park today.",grammar:is
+"I like this movie because the movie is funny and the movie is short.",repetition:movie
+"Yesterday I buy a new phone, it is very expensive.","grammar:buy|punctuation:, it"
+"Can you borrow me your pen please?",word_choice:borrow
+"My freind and I usually goes to the library on Sundays.",spelling:freind|grammar:goes
+"The weather was beautiful and we had a great time at the beach.",

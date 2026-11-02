@@ -10,6 +10,19 @@ spring:
           issuer-uri: https://example.invalid/auth/v1
           jwk-set-uri: https://example.invalid/auth/v1/.well-known/jwks.json
 
+# Giống main: springdoc tắt mặc định, profile dev bật
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 pela:
+  # Job chạy theo lịch không chạy ngầm trong test; test gọi use case trực tiếp
+  jobs:
+    enabled: false
   gemini:
     api-key: test
+  # Không chấm ngay trên virtual thread; test gọi GradeWritingUseCase trực tiếp
+  writing:
+    grade-immediately: false

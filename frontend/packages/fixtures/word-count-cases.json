@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "rule": "Writing.Submit.Validate (UC-10, BR-18)",
+  "notes": "Một từ = chuỗi chữ/số Unicode, có thể nối bằng ' ’ hoặc - (it's, well-known, 2nd). Dấu câu, ký hiệu và gạch đứng riêng không tính là từ.",
+  "cases": [
+    { "id": "empty", "text": "", "expected": 0 },
+    { "id": "whitespace-only", "text": "   \n\t ", "expected": 0 },
+    { "id": "simple", "text": "I like my school.", "expected": 4 },
+    { "id": "extra-spaces-newlines", "text": "  Hello   world\n\nagain  ", "expected": 3 },
+    { "id": "contraction", "text": "It's a nice day, isn't it?", "expected": 6 },
+    { "id": "curly-apostrophe", "text": "I don’t know.", "expected": 3 },
+    { "id": "hyphenated", "text": "She is a well-known teacher.", "expected": 5 },
+    { "id": "standalone-dash", "text": "Yes - of course.", "expected": 3 },
+    { "id": "numbers", "text": "I have 2 cats and 10 fish.", "expected": 7 },
+    { "id": "ordinal", "text": "My 2nd try was better.", "expected": 5 },
+    { "id": "punctuation-only", "text": "... !!! ???", "expected": 0 },
+    { "id": "vietnamese-letters", "text": "Phở is delicious in Hà Nội.", "expected": 6 },
+    { "id": "trailing-hyphen", "text": "pre- and post-war", "expected": 3 },
+    { "id": "abbreviation", "text": "Mr. Smith met Dr. Lee at 9 a.m.", "expected": 9 }
+  ]
+}

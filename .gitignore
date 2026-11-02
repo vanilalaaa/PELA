@@ -23,6 +23,7 @@ backend/bin/
 backend/out/
 *.class
 hs_err_pid*
+replay_pid*
 
 # Frontend (Node / pnpm)
 node_modules/
