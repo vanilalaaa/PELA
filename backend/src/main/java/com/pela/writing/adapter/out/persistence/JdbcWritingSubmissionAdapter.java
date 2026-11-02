@@ -70,10 +70,11 @@ public class JdbcWritingSubmissionAdapter implements WritingSubmissionPort {
     @Override
     public QuotaUsage quotaUsage(UUID userId, Instant from, Instant to) {
         return jdbc.queryForObject("""
-                SELECT count(*) FILTER (WHERE grading_status = 'graded' AND graded_at >= ? AND graded_at < ?),
+                SELECT count(*) FILTER (WHERE grading_status = 'graded'),
                        count(*) FILTER (WHERE grading_status IN ('pending', 'retry_queued'))
-                FROM writing_submission WHERE user_id = ?
-                """, (rs, i) -> new QuotaUsage(rs.getInt(1), rs.getInt(2)), timestamp(from), timestamp(to), userId);
+                FROM writing_submission
+                WHERE user_id = ? AND submitted_at >= ? AND submitted_at < ?
+                """, (rs, i) -> new QuotaUsage(rs.getInt(1), rs.getInt(2)), userId, timestamp(from), timestamp(to));
     }
 
     @Override
@@ -116,8 +117,8 @@ public class JdbcWritingSubmissionAdapter implements WritingSubmissionPort {
     }
 
     @Override
-    public void saveGraded(GradedSubmission g) {
-        tx.executeWithoutResult(status -> {
+    public boolean saveGraded(GradedSubmission g) {
+        return Boolean.TRUE.equals(tx.execute(status -> {
             int updated = jdbc.update("""
                     UPDATE writing_submission
                     SET grading_status = 'graded', score = ?, criteria_scores = ?::jsonb, stars_earned = ?,
@@ -126,7 +127,7 @@ public class JdbcWritingSubmissionAdapter implements WritingSubmissionPort {
                     """, g.score(), json(criteriaMap(g.criteria())), g.stars(), json(g.aiFeedback()), g.promptVersion(),
                     g.model(), timestamp(g.gradedAt()), g.submissionId());
             if (updated == 0) {
-                return; // Đã được chấm ở nơi khác
+                return false; // Đã được chấm ở nơi khác
             }
             for (IssueRecord r : g.issues()) {
                 var i = r.issue();
@@ -148,7 +149,8 @@ public class JdbcWritingSubmissionAdapter implements WritingSubmissionPort {
                         w.reason().dbValue(), w.meaningVi(), w.cefrLevel() == null ? null : w.cefrLevel().name(),
                         s.vocabId(), s.status(), s.reviewCardId());
             }
-        });
+            return true;
+        }));
     }
 
     @Override

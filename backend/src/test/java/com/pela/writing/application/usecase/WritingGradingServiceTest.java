@@ -22,6 +22,8 @@ import com.pela.shared.application.port.out.LlmPort;
 import com.pela.shared.application.port.out.LlmPort.LlmResult;
 import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.srs.application.port.in.ReviewQueueUseCase;
+import com.pela.writing.application.port.out.WritingGradedEventPort;
+import com.pela.writing.application.port.out.WritingGradedEventPort.WritingGraded;
 import com.pela.writing.application.port.out.WritingPromptPort;
 import com.pela.writing.application.port.out.WritingSubmissionPort;
 import com.pela.writing.application.port.out.WritingSubmissionPort.Claimed;
@@ -63,6 +65,7 @@ class WritingGradingServiceTest {
     private final GetCurrentUserUseCase users = mock(GetCurrentUserUseCase.class);
     private final VocabularyCatalogUseCase vocabulary = mock(VocabularyCatalogUseCase.class);
     private final ReviewQueueUseCase reviewQueue = mock(ReviewQueueUseCase.class);
+    private final WritingGradedEventPort events = mock(WritingGradedEventPort.class);
     private final SettingsPort settings = key -> Optional.ofNullable(SETTINGS.get(key));
     /** Chặn mọi đoạn có chữ "badword". */
     private final ContentFilterPort filter = text -> text.contains("badword")
@@ -73,13 +76,14 @@ class WritingGradingServiceTest {
     @BeforeEach
     void setUp() {
         service = new WritingGradingService(submissions, prompts, llm, filter, users, vocabulary, reviewQueue, settings,
-                () -> NOW, UUID::randomUUID);
+                () -> NOW, UUID::randomUUID, events);
         UserAccount learner = mock(UserAccount.class);
         when(learner.cefrLevel()).thenReturn("B1");
         when(learner.timezone()).thenReturn("Asia/Ho_Chi_Minh");
         when(users.currentUser(USER)).thenReturn(learner);
         when(vocabulary.findCurated(any())).thenReturn(Map.of());
         when(reviewQueue.wordsInReviewPool(eq(USER), any())).thenReturn(Set.of());
+        when(submissions.saveGraded(any())).thenReturn(true);
     }
 
     private void claimed(int attempts) {
@@ -122,6 +126,45 @@ class WritingGradingServiceTest {
         assertThat(g.issues().get(0).issue().start()).isEqualTo(2);
         assertThat(g.aiFeedback()).containsEntry("comment", "Bài viết tốt.")
                 .containsEntry("rewrites", List.of("I go to school every day."));
+        verify(events).writingGraded(new WritingGraded(SUBMISSION, USER, 4, NOW));
+    }
+
+    @Test
+    void noEventWhenAnotherWorkerAlreadySavedTheResult() {
+        claimed(1);
+        llmReturns(response(List.of(), List.of(), List.of(), "Ok."));
+        when(submissions.saveGraded(any())).thenReturn(false);
+
+        service.gradeOne(SUBMISSION);
+
+        verify(events, never()).writingGraded(any());
+    }
+
+    @Test
+    void invalidOrFilteredWordsAreDroppedWithoutFailingTheGrading() {
+        claimed(1);
+        llmReturns(response(List.of(), List.of(),
+                List.of(new VocabCandidate("recieve", "receive", "misspelled", " ", "B1"),
+                        new VocabCandidate("wether", "weather", "misspelled", "thời tiết", "Z1"),
+                        new VocabCandidate("freind", "friend", "misspelled", "badword nghĩa", "A1"),
+                        new VocabCandidate("buisness", "business", "misspelled", "kinh doanh", "A2")),
+                "Ok."));
+
+        service.gradeOne(SUBMISSION);
+
+        assertThat(saved().suggestions()).extracting(sv -> sv.word().word()).containsExactly("business");
+        verify(submissions, never()).markRetryQueued(any(), any());
+        verify(events).writingGraded(any());
+    }
+
+    @Test
+    void failedGradingPublishesNoEvent() {
+        claimed(3);
+        when(llm.generateJson(any(), anyMap(), any(), any())).thenThrow(new AiCallException(Kind.TIMEOUT, "t"));
+
+        service.gradeOne(SUBMISSION);
+
+        verify(events, never()).writingGraded(any());
     }
 
     @Test
@@ -164,9 +207,9 @@ class WritingGradingServiceTest {
         when(vocabulary.findCurated(any())).thenReturn(Map.of("advice", new CatalogEntry(adviceId, "A2")));
         when(reviewQueue.pushForReviewToday(USER, adviceId, LocalDate.of(2026, 11, 2))).thenReturn(cardId);
         llmReturns(response(List.of(), List.of(),
-                List.of(new VocabCandidate("advices", "advice", "wrong_form", "lời khuyên"),
-                        new VocabCandidate("recieve", "receive", "misspelled", "nhận"),
-                        new VocabCandidate("happy", "glad", "better_alternative", "vui")),
+                List.of(new VocabCandidate("advices", "advice", "wrong_form", "lời khuyên", "A2"),
+                        new VocabCandidate("recieve", "receive", "misspelled", "nhận", "B1"),
+                        new VocabCandidate("happy", "glad", "better_alternative", "vui", "A2")),
                 "Ok."));
 
         service.gradeOne(SUBMISSION);

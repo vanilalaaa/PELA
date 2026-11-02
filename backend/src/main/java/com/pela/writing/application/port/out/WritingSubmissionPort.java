@@ -22,7 +22,10 @@ public interface WritingSubmissionPort {
     /** Cập nhật bản nháp đã có thành bài nộp/nháp mới (cùng chủ, đang ở trạng thái draft). */
     boolean updateDraft(NewSubmission submission);
 
-    /** Số bài chấm thành công trong khoảng [from, to) và số bài đang chờ chấm (pending, retry_queued). */
+    /**
+     * Bài đang giữ lượt chấm (BR-29) trong số bài nộp ([submitted_at]) thuộc khoảng [from, to): đã chấm (graded) và
+     * đang chờ chấm (pending, retry_queued). Bài failed trả lượt nên không tính.
+     */
     QuotaUsage quotaUsage(UUID userId, Instant from, Instant to);
 
     /** Id bài cần chấm: pending hoặc retry_queued có next_retry_at null/≤ now. */
@@ -38,8 +41,11 @@ public interface WritingSubmissionPort {
 
     void markFailed(UUID submissionId);
 
-    /** Lưu kết quả chấm trong một transaction: bài → graded, các issue và từ đáng học. */
-    void saveGraded(GradedSubmission graded);
+    /**
+     * Lưu kết quả chấm trong một transaction: bài → graded, các issue và từ đáng học. false nếu bài đã được chấm ở
+     * nơi khác (không lưu gì).
+     */
+    boolean saveGraded(GradedSubmission graded);
 
     void markSuggestionAdded(UUID suggestionId, String status, UUID vocabId, UUID reviewCardId);
 

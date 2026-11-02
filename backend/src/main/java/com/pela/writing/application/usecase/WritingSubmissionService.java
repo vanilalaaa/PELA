@@ -88,6 +88,7 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
         int limit = settings.requiredInt(DAILY_LIMIT_SETTING);
         var usage = submissions.quotaUsage(userId, today.atStartOfDay(zone).toInstant(),
                 today.plusDays(1).atStartOfDay(zone).toInstant());
+        // BR-29: lượt bị giữ bởi bài nộp hôm nay (theo múi giờ learner) đã chấm hoặc đang chờ chấm; failed trả lượt
         String status = usage.used() >= limit ? "draft" : "pending";
 
         NewSubmission submission = new NewSubmission(command.submissionId(), userId, promptSource,
@@ -107,7 +108,13 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
             details.put("status", "draft");
             details.put("dailyLimit", limit);
             details.put("resetsAt", today.plusDays(1).atStartOfDay(zone).toInstant().toString());
-            throw new TooManyRequestsException("WRITING_QUOTA_EXCEEDED", "Daily grading quota is used up", details);
+            details.put("gradedToday", usage.gradedToday());
+            details.put("awaitingGrading", usage.inFlight());
+            String message = usage.inFlight() > 0
+                    ? "Daily grading quota is used up; " + usage.inFlight()
+                            + " submission(s) still awaiting grading hold a slot and return it if grading fails"
+                    : "Daily grading quota is used up";
+            throw new TooManyRequestsException("WRITING_QUOTA_EXCEEDED", message, details);
         }
         trigger.gradeSoon(command.submissionId());
         return new SubmitResult(command.submissionId(), "pending");

@@ -13,6 +13,8 @@ import com.pela.shared.application.port.out.LlmPort.LlmResult;
 import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.srs.application.port.in.ReviewQueueUseCase;
 import com.pela.writing.application.port.in.GradeWritingUseCase;
+import com.pela.writing.application.port.out.WritingGradedEventPort;
+import com.pela.writing.application.port.out.WritingGradedEventPort.WritingGraded;
 import com.pela.writing.application.port.out.WritingPromptPort;
 import com.pela.writing.application.port.out.WritingSubmissionPort;
 import com.pela.writing.application.port.out.WritingSubmissionPort.Claimed;
@@ -74,10 +76,12 @@ public class WritingGradingService implements GradeWritingUseCase {
     private final SettingsPort settings;
     private final ClockPort clock;
     private final IdGeneratorPort ids;
+    private final WritingGradedEventPort gradedEvents;
 
     public WritingGradingService(WritingSubmissionPort submissions, WritingPromptPort prompts, LlmPort llm,
             ContentFilterPort contentFilter, GetCurrentUserUseCase users, VocabularyCatalogUseCase vocabulary,
-            ReviewQueueUseCase reviewQueue, SettingsPort settings, ClockPort clock, IdGeneratorPort ids) {
+            ReviewQueueUseCase reviewQueue, SettingsPort settings, ClockPort clock, IdGeneratorPort ids,
+            WritingGradedEventPort gradedEvents) {
         this.submissions = submissions;
         this.prompts = prompts;
         this.llm = llm;
@@ -88,6 +92,7 @@ public class WritingGradingService implements GradeWritingUseCase {
         this.settings = settings;
         this.clock = clock;
         this.ids = ids;
+        this.gradedEvents = gradedEvents;
     }
 
     @Override
@@ -212,8 +217,14 @@ public class WritingGradingService implements GradeWritingUseCase {
         if (!commentClean) {
             aiFeedback.put("comment_filtered", true);
         }
-        submissions.saveGraded(new GradedSubmission(claimed.submissionId(), score, criteria, stars, aiFeedback,
-                result.templateVersion(), result.model(), clock.now(), issues, suggestions));
+        Instant gradedAt = clock.now();
+        boolean saved = submissions.saveGraded(new GradedSubmission(claimed.submissionId(), score, criteria, stars,
+                aiFeedback, result.templateVersion(), result.model(), gradedAt, issues, suggestions));
+        if (!saved) {
+            return;
+        }
+        // Ngay sau commit: gamification (star_event, streak, Final Test, thông báo) — hiện là no-op
+        gradedEvents.writingGraded(new WritingGraded(claimed.submissionId(), claimed.userId(), stars, gradedAt));
         log.info("Writing graded: submission={}, score={}, stars={}, issues={}, words={}, template v{}, model={}",
                 claimed.submissionId(), score, stars, issues.size(), suggestions.size(), result.templateVersion(),
                 result.model());
@@ -222,7 +233,8 @@ public class WritingGradingService implements GradeWritingUseCase {
     /** BR-30 chọn từ; từ có sẵn trong kho chung được đẩy vào hàng ôn hôm nay (BR-9), từ khác chờ learner bấm thêm. */
     private List<SuggestionToSave> selectWords(UUID userId, UserAccount learner, List<RepeatedWord> repeated,
             GradingResponse response) {
-        List<String> words = response.vocabCandidates().stream().map(GradingResponse.VocabCandidate::word).toList();
+        List<String> words = response.vocabCandidates().stream().map(GradingResponse.VocabCandidate::word)
+                .filter(w -> w != null && !w.isBlank()).toList();
         Map<String, CatalogueWord> catalogue = new HashMap<>();
         vocabulary.findCurated(words).forEach((word, entry) ->
                 catalogue.put(word, new CatalogueWord(entry.vocabId(), CefrLevel.parse(entry.cefrLevel()))));
@@ -232,7 +244,7 @@ public class WritingGradingService implements GradeWritingUseCase {
         List<WorthLearningWords.Selected> selected = WorthLearningWords.select(
                 response.vocabCandidates().stream()
                         .filter(c -> isClean(c.meaningVi()))
-                        .map(c -> new WorthLearningWords.Candidate(c.learnerForm(), c.word(), c.reason(), c.meaningVi()))
+                        .map(c -> new WorthLearningWords.Candidate(c.learnerForm(), c.word(), c.reason(), c.meaningVi(), c.cefrLevel()))
                         .toList(),
                 new WorthLearningWords.Context(CefrLevel.parse(learner.cefrLevel()), repeatedWords, catalogue, inPool,
                         settings.requiredInt(VOCAB_MAX_SETTING)));

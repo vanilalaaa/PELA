@@ -49,10 +49,10 @@ class AiConfigAdaptersIT extends PostgresIntegrationTest {
     void readsActivePromptTemplate() {
         var template = prompts.active("writing_grading").orElseThrow();
 
-        assertThat(template.version()).isEqualTo(2);
+        assertThat(template.version()).isEqualTo(3);
         assertThat(template.body()).contains("{{numbered_sentences}}", "{{repeated_words}}");
         assertThat(template.systemText()).contains("{{level}}");
-        assertThat(template.responseSchema()).contains("\"vocab_candidates\"");
+        assertThat(template.responseSchema()).contains("\"vocab_candidates\"", "\"cefr_level\"");
         assertThat(template.temperature()).isEqualTo(0.2);
         assertThat(prompts.active("no_such_template")).isEmpty();
     }

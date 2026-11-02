@@ -22,7 +22,7 @@ Hiện có 10 câu mẫu để kiểm tra công cụ. Cần bổ sung lên 100�
 
 ## Cách chấm điểm
 
-- Mỗi câu được gửi tới prompt `writing_grading` v2, đọc thẳng từ `db/migrations/V7__writing_grading_prompt_v2.sql`
+- Mỗi câu được gửi tới prompt `writing_grading` v3, đọc thẳng từ `db/migrations/V8__writing_grading_prompt_v3.sql`
   (system, body, response schema, temperature 0.2). Biến prompt được dựng giống `WritingGradingService`; đề là
   "free writing", trình độ lấy từ `WRITING_EVAL_LEVEL` (mặc định B1).
 - Issue AI trả về được định vị bằng chính `WritingGrading.locate` của server. Issue không định vị được thì bị bỏ, giống

@@ -22,7 +22,11 @@ class WorthLearningWordsTest {
     }
 
     private static Candidate candidate(String learnerForm, String word, String reason) {
-        return new Candidate(learnerForm, word, reason, "nghĩa");
+        return candidate(learnerForm, word, reason, "B1");
+    }
+
+    private static Candidate candidate(String learnerForm, String word, String reason, String aiLevel) {
+        return new Candidate(learnerForm, word, reason, "nghĩa", aiLevel);
     }
 
     @Test
@@ -75,11 +79,45 @@ class WorthLearningWordsTest {
     }
 
     @Test
-    void unknownLevelsSkipCefrRule() {
-        Map<String, CatalogueWord> catalogue = Map.of("meticulous", new CatalogueWord(UUID.randomUUID(), CefrLevel.C1));
+    void usesAiLevelWhenWordIsNotInCatalogue() {
+        List<Selected> selected = WorthLearningWords.select(
+                List.of(candidate("x", "meticulous", "misused", "C1"), candidate("y", "careful", "misused", "B1")),
+                context(CefrLevel.A2, Map.of(), Set.of(), 3));
 
-        assertThat(WorthLearningWords.select(List.of(candidate("x", "meticulous", "misused")),
-                context(null, catalogue, Set.of(), 3))).hasSize(1);
+        assertThat(selected).extracting(Selected::word).containsExactly("careful");
+        assertThat(selected.get(0).cefrLevel()).isEqualTo(CefrLevel.B1);
+    }
+
+    @Test
+    void catalogueLevelOverridesAiLevel() {
+        Map<String, CatalogueWord> catalogue = Map.of("souvenir", new CatalogueWord(UUID.randomUUID(), CefrLevel.A2));
+
+        List<Selected> selected = WorthLearningWords.select(List.of(candidate("sovenir", "souvenir", "misspelled", "C2")),
+                context(CefrLevel.A2, catalogue, Set.of(), 3));
+
+        assertThat(selected).singleElement().satisfies(w -> assertThat(w.cefrLevel()).isEqualTo(CefrLevel.A2));
+    }
+
+    @Test
+    void learnerWithoutLevelCountsAsA1() {
+        List<Selected> selected = WorthLearningWords.select(
+                List.of(candidate("a", "advice", "wrong_form", "A2"), candidate("b", "receive", "misspelled", "B1")),
+                context(null, Map.of(), Set.of(), 3));
+
+        assertThat(selected).extracting(Selected::word).containsExactly("advice");
+    }
+
+    @Test
+    void dropsOnlyCandidatesWithMissingOrInvalidFields() {
+        List<Selected> selected = WorthLearningWords.select(
+                List.of(candidate("a", "advice", "wrong_form", null),
+                        candidate("b", "receive", "misspelled", "Z9"),
+                        new Candidate("c", "weather", "misspelled", null, "A2"),
+                        candidate("d", "x".repeat(101), "misspelled", "A2"),
+                        candidate("e", "business", "misspelled", "a2")),
+                context(CefrLevel.B1, Map.of(), Set.of(), 5));
+
+        assertThat(selected).extracting(Selected::word).containsExactly("business");
     }
 
     @Test
@@ -89,7 +127,7 @@ class WorthLearningWordsTest {
                         candidate("recieve", "receive", "misspelled"),
                         candidate("recieved", "Receive", "misspelled"),
                         candidate("x", "beautiful", "unknown_reason"),
-                        new Candidate("x", "thing", "misused", " "),
+                        new Candidate("x", "thing", "misused", " ", "A1"),
                         candidate("wether", "weather", "misspelled"),
                         candidate("buisness", "business", "misspelled")),
                 context(CefrLevel.B1, Map.of(), Set.of("advice"), 2));

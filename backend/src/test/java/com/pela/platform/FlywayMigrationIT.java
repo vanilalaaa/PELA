@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8");
     }
 
     @Test
@@ -85,12 +85,12 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
     }
 
     @Test
-    void v7ActivatesWritingGradingV2() {
+    void v8ActivatesWritingGradingV3() {
         List<Integer> active = jdbc.queryForList(
                 "SELECT version FROM prompt_template WHERE name = 'writing_grading' AND is_active", Integer.class);
-        assertThat(active).containsExactly(2);
-        assertThat(jdbc.queryForObject("SELECT is_active FROM prompt_template WHERE name = 'writing_grading' AND version = 1",
-                Boolean.class)).isFalse();
+        assertThat(active).containsExactly(3);
+        assertThat(jdbc.queryForList("SELECT version FROM prompt_template WHERE name = 'writing_grading' AND NOT is_active"
+                + " ORDER BY version", Integer.class)).containsExactly(1, 2);
     }
 
     @Test

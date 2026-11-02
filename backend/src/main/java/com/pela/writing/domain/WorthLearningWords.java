@@ -12,9 +12,13 @@ import java.util.UUID;
 /**
  * BR-30: chọn tối đa {@code max} từ đáng học từ ứng viên AI đề xuất. Một từ hợp lệ khi: đến từ lỗi chính tả,
  * dùng sai từ, sai dạng từ, hoặc là từ thay thế cho từ bị lặp; không phải từ chức năng hay tên riêng; không
- * cao hơn trình độ learner quá một bậc CEFR; chưa có trong review pool của learner.
+ * cao hơn trình độ learner quá một bậc CEFR (bậc từ = bậc trong kho chung, không có thì bậc AI ước lượng; learner
+ * chưa xếp trình độ coi là A1); chưa có trong review pool của learner. Ứng viên thiếu/sai trường chỉ bị bỏ riêng.
  */
 public final class WorthLearningWords {
+
+    /** Độ dài tối đa của word / learner_form (cột varchar(100)). */
+    private static final int MAX_LENGTH = 100;
 
     private WorthLearningWords() {
     }
@@ -36,7 +40,7 @@ public final class WorthLearningWords {
         }
     }
 
-    public record Candidate(String learnerForm, String word, String reason, String meaningVi) {
+    public record Candidate(String learnerForm, String word, String reason, String meaningVi, String cefrLevel) {
     }
 
     /** Từ trong kho chung (vocabulary curated). */
@@ -44,7 +48,7 @@ public final class WorthLearningWords {
     }
 
     /**
-     * @param learnerLevel  null = chưa xếp trình độ, bỏ qua luật bậc CEFR
+     * @param learnerLevel  null = chưa xếp trình độ, coi là A1
      * @param repeatedWords từ lặp do luật phát hiện (chữ thường)
      * @param catalogue     từ (chữ thường) → mục trong kho chung; không có = từ ngoài kho, bậc CEFR chưa biết
      * @param inReviewPool  từ (chữ thường) learner đã có trong review pool
@@ -54,12 +58,9 @@ public final class WorthLearningWords {
     }
 
     /** @param catalogueWord có giá trị = từ có sẵn trong kho chung → BR-9 tự đẩy vào hàng ôn */
-    public record Selected(String learnerForm, String word, Reason reason, String meaningVi,
+    /** @param cefrLevel bậc dùng để xét BR-30: bậc trong kho chung, không có thì bậc AI ước lượng */
+    public record Selected(String learnerForm, String word, Reason reason, String meaningVi, CefrLevel cefrLevel,
             Optional<CatalogueWord> catalogueWord) {
-
-        public CefrLevel cefrLevel() {
-            return catalogueWord.map(CatalogueWord::cefrLevel).orElse(null);
-        }
     }
 
     public static List<Selected> select(List<Candidate> candidates, Context context) {
@@ -73,7 +74,8 @@ public final class WorthLearningWords {
             String word = candidate.word() == null ? "" : candidate.word().trim();
             String learnerForm = candidate.learnerForm() == null ? "" : candidate.learnerForm().trim();
             String key = word.toLowerCase(Locale.ROOT);
-            if (reason == null || word.isEmpty() || candidate.meaningVi() == null || candidate.meaningVi().isBlank()) {
+            if (reason == null || word.isEmpty() || word.length() > MAX_LENGTH || learnerForm.length() > MAX_LENGTH
+                    || candidate.meaningVi() == null || candidate.meaningVi().isBlank()) {
                 continue;
             }
             if (reason == Reason.BETTER_ALTERNATIVE
@@ -85,13 +87,16 @@ public final class WorthLearningWords {
                 continue;
             }
             Optional<CatalogueWord> catalogueWord = Optional.ofNullable(context.catalogue().get(key));
-            if (catalogueWord.isPresent() && !withinOneLevel(catalogueWord.get().cefrLevel(), context.learnerLevel())) {
+            CefrLevel wordLevel = catalogueWord.map(CatalogueWord::cefrLevel)
+                    .orElseGet(() -> CefrLevel.parse(candidate.cefrLevel()));
+            CefrLevel learnerLevel = context.learnerLevel() == null ? CefrLevel.A1 : context.learnerLevel();
+            if (wordLevel == null || wordLevel.ordinal() > learnerLevel.ordinal() + 1) {
                 continue;
             }
             if (context.inReviewPool().contains(key) || !seen.add(key)) {
                 continue;
             }
-            selected.add(new Selected(learnerForm, word, reason, candidate.meaningVi().trim(), catalogueWord));
+            selected.add(new Selected(learnerForm, word, reason, candidate.meaningVi().trim(), wordLevel, catalogueWord));
         }
         return selected;
     }
@@ -111,7 +116,4 @@ public final class WorthLearningWords {
         return Character.isUpperCase(first) && word.length() > 1 && !word.equals(word.toUpperCase(Locale.ROOT));
     }
 
-    private static boolean withinOneLevel(CefrLevel wordLevel, CefrLevel learnerLevel) {
-        return wordLevel == null || learnerLevel == null || wordLevel.ordinal() <= learnerLevel.ordinal() + 1;
-    }
 }

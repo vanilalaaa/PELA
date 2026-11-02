@@ -155,6 +155,59 @@ class WritingSubmissionServiceTest {
     }
 
     @Test
+    void quotaMessageMentionsSubmissionsAwaitingGrading() {
+        when(submissions.quotaUsage(any(), any(), any())).thenReturn(new QuotaUsage(3, 2));
+
+        assertThatThrownBy(() -> service.submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS)))
+                .isInstanceOf(TooManyRequestsException.class)
+                .hasMessageContaining("2 submission(s) still awaiting grading")
+                .satisfies(e -> assertThat(((TooManyRequestsException) e).details())
+                        .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.MAP)
+                        .containsEntry("gradedToday", 3).containsEntry("awaitingGrading", 2));
+    }
+
+    @Test
+    void quotaMessageWithoutPendingDoesNotMentionThem() {
+        when(submissions.quotaUsage(any(), any(), any())).thenReturn(new QuotaUsage(5, 0));
+
+        assertThatThrownBy(() -> service.submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS)))
+                .hasMessage("Daily grading quota is used up");
+    }
+
+    @Test
+    void underLimitWithPendingSubmissionsIsAccepted() {
+        when(submissions.quotaUsage(any(), any(), any())).thenReturn(new QuotaUsage(2, 2));
+
+        assertThat(service.submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS)).status()).isEqualTo("pending");
+    }
+
+    @Test
+    void quotaDayFollowsLearnerTimezoneAcrossMidnight() {
+        // 23:59:59 ngày 01/11 giờ Việt Nam (UTC+7) → cửa sổ 01/11; 1 giây sau → cửa sổ 02/11
+        Instant beforeMidnight = Instant.parse("2026-11-01T16:59:59Z");
+        new WritingSubmissionService(submissions, prompts, trigger, users, vocabulary, reviewQueue, settings,
+                () -> beforeMidnight).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
+        verify(submissions).quotaUsage(USER, Instant.parse("2026-10-31T17:00:00Z"), Instant.parse("2026-11-01T17:00:00Z"));
+
+        new WritingSubmissionService(submissions, prompts, trigger, users, vocabulary, reviewQueue, settings,
+                () -> beforeMidnight.plusSeconds(1)).submit(USER, freeform(UUID.randomUUID(), TEXT_25_WORDS));
+        verify(submissions).quotaUsage(USER, Instant.parse("2026-11-01T17:00:00Z"), Instant.parse("2026-11-02T17:00:00Z"));
+    }
+
+    @Test
+    void quotaDayUsesEachLearnersOwnTimezone() {
+        UserAccount london = mock(UserAccount.class);
+        when(london.timezone()).thenReturn("Europe/London");
+        UUID other = UUID.randomUUID();
+        when(users.currentUser(other)).thenReturn(london);
+
+        // 03:00Z ngày 02/11: London là 03:00 ngày 02/11 (GMT)
+        service.submit(other, freeform(UUID.randomUUID(), TEXT_25_WORDS));
+
+        verify(submissions).quotaUsage(other, Instant.parse("2026-11-02T00:00:00Z"), Instant.parse("2026-11-03T00:00:00Z"));
+    }
+
+    @Test
     void draftIsSubmittedLaterWithSameId() {
         UUID id = UUID.randomUUID();
         when(submissions.find(id)).thenReturn(Optional.of(new Existing(id, USER, "draft")));

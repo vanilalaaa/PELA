@@ -17,6 +17,8 @@ import com.pela.shared.application.port.out.LlmPort;
 import com.pela.shared.application.port.out.LlmPort.LlmResult;
 import com.pela.support.PostgresIntegrationTest;
 import com.pela.writing.application.port.in.GradeWritingUseCase;
+import com.pela.writing.application.port.out.WritingSubmissionPort;
+import com.pela.writing.application.port.out.WritingSubmissionPort.QuotaUsage;
 import com.pela.writing.application.usecase.GradingResponse;
 import com.pela.writing.application.usecase.GradingResponse.Criteria;
 import com.pela.writing.application.usecase.GradingResponse.Issue;
@@ -51,6 +53,9 @@ class WritingIT extends PostgresIntegrationTest {
 
     @Autowired
     GradeWritingUseCase grading;
+
+    @Autowired
+    WritingSubmissionPort submissionPort;
 
     @MockitoBean
     LlmPort llm;
@@ -93,8 +98,8 @@ class WritingIT extends PostgresIntegrationTest {
                 List.of(new Issue(0, "goes", "go", "grammar", "error", "Chủ ngữ \"I\" đi với động từ nguyên mẫu."),
                         new Issue(2, "very much", "a lot", "style", "error", "Cách nói tự nhiên hơn.")),
                 List.of("I go to school every day."),
-                List.of(new VocabCandidate("souvenir", "souvenir", "misused", "quà lưu niệm"),
-                        new VocabCandidate("recieve", "receive", "misspelled", "nhận")),
+                List.of(new VocabCandidate("souvenir", "souvenir", "misused", "quà lưu niệm", "A2"),
+                        new VocabCandidate("recieve", "receive", "misspelled", "nhận", "B1")),
                 "Bài viết rõ ý, cần chú ý chia động từ.");
     }
 
@@ -161,7 +166,7 @@ class WritingIT extends PostgresIntegrationTest {
         GradingResponse r = response();
         when(llm.generateJson(eq("writing_grading"), anyMap(), eq(GradingResponse.class), any(Duration.class)))
                 .thenReturn(new LlmResult<>(new GradingResponse(r.criteria(), List.of(), List.of(),
-                        List.of(new VocabCandidate("sovenir", "souvenir", "misspelled", "quà lưu niệm")), "Ok."),
+                        List.of(new VocabCandidate("sovenir", "souvenir", "misspelled", "quà lưu niệm", "A2")), "Ok."),
                         2, "m"));
 
         submit(learner, id, TEXT).andExpect(status().isAccepted());
@@ -214,6 +219,58 @@ class WritingIT extends PostgresIntegrationTest {
 
         assertThat(jdbc.queryForObject("SELECT grading_status FROM writing_submission WHERE submission_id = ?",
                 String.class, id)).isEqualTo("draft");
+    }
+
+    /** @param submittedAtSql biểu thức SQL hằng của test, vd {@code now()} hoặc {@code '2026-11-01T17:00:00Z'} */
+    private void insertSubmission(UUID user, String status, String submittedAtSql) {
+        jdbc.update("""
+                INSERT INTO writing_submission (user_id, prompt_source, submitted_text, word_count, grading_status,
+                                                submitted_at)
+                VALUES (?, 'freeform', 'x', 25, ?, %s)
+                """.formatted(submittedAtSql), user, status);
+    }
+
+    @Test
+    void quotaCountsGradedAndAwaitingSubmittedTodayButNotFailedOrYesterday() throws Exception {
+        insertSubmission(learner, "graded", "now()");
+        insertSubmission(learner, "graded", "now()");
+        insertSubmission(learner, "retry_queued", "now()");
+        insertSubmission(learner, "failed", "now()");
+        insertSubmission(learner, "failed", "now()");
+        insertSubmission(learner, "graded", "now() - interval '1 day'");
+        insertSubmission(learner, "graded", "now() - interval '1 day'");
+        UUID fourth = UUID.randomUUID();
+        UUID sixth = UUID.randomUUID();
+
+        // Đang giữ 3 lượt (2 graded + 1 retry_queued) → bài thứ 4 và 5 được nhận
+        submit(learner, fourth, TEXT).andExpect(status().isAccepted()).andExpect(jsonPath("$.status").value("pending"));
+        submit(learner, UUID.randomUUID(), TEXT).andExpect(status().isAccepted());
+        // Bài thứ 6: hết lượt, message nhắc bài đang chờ chấm giữ lượt, bài được lưu nháp
+        submit(learner, sixth, TEXT).andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.error.code").value("WRITING_QUOTA_EXCEEDED"))
+                .andExpect(jsonPath("$.error.details.awaitingGrading").value(3))
+                .andExpect(jsonPath("$.error.details.gradedToday").value(2));
+        assertThat(jdbc.queryForObject("SELECT grading_status FROM writing_submission WHERE submission_id = ?",
+                String.class, sixth)).isEqualTo("draft");
+
+        // Bài chấm thất bại trả lượt: nộp lại bản nháp được nhận
+        jdbc.update("UPDATE writing_submission SET grading_status = 'failed' WHERE submission_id = ?", fourth);
+        submit(learner, sixth, TEXT).andExpect(status().isAccepted()).andExpect(jsonPath("$.status").value("pending"));
+    }
+
+    @Test
+    void quotaWindowIsHalfOpenOnSubmittedAt() {
+        // Nửa đêm 02/11 giờ Việt Nam = 2026-11-01T17:00:00Z
+        insertSubmission(learner, "graded", "'2026-11-01T16:59:59Z'");
+        insertSubmission(learner, "graded", "'2026-11-01T17:00:00Z'");
+        insertSubmission(learner, "pending", "'2026-11-02T16:59:59Z'");
+        insertSubmission(learner, "graded", "'2026-11-02T17:00:00Z'");
+        insertSubmission(learner, "failed", "'2026-11-02T10:00:00Z'");
+
+        QuotaUsage usage = submissionPort.quotaUsage(learner, Instant.parse("2026-11-01T17:00:00Z"),
+                Instant.parse("2026-11-02T17:00:00Z"));
+
+        assertThat(usage).isEqualTo(new QuotaUsage(1, 1));
     }
 
     @Test

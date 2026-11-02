@@ -40,7 +40,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 /**
- * PER-2: đo Precision/Recall theo loại lỗi và tỉ lệ JSON hợp lệ của prompt writing_grading v2 trên bộ câu có chú thích
+ * PER-2: đo Precision/Recall theo loại lỗi và tỉ lệ JSON hợp lệ của prompt writing_grading v3 trên bộ câu có chú thích
  * (docs/evaluation/writing-grading). Gọi Gemini thật — chỉ chạy bằng {@code ./gradlew externalTest}. Không in key, không
  * log nội dung câu; kết quả ghi vào build/evaluation.
  */
@@ -48,7 +48,7 @@ import org.springframework.web.client.RestClient;
 class WritingGradingEvaluationTest {
 
     private static final String BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
-    private static final Path MIGRATION = Path.of("../db/migrations/V7__writing_grading_prompt_v2.sql");
+    private static final Path MIGRATION = Path.of("../db/migrations/V8__writing_grading_prompt_v3.sql");
     private static final List<IssueCategory> REPORTED = List.of(IssueCategory.GRAMMAR, IssueCategory.SPELLING,
             IssueCategory.WORD_CHOICE, IssueCategory.REPETITION, IssueCategory.PUNCTUATION);
     /** PER-2 chỉ kết luận được với bộ ≥ 100 câu. */
@@ -215,13 +215,13 @@ class WritingGradingEvaluationTest {
         return vars;
     }
 
-    /** Đọc prompt v2 từ migration V7 (dollar-quote $system$, $body$, $json$), để đánh giá đúng bản sẽ chạy. */
+    /** Đọc prompt v3 từ migration V8 (dollar-quote $system$, $body$, $json$), để đánh giá đúng bản sẽ chạy. */
     private static PromptTemplate promptFromMigration() throws IOException {
         String sql = Files.readString(MIGRATION, StandardCharsets.UTF_8);
         String system = between(sql, "$system$");
         String body = between(sql, "$body$");
         String schema = between(sql, "$json$");
-        return new PromptTemplate("writing_grading", 2, system, body, schema, 0.2);
+        return new PromptTemplate("writing_grading", 3, system, body, schema, 0.2);
     }
 
     private static String between(String sql, String tag) {
