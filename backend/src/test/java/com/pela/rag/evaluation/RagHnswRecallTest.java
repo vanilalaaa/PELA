@@ -31,7 +31,7 @@ class RagHnswRecallTest {
             // Truy vấn dựng bằng RagQueryBuilder: đúng hàm UC-24 dùng (RAG.Embed.Input)
             List<String[]> queries = new ArrayList<>();
             for (RagEvalSupport.QueryRow row : RagEvalSupport.readQueries()) {
-                queries.add(new String[] {row.topic(), row.level(), row.text()});
+                queries.add(new String[] {row.filterTopic(), row.level(), row.text()});
             }
             int activePrompts = support.readOnly(() -> support.jdbc.queryForObject(
                     "SELECT count(*) FROM question_bank WHERE status = 'active' AND question_purpose = 'writing_prompt'",

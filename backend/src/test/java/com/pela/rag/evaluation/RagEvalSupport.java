@@ -164,12 +164,17 @@ final class RagEvalSupport implements AutoCloseable {
 
 
     /**
-     * Một dòng queries.csv. Truy vấn thật dựng bằng {@link RagQueryBuilder} (RAG.Embed.Input) từ topic + level + sở thích,
-     * giống hệt UC-24. {@code note = kho_gap}: kho chưa có đề gần chủ đề này, loại khỏi phần tính ngưỡng.
+     * Một dòng queries.csv. Truy vấn thật dựng bằng {@link RagQueryBuilder} (RAG.Embed.Input) từ {@code topic} + level + sở
+     * thích, giống hệt UC-24; truy hồi lọc theo {@code filterTopic} + level.
      *
-     * @param interests cột {@code interests}, các sở thích ngăn bằng "|"; rỗng = learner không có sở thích
+     * @param interests   cột {@code interests}, các sở thích ngăn bằng "|"; rỗng = learner không có sở thích
+     * @param filterTopic topic dùng để lọc truy hồi; cột trống = {@code topic}. Khác {@code topic} = mô phỏng kho không có
+     *                    đề sát yêu cầu (nhãn off_topic)
+     * @param note        {@code kho_gap}: kho chưa có đề gần chủ đề này, loại khỏi phần tính ngưỡng; {@code interest_far}:
+     *                    sở thích xa topic nhưng vẫn là yêu cầu bình thường (on_topic), thống kê riêng
      */
-    record QueryRow(String topic, String level, List<String> interests, boolean onTopic, String note) {
+    record QueryRow(String topic, String level, List<String> interests, String filterTopic, boolean onTopic,
+            String note) {
 
         String text() {
             return RagQueryBuilder.build(topic, level, interests);
@@ -178,13 +183,18 @@ final class RagEvalSupport implements AutoCloseable {
         boolean khoGap() {
             return "kho_gap".equals(note);
         }
+
+        boolean interestFar() {
+            return "interest_far".equals(note);
+        }
     }
 
-    /** Đọc docs/evaluation/rag/queries.csv (cột topic,level,interests,expected,note). */
+    /** Đọc docs/evaluation/rag/queries.csv (cột topic,level,interests,filter_topic,expected,note). */
     static List<QueryRow> readQueries() throws IOException {
         return readCsv(EVAL_DIR.resolve("queries.csv"), c -> new QueryRow(c.get(0).trim(), c.get(1).trim(),
-                c.get(2).isBlank() ? List.of() : List.of(c.get(2).trim().split("\\|")), c.get(3).trim().equals("on_topic"),
-                c.size() > 4 ? c.get(4).trim() : ""));
+                c.get(2).isBlank() ? List.of() : List.of(c.get(2).trim().split("\\|")),
+                c.get(3).isBlank() ? c.get(0).trim() : c.get(3).trim(), c.get(4).trim().equals("on_topic"),
+                c.size() > 5 ? c.get(5).trim() : ""));
     }
 
     /** Dạng văn bản của pgvector: [x1,x2,...]. */

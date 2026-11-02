@@ -78,15 +78,18 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 
 ### 1. Ngưỡng truy hồi (AS-7)
 
-- `queries.csv` (cột `topic,level,interests,expected,note`) có 120 dòng: 72 `on_topic` và 48 `off_topic`, phủ đủ 24 cặp
-  topic + level của bộ 138 đề (mỗi cặp 3 `on_topic` và 2 `off_topic`). **Truy vấn không phải câu tự do**: bài đo dựng
-  truy vấn bằng `RagQueryBuilder.build(topic, level, interests)`, đúng hàm UC-24 dùng (SRS `RAG.Embed.Input`: topic + level
-  + sở thích của learner). Cột `interests` là các sở thích của `learner_profile.interests` (family, school, travel, food,
-  sport, music, movie, tech, animal, health) ngăn bằng `|`; rỗng = learner không có sở thích.
-  - `on_topic`: không có sở thích, hoặc sở thích liên quan topic (ví dụ Travel + `travel|food`).
-  - `off_topic`: sở thích xa topic (ví dụ Work + `animal|food`), mô phỏng truy vấn bị kéo lệch khỏi topic. Topic và level
-    vẫn lọc đúng nên đây là phép đo độ nhạy của truy hồi với sở thích, không phải với chủ đề.
-  - Nhãn và danh sách sở thích do người duyệt, không để AI gắn.
+- `queries.csv` (cột `topic,level,interests,filter_topic,expected,note`) có 168 dòng, phủ đủ 24 cặp topic + level của bộ
+  138 đề, mỗi cặp 7 dòng. **Truy vấn không phải câu tự do**: bài đo dựng truy vấn bằng
+  `RagQueryBuilder.build(topic, level, interests)`, đúng hàm UC-24 dùng (SRS `RAG.Embed.Input`), còn truy hồi lọc theo
+  `filter_topic` + level (cột trống = `topic`). Cột `interests` là các sở thích của `learner_profile.interests` (family,
+  school, travel, food, sport, music, movie, tech, animal, health) ngăn bằng `|`; rỗng = không có sở thích.
+  - **`on_topic` (5 dòng/cặp)**: yêu cầu bình thường, hệ thống nên tạo đề bằng AI: không có sở thích, hoặc sở thích liên quan
+    topic (3 dòng), hoặc sở thích xa topic (2 dòng, `note = interest_far`). Sở thích chỉ để cá nhân hoá đề; learner đã tự
+    chọn topic, nên truy hồi luôn lọc đúng topic + level và người thích động vật chọn topic Work vẫn là yêu cầu bình thường.
+    Dòng `interest_far` được thống kê riêng để xem ảnh hưởng của sở thích.
+  - **`off_topic` (2 dòng/cặp)**: truy vấn của topic A nhưng kho lọc theo topic B cùng level (`filter_topic` ≠ `topic`),
+    mô phỏng **kho không có đề sát yêu cầu**. Đây là trường hợp ngưỡng phải chặn để chuyển sang đề có sẵn (BR-7).
+  - Nhãn, sở thích và `filter_topic` do người duyệt, không để AI gắn.
 - **Cột `note`:** `kho_gap` đánh dấu truy vấn đúng nhãn nhưng **kho Writing chưa có đề gần chủ đề đó**, nên similarity
   thấp và fallback BR-7 là hành vi đúng, không phải lỗi ngưỡng. Dòng `kho_gap` vẫn được đo và ghi vào `threshold.csv`,
   nhưng **loại khỏi phần tính ngưỡng đề xuất** (in riêng một dòng). Hiện chưa có dòng nào đánh dấu. Ví dụ từ bộ truy vấn
@@ -97,9 +100,13 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 - `threshold.csv` (cột `topic,level,interests,expected,query,top1_question_id,top1_similarity,note`): similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
 - Phần in ra gồm phân bố (min/p25/median/p75/max) của từng nhóm, giá trị `rag.retrieval.min_similarity` hiện tại và
   **ngưỡng đề xuất**:
-  - hai nhóm tách hẳn (`separable=true`): lấy điểm giữa max(off_topic) và min(on_topic);
-  - hai nhóm chồng nhau: chọn ngưỡng có độ chính xác cao nhất; nếu hoà thì chọn ngưỡng loại ít đề on_topic hơn (đề
-    bị loại vẫn có BR-7 dự phòng). Phần in ra ghi rõ số đề bị phân loại sai.
+  - phân bố riêng cho on_topic thường, `interest_far` và off_topic;
+  - bảng ở các mức 0.60, 0.65, 0.68, 0.70: tỉ lệ on_topic được tạo đề, tỉ lệ `interest_far` được tạo đề, tỉ lệ off_topic bị
+    chặn;
+  - **ngưỡng đề xuất ưu tiên không chặn nhầm người học**: giá trị lớn nhất mà ≥ 99% dòng on_topic (gồm `interest_far`) vẫn
+    được tạo đề, kèm tỉ lệ off_topic bị chặn ở ngưỡng đó. Bị chặn nhầm nghĩa là learner nhận đề có sẵn thay vì đề AI
+    (không mất gì nhiều), còn đề AI lệch chủ đề thì không có bước nào chặn lại, nên ưu tiên chặn được off_topic nhưng không
+    đánh đổi bằng việc chặn yêu cầu bình thường.
 - **Travel/A2 và Work/B1 có ~11 đề** (5 của bộ 138 đề + 6 đề seed cũ `9a000000-…` của `R__dev_seed.sql`), nhiều hơn
   các cặp khác (5–13 đề), nên kết quả AS-7 ở hai cặp này lệch nhẹ. Đây là dữ liệu dev, không phải kho đề thật.
 
@@ -123,7 +130,9 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
   `latency-cache-hit.csv`.
 
 Bảng `rag_generation_log` (mỗi lần UC-24 chạy ghi outcome, lý do fallback, top-1 similarity, latency) dùng để thống kê tỉ lệ
-fallback và cache hit trên dữ liệu thật; các bài đo ở đây rollback nên không ghi vào bảng này.
+fallback và cache hit trên dữ liệu thật; các bài đo ở đây rollback nên không ghi vào bảng này. **Lưu ý khi đọc số liệu:**
+`latency_ms` trong bảng đó được ghi ở cuối chuỗi `rag`, nên **chưa gồm bước chọn đề có sẵn (BR-7)** khi fallback; số đo đầy
+đủ end-to-end là của `RagLatencyTest`.
 
 ### 4. Chất lượng đề sinh ra (PER-3): CẦN NGƯỜI CHẤM
 
