@@ -139,7 +139,7 @@ Nội dung đo:
   **không tính** bước embed truy vấn; mọi truy vấn phải trúng entry của chính nó. Ghi `latency-cache-hit.csv`.
 - Biến tuỳ chọn: `RAG_LATENCY_PAUSE_MS` (nghỉ giữa các lượt sinh đề để tránh hạn mức Gemini; không tính vào thời gian đo).
 - Hai thiết lập giữ UC-24 trong ngân sách và tiết kiệm hạn mức: `rag.generation.min_llm_ms` (V11, mặc định 2000: còn ít hơn thì phát
-  đề có sẵn ngay với lý do `BUDGET_EXHAUSTED`, không gọi Gemini) và `prompt_template.thinking_level` (V12: `rag_question_generation`
+  đề có sẵn ngay với lý do `BUDGET_EXHAUSTED`, không gọi Gemini) và `prompt_template.thinking_level` (V11: `rag_question_generation`
   v2 dùng `LOW`, mức thấp nhất của `gemini-3.8-flash`).
 
 **Xuất fixture cho chế độ local** (chỉ đọc, không gọi Gemini; chạy một lần, hỏi trước khi chạy vì chạm Supabase dev):

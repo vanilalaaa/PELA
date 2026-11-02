@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
     }
 
     @Test
@@ -111,7 +111,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
     }
 
     @Test
-    void v12AddsThinkingLevelAndSetsItForRagQuestionGeneration() {
+    void v11AddsThinkingLevelAndSetsItForRagQuestionGeneration() {
         assertThat(columns("prompt_template")).contains("thinking_level");
         assertThat(jdbc.queryForList("SELECT name || ' v' || version || '=' || thinking_level FROM prompt_template "
                 + "WHERE thinking_level IS NOT NULL", String.class)).containsExactly("rag_question_generation v2=LOW");

@@ -31,7 +31,7 @@ File thô: `latency-generate.csv`, `latency-cache-hit.csv`.
 ## Đã sửa sau lần đo này
 
 - `rag.generation.min_llm_ms` (V11, mặc định 2000): còn ít hơn thì phát đề có sẵn ngay (`BUDGET_EXHAUSTED`), không gọi Gemini.
-- Mức thinking của Gemini cấu hình theo prompt (`prompt_template.thinking_level`, V12; `rag_question_generation` v2 dùng `LOW`,
+- Mức thinking của Gemini cấu hình theo prompt (`prompt_template.thinking_level`, V11; `rag_question_generation` v2 dùng `LOW`,
   mức thấp nhất của `gemini-3.8-flash`).
 - `RagLatencyTest` đo chi tiết từng bước (db, embed, llm, filter, cache_write) và độ trễ `SELECT 1`, có chế độ
   `RAG_LATENCY_MODE=local` (Postgres Testcontainers nạp embedding từ fixture, Gemini vẫn thật) để lấy số so sánh được.
