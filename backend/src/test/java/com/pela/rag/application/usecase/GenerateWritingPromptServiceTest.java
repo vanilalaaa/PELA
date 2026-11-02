@@ -29,7 +29,6 @@ import com.pela.rag.application.port.out.PromptExampleDetailsPort;
 import com.pela.rag.application.port.out.PromptExampleDetailsPort.ExampleDetails;
 import com.pela.rag.application.port.out.WritingPromptVectorPort;
 import com.pela.rag.domain.FallbackReason;
-import com.pela.rag.domain.LatencyBudget;
 import com.pela.shared.application.port.out.AiCallException;
 import com.pela.shared.application.port.out.AiCallException.Kind;
 import com.pela.shared.application.port.out.ContentFilterPort;
@@ -112,7 +111,7 @@ class GenerateWritingPromptServiceTest {
     }
 
     private GenerateCommand command(String taskType) {
-        return new GenerateCommand("Travel", "A2", taskType, LatencyBudget.startingAt(NOW, 4000));
+        return new GenerateCommand("Travel", "A2", taskType, NOW.plusMillis(4000));
     }
 
     private GenerationResult run() {
@@ -120,7 +119,7 @@ class GenerateWritingPromptServiceTest {
     }
 
     private void assertFallback(GenerationResult result, FallbackReason reason) {
-        assertThat(result).isEqualTo(new NeedsFallback(reason));
+        assertThat(result).isEqualTo(NeedsFallback.of(reason));
         verify(cache, never()).storeAndServe(any(), any(), any());
         ArgumentCaptor<GenerationLogPort.Entry> logged = ArgumentCaptor.forClass(GenerationLogPort.Entry.class);
         verify(log).record(logged.capture());
@@ -180,7 +179,7 @@ class GenerateWritingPromptServiceTest {
         GenerationResult result = service.generate(USER, command("essay"));
 
         // essay không có trong đề mẫu nhưng learner đã chọn: LLM bị yêu cầu đúng dạng đó (đề trả về là email → sai dạng)
-        assertThat(result).isEqualTo(new NeedsFallback(FallbackReason.INVALID_OUTPUT));
+        assertThat(result).isEqualTo(NeedsFallback.of(FallbackReason.INVALID_OUTPUT));
         ArgumentCaptor<CacheLookup> lookup = ArgumentCaptor.forClass(CacheLookup.class);
         verify(cache).findHit(lookup.capture());
         assertThat(lookup.getValue().taskType()).contains("essay");

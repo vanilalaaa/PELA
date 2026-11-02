@@ -1,6 +1,6 @@
 package com.pela.rag.application.port.in;
 
-import com.pela.rag.domain.LatencyBudget;
+import java.time.Instant;
 import java.util.UUID;
 
 /** UC-24: tạo đề Writing mới bằng RAG (RAG.Embed → Cache → Retrieve → Generate → Validate), BR-7, BR-8, BR-15, BR-24, BR-25. */
@@ -16,8 +16,9 @@ public interface GenerateWritingPromptUseCase {
      * @param cefrLevel trình độ của learner (người gọi đã lấy từ hồ sơ)
      * @param taskType  email | paragraph | essay; null = learner không chọn dạng bài (BR-24: khoá cache theo dạng bài
      *                  chỉ áp dụng khi có chọn; không chọn thì LLM giữ dạng bài của đề mẫu Top-1)
-     * @param budget    ngân sách thời gian của CẢ chuỗi (rag + chọn đề dự phòng), tính từ lúc nhận yêu cầu
+     * @param deadline  hạn chót của CẢ chuỗi (rag + chọn đề dự phòng): lúc nhận yêu cầu + ai.question_gen_p95_budget_ms.
+     *                  LLM chỉ được chờ trong thời gian còn lại tới hạn này
      */
-    record GenerateCommand(String topic, String cefrLevel, String taskType, LatencyBudget budget) {
+    record GenerateCommand(String topic, String cefrLevel, String taskType, Instant deadline) {
     }
 }

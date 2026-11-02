@@ -100,18 +100,21 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
         Optional<WritingTaskType> requestedType = parseRequestedType(command.taskType());
         Instant start = clock.now();
         Attempt attempt = new Attempt();
+        LatencyBudget budget = new LatencyBudget(command.deadline());
         GenerationResult result;
+        FallbackReason fallbackReason = null;
         try {
-            result = run(userId, command, requestedType, attempt);
+            result = run(userId, command, requestedType, budget, attempt);
         } catch (Fallback fallback) {
-            result = new NeedsFallback(fallback.reason);
+            fallbackReason = fallback.reason;
+            result = NeedsFallback.of(fallback.reason);
         }
-        record(userId, command, result, attempt, start);
+        record(userId, command, result, fallbackReason, attempt, start);
         return result;
     }
 
     private GenerationResult run(UUID userId, GenerateCommand command, Optional<WritingTaskType> requestedType,
-            Attempt attempt) {
+            LatencyBudget budget, Attempt attempt) {
         LearnerContext learner = learners.context(userId);
 
         // RAG.Limit.Daily: đếm đề AI đã phát trong ngày giờ địa phương của learner; đề dự phòng từ kho không tính
@@ -126,7 +129,7 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
 
         // RAG.Embed.Input: hàm dựng truy vấn duy nhất
         String query = RagQueryBuilder.build(command.topic(), command.cefrLevel(), learner.interests());
-        float[] queryVector = embed(query, TaskType.RETRIEVAL_QUERY, command.budget());
+        float[] queryVector = embed(query, TaskType.RETRIEVAL_QUERY, budget);
 
         // RAG.Cache.Lookup (BR-24)
         Optional<ServedPrompt> hit = cache.findHit(new CacheLookup(queryVector, command.topic(), command.cefrLevel(),
@@ -154,7 +157,7 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
         vars.put("interests", RagQueryBuilder.interestsText(learner.interests()));
         vars.put("task_type_rule", PromptExamples.taskTypeRule(requestedType));
         vars.put("examples", PromptExamples.render(examples));
-        GeneratedPrompt generated = callLlm(vars, command.budget());
+        GeneratedPrompt generated = callLlm(vars, budget);
 
         // RAG.Generate.Validate: kiểm tra rẻ trước (cấu trúc, từ cấm), kiểm tra tốn thêm một lần embedding sau cùng
         if (RagDecisionPolicy.validate(generated, PromptExamples.allowedTypes(requestedType, examples),
@@ -164,7 +167,7 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
         if (!contentFilter.check(generated.promptText()).allowed()) {
             throw new Fallback(FallbackReason.FILTERED);
         }
-        float[] promptVector = embed(generated.promptText(), TaskType.RETRIEVAL_DOCUMENT, command.budget());
+        float[] promptVector = embed(generated.promptText(), TaskType.RETRIEVAL_DOCUMENT, budget);
         Optional<Double> closestBank = vectors.nearest(promptVector, command.topic(), command.cefrLevel(), 1).stream()
                 .findFirst().map(SimilarWritingPrompt::similarity);
         if (RagDecisionPolicy.checkBankSimilarity(closestBank, settings.requiredDouble(MAX_BANK_SIMILARITY_SETTING))
@@ -235,17 +238,13 @@ public class GenerateWritingPromptService implements GenerateWritingPromptUseCas
     }
 
     /** Ghi nhật ký; lỗi ghi log không được làm hỏng việc phát đề. Không ghi nội dung đề, truy vấn hay sở thích. */
-    private void record(UUID userId, GenerateCommand command, GenerationResult result, Attempt attempt, Instant start) {
+    private void record(UUID userId, GenerateCommand command, GenerationResult result, FallbackReason reason,
+            Attempt attempt, Instant start) {
         try {
             int latency = (int) Math.max(0, Duration.between(start, clock.now()).toMillis());
-            String outcome;
-            FallbackReason reason = null;
-            if (result instanceof Generated generated) {
-                outcome = generated.source() == Source.CACHE_HIT ? "cache_hit" : "generated";
-            } else {
-                outcome = "fallback";
-                reason = ((NeedsFallback) result).reason();
-            }
+            String outcome = result instanceof Generated generated
+                    ? (generated.source() == Source.CACHE_HIT ? "cache_hit" : "generated")
+                    : "fallback";
             generationLog.record(new GenerationLogPort.Entry(userId, command.topic(), command.cefrLevel(), outcome,
                     reason, attempt.top1Similarity, latency, clock.now()));
         } catch (RuntimeException e) {

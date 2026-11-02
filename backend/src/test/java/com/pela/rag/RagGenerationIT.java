@@ -20,7 +20,6 @@ import com.pela.rag.application.port.in.GenerationResult.Source;
 import com.pela.rag.application.port.in.GetServedPromptUseCase;
 import com.pela.rag.application.usecase.GeneratedPromptResponse;
 import com.pela.rag.domain.FallbackReason;
-import com.pela.rag.domain.LatencyBudget;
 import com.pela.shared.application.port.out.ClockPort;
 import com.pela.shared.application.port.out.EmbeddingPort;
 import com.pela.shared.application.port.out.EmbeddingPort.TaskType;
@@ -95,7 +94,7 @@ class RagGenerationIT extends PostgresIntegrationTest {
     }
 
     private GenerateCommand command(String taskType) {
-        return new GenerateCommand(topic, "A2", taskType, LatencyBudget.startingAt(clock.now(), 4000));
+        return new GenerateCommand(topic, "A2", taskType, clock.now().plusMillis(4000));
     }
 
     @Test
@@ -167,7 +166,7 @@ class RagGenerationIT extends PostgresIntegrationTest {
         // Cache chỉ có đề email: learner khác xin essay thì không hit (LLM trả đề email nên sai dạng -> fallback)
         GenerationResult result = generate.generate(otherLearner, command("essay"));
 
-        assertThat(result).isEqualTo(new NeedsFallback(FallbackReason.INVALID_OUTPUT));
+        assertThat(result).isEqualTo(NeedsFallback.of(FallbackReason.INVALID_OUTPUT));
     }
 
     @Test
@@ -215,7 +214,7 @@ class RagGenerationIT extends PostgresIntegrationTest {
 
         GenerationResult result = generate.generate(learner, command(null));
 
-        assertThat(result).isEqualTo(new NeedsFallback(FallbackReason.DAILY_LIMIT));
+        assertThat(result).isEqualTo(NeedsFallback.of(FallbackReason.DAILY_LIMIT));
         verifyNoInteractions(llm);
         verify(embedding, times(0)).embed(anyString(), any());
         assertThat(jdbc.queryForMap("SELECT outcome, reason FROM rag_generation_log WHERE user_id = ? AND topic = ?",
@@ -225,9 +224,9 @@ class RagGenerationIT extends PostgresIntegrationTest {
     @Test
     void emptyBankOfTheRequestedTopicFallsBackAndLogsTheReason() {
         GenerationResult result = generate.generate(learner,
-                new GenerateCommand(topic + "-empty", "A2", null, LatencyBudget.startingAt(clock.now(), 4000)));
+                new GenerateCommand(topic + "-empty", "A2", null, clock.now().plusMillis(4000)));
 
-        assertThat(result).isEqualTo(new NeedsFallback(FallbackReason.BELOW_THRESHOLD));
+        assertThat(result).isEqualTo(NeedsFallback.of(FallbackReason.BELOW_THRESHOLD));
         verifyNoInteractions(llm);
         assertThat(jdbc.queryForMap("SELECT reason, top1_similarity FROM rag_generation_log WHERE topic = ?",
                 topic + "-empty")).containsEntry("reason", "BELOW_THRESHOLD").containsEntry("top1_similarity", null);
@@ -240,7 +239,7 @@ class RagGenerationIT extends PostgresIntegrationTest {
 
         GenerationResult result = generate.generate(learner, command(null));
 
-        assertThat(result).isEqualTo(new NeedsFallback(FallbackReason.INVALID_OUTPUT));
+        assertThat(result).isEqualTo(NeedsFallback.of(FallbackReason.INVALID_OUTPUT));
         assertThat(count("SELECT count(*) FROM rag_question_cache WHERE topic = '" + topic + "'")).isZero();
     }
 

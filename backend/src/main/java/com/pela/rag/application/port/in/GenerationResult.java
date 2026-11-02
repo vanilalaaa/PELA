@@ -16,6 +16,14 @@ public sealed interface GenerationResult {
     record Generated(ServedPrompt prompt, Source source) implements GenerationResult {
     }
 
-    record NeedsFallback(FallbackReason reason) implements GenerationResult {
+    /**
+     * @param reason tên {@link FallbackReason} (BELOW_THRESHOLD, TIMEOUT, …) dạng chuỗi: module khác chỉ cần chuỗi này,
+     *               không phụ thuộc domain của rag
+     */
+    record NeedsFallback(String reason) implements GenerationResult {
+
+        public static NeedsFallback of(FallbackReason reason) {
+            return new NeedsFallback(reason.name());
+        }
     }
 }
