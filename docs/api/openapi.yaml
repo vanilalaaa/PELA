@@ -365,6 +365,33 @@ paths:
         '409':
           description: "Learner đã bỏ qua từ này. Mã: SUGGESTION_DISMISSED"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/question-bank/embeddings/backfill:
+    post:
+      summary: Tạo bù embedding đề Writing (BR-14)
+      description: |
+        Chạy nền: embed lại đề Writing active có `embedding_model` khác `ai.model.embedding`, và embed rồi kích hoạt
+        đề chưa từng kích hoạt (retired, `retired_at` null, chưa có embedding — vd seed dev). Đề do Admin retire không
+        bị đụng. Embed theo lô `rag.embedding.backfill_batch_size`, nghỉ `rag.embedding.backfill_pause_ms` giữa các lô;
+        gặp rate limit thì dừng, gọi lại sau. Profile dev tự chạy khi khởi động.
+      operationId: backfillPromptEmbeddings
+      tags: [rag, admin]
+      responses:
+        '202':
+          description: Đã bắt đầu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: {type: string, const: started}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "Đang có lượt tạo bù khác. Mã: BACKFILL_RUNNING"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
 
 components:
   securitySchemes:

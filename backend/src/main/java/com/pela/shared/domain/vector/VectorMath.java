@@ -33,4 +33,17 @@ public final class VectorMath {
         }
         return Math.sqrt(sumSquares);
     }
+
+    /** Cosine similarity, cùng thước đo với pgvector: 1 - (a <=> b). Vector rỗng hoặc toàn 0 → 0. */
+    public static double cosineSimilarity(float[] a, float[] b) {
+        if (a.length != b.length) {
+            throw new IllegalArgumentException("Vector dimensions differ: " + a.length + " vs " + b.length);
+        }
+        double dot = 0;
+        for (int i = 0; i < a.length; i++) {
+            dot += (double) a[i] * b[i];
+        }
+        double norms = l2Norm(a) * l2Norm(b);
+        return norms == 0 ? 0 : dot / norms;
+    }
 }
