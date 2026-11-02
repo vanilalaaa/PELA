@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7");
     }
 
     @Test
@@ -80,17 +80,27 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
         List<String> active = jdbc.queryForList(
                 "SELECT name FROM prompt_template WHERE is_active AND version = 1 AND body = 'TODO v1' ORDER BY name",
                 String.class);
-        assertThat(active).containsExactly("rag_question_generation", "writing_file_extraction", "writing_grading");
+        // writing_grading v1 bị V7 thay bằng v2
+        assertThat(active).containsExactly("rag_question_generation", "writing_file_extraction");
+    }
+
+    @Test
+    void v7ActivatesWritingGradingV2() {
+        List<Integer> active = jdbc.queryForList(
+                "SELECT version FROM prompt_template WHERE name = 'writing_grading' AND is_active", Integer.class);
+        assertThat(active).containsExactly(2);
+        assertThat(jdbc.queryForObject("SELECT is_active FROM prompt_template WHERE name = 'writing_grading' AND version = 1",
+                Boolean.class)).isFalse();
     }
 
     @Test
     @Transactional
     void onlyOneActivePromptPerName() {
         // Bản không active thêm được thoải mái
-        jdbc.update("INSERT INTO prompt_template (name, version, body, is_active) VALUES ('writing_grading', 2, 'draft', false)");
+        jdbc.update("INSERT INTO prompt_template (name, version, body, is_active) VALUES ('writing_grading', 90, 'draft', false)");
 
         assertThatThrownBy(() -> jdbc.update(
-                "INSERT INTO prompt_template (name, version, body, is_active) VALUES ('writing_grading', 3, 'x', true)"))
+                "INSERT INTO prompt_template (name, version, body, is_active) VALUES ('writing_grading', 91, 'x', true)"))
                 .isInstanceOf(DataIntegrityViolationException.class)
                 .hasMessageContaining("uq_prompt_active");
     }
