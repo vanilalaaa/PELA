@@ -12,21 +12,21 @@ Work,A1,school|tech,,on_topic,
 Work,A1,animal,,on_topic,interest_far
 Work,A1,animal|food,,on_topic,interest_far
 Work,A1,,Travel,off_topic,
-Work,A1,school,Daily Life,off_topic,
+Work,A1,school,Travel,off_topic,
 Technology,A1,,,on_topic,
 Technology,A1,tech,,on_topic,
 Technology,A1,tech|movie,,on_topic,
 Technology,A1,animal,,on_topic,interest_far
 Technology,A1,animal|food,,on_topic,interest_far
 Technology,A1,,Travel,off_topic,
-Technology,A1,tech,Daily Life,off_topic,
+Technology,A1,tech,Travel,off_topic,
 Daily Life,A1,,,on_topic,
 Daily Life,A1,family,,on_topic,
 Daily Life,A1,family|food,,on_topic,
 Daily Life,A1,tech,,on_topic,interest_far
 Daily Life,A1,tech|school,,on_topic,interest_far
 Daily Life,A1,,Technology,off_topic,
-Daily Life,A1,family,Work,off_topic,
+Daily Life,A1,family,Travel,off_topic,
 Travel,A2,,,on_topic,
 Travel,A2,travel,,on_topic,
 Travel,A2,travel|food,,on_topic,
@@ -40,21 +40,21 @@ Work,A2,school|tech,,on_topic,
 Work,A2,animal,,on_topic,interest_far
 Work,A2,animal|food,,on_topic,interest_far
 Work,A2,,Travel,off_topic,
-Work,A2,school,Daily Life,off_topic,
+Work,A2,school,Travel,off_topic,
 Technology,A2,,,on_topic,
 Technology,A2,tech,,on_topic,
 Technology,A2,tech|movie,,on_topic,
 Technology,A2,animal,,on_topic,interest_far
 Technology,A2,animal|food,,on_topic,interest_far
 Technology,A2,,Travel,off_topic,
-Technology,A2,tech,Daily Life,off_topic,
+Technology,A2,tech,Travel,off_topic,
 Daily Life,A2,,,on_topic,
 Daily Life,A2,family,,on_topic,
 Daily Life,A2,family|food,,on_topic,
 Daily Life,A2,tech,,on_topic,interest_far
 Daily Life,A2,tech|school,,on_topic,interest_far
 Daily Life,A2,,Technology,off_topic,
-Daily Life,A2,family,Work,off_topic,
+Daily Life,A2,family,Travel,off_topic,
 Travel,B1,,,on_topic,
 Travel,B1,travel,,on_topic,
 Travel,B1,travel|food,,on_topic,
@@ -68,27 +68,27 @@ Work,B1,school|tech,,on_topic,
 Work,B1,animal,,on_topic,interest_far
 Work,B1,animal|food,,on_topic,interest_far
 Work,B1,,Travel,off_topic,
-Work,B1,school,Daily Life,off_topic,
+Work,B1,school,Travel,off_topic,
 Technology,B1,,,on_topic,
 Technology,B1,tech,,on_topic,
 Technology,B1,tech|movie,,on_topic,
 Technology,B1,animal,,on_topic,interest_far
 Technology,B1,animal|food,,on_topic,interest_far
 Technology,B1,,Travel,off_topic,
-Technology,B1,tech,Daily Life,off_topic,
+Technology,B1,tech,Travel,off_topic,
 Daily Life,B1,,,on_topic,
 Daily Life,B1,family,,on_topic,
 Daily Life,B1,family|food,,on_topic,
 Daily Life,B1,tech,,on_topic,interest_far
 Daily Life,B1,tech|school,,on_topic,interest_far
 Daily Life,B1,,Technology,off_topic,
-Daily Life,B1,family,Work,off_topic,
+Daily Life,B1,family,Travel,off_topic,
 Technology,B2,,,on_topic,
 Technology,B2,tech,,on_topic,
 Technology,B2,tech|movie,,on_topic,
 Technology,B2,animal,,on_topic,interest_far
 Technology,B2,animal|food,,on_topic,interest_far
-Technology,B2,,Society,off_topic,
+Technology,B2,,Environment,off_topic,
 Technology,B2,tech,Environment,off_topic,
 Work,B2,,,on_topic,
 Work,B2,school,,on_topic,
@@ -102,7 +102,7 @@ Society,B2,school,,on_topic,
 Society,B2,school|family,,on_topic,
 Society,B2,animal,,on_topic,interest_far
 Society,B2,animal|sport,,on_topic,interest_far
-Society,B2,,Technology,off_topic,
+Society,B2,,Environment,off_topic,
 Society,B2,school,Work,off_topic,
 Environment,B2,,,on_topic,
 Environment,B2,animal,,on_topic,
@@ -117,7 +117,7 @@ Work,C1,school|tech,,on_topic,
 Work,C1,animal,,on_topic,interest_far
 Work,C1,animal|food,,on_topic,interest_far
 Work,C1,,Environment,off_topic,
-Work,C1,school,Society,off_topic,
+Work,C1,school,Environment,off_topic,
 Environment,C1,,,on_topic,
 Environment,C1,animal,,on_topic,
 Environment,C1,animal|travel,,on_topic,
@@ -152,7 +152,7 @@ Technology,C2,tech|movie,,on_topic,
 Technology,C2,animal,,on_topic,interest_far
 Technology,C2,animal|food,,on_topic,interest_far
 Technology,C2,,Education,off_topic,
-Technology,C2,tech,Work,off_topic,
+Technology,C2,tech,Society,off_topic,
 Work,C2,,,on_topic,
 Work,C2,school,,on_topic,
 Work,C2,school|tech,,on_topic,
@@ -165,5 +165,5 @@ Education,C2,school,,on_topic,
 Education,C2,school|tech,,on_topic,
 Education,C2,animal,,on_topic,interest_far
 Education,C2,animal|music,,on_topic,interest_far
-Education,C2,,Work,off_topic,
+Education,C2,,Society,off_topic,
 Education,C2,school,Technology,off_topic,
