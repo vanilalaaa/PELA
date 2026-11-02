@@ -254,6 +254,117 @@ paths:
         '403':
           description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/submissions:
+    post:
+      summary: Nộp bài Writing để chấm (UC-10, Writing.Submit, BR-29)
+      description: |
+        `submissionId` do client sinh (UUID) để gửi lại an toàn: gửi lại cùng id trả trạng thái hiện tại, không
+        nộp lần hai. Server tự đếm từ (20–300 từ, hoặc khoảng hẹp hơn của đề `min_words`/`max_words`).
+        Bài được chấm bất đồng bộ (UC-23); client hỏi `GET /practice/writing/submissions/{submissionId}`.
+        Lượt chấm (`writing.daily_limit`/ngày theo múi giờ learner) chỉ bị trừ khi chấm thành công; bài đang chờ
+        chấm cũng được tính để không nộp vượt. Hết lượt → 429, bài được giữ dưới dạng nháp (`draft`), nộp lại
+        cùng `submissionId` vào ngày sau.
+      operationId: submitWriting
+      tags: [writing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WritingSubmitRequest'}
+      responses:
+        '202':
+          description: Đã nhận, đang chờ chấm (hoặc trạng thái hiện tại nếu gửi lại cùng id)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingSubmitResult'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Đề trong kho không có hoặc đã ngừng dùng. Mã: PROMPT_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "submissionId đã được người khác dùng. Mã: SUBMISSION_ID_CONFLICT"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: |
+            WORD_COUNT_OUT_OF_RANGE — details {wordCount, minWords, maxWords};
+            PROMPT_SOURCE_NOT_SUPPORTED — đề do AI tạo (UC-24) chưa hỗ trợ; hoặc VALIDATION_FAILED.
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '429':
+          description: |
+            Hết lượt chấm hôm nay. Mã: WRITING_QUOTA_EXCEEDED, details {submissionId, status: draft, dailyLimit,
+            resetsAt}. Bài đã được lưu nháp.
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    get:
+      summary: Lịch sử bài viết và xu hướng điểm (Writing.History.List)
+      operationId: listWritingSubmissions
+      tags: [writing]
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 50, default: 20}
+      responses:
+        '200':
+          description: Bài mới nhất trước; scoreTrend theo thời gian chấm, cũ → mới
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingHistory'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+  /practice/writing/submissions/{submissionId}:
+    get:
+      summary: Kết quả chấm một bài (Writing.Grade.Output, UC-23)
+      description: |
+        `status`: draft | pending | retry_queued (AI lỗi/timeout 2 lần, job chấm lại lúc `nextRetryAt`) |
+        graded | failed (hết số lần thử, không trừ lượt). Điểm và sao do server tính từ 4 tiêu chí (BR-18).
+        Vị trí lỗi (`startOffset`, `endOffset`) là chỉ số ký tự trong `submittedText`, do server tính.
+        Nội dung AI sinh đã qua bộ lọc BR-15.
+      operationId: getWritingSubmission
+      tags: [writing]
+      parameters:
+        - {name: submissionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Bài viết
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingSubmission'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Không có hoặc không phải bài của người gọi. Mã: SUBMISSION_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/vocab-suggestions/{suggestionId}/add:
+    post:
+      summary: Thêm "từ đáng học" vào hàng ôn SM-2 (BR-30, BR-9)
+      description: |
+        Từ chưa có trong kho chung được thêm vào kho riêng của learner, rồi đưa vào hàng ôn hôm nay.
+        Từ có sẵn trong kho chung đã được tự thêm khi chấm (`auto_added`). Gọi lại trả trạng thái hiện tại.
+      operationId: addWritingVocabSuggestion
+      tags: [writing]
+      parameters:
+        - {name: suggestionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Đã thêm
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [suggestionId, status, vocabId]
+                properties:
+                  suggestionId: {type: string, format: uuid}
+                  status: {type: string, enum: [added, auto_added]}
+                  vocabId: {type: string, format: uuid}
+                  reviewCardId: {type: [string, 'null'], format: uuid}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Mã: SUGGESTION_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "Learner đã bỏ qua từ này. Mã: SUGGESTION_DISMISSED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
 
 components:
   securitySchemes:
@@ -360,3 +471,105 @@ components:
         status: {type: string, enum: [unverified, active, suspended, pending_deletion]}
         cefrLevel: {type: [string, 'null'], enum: [A1, A2, B1, B2, C1, C2, null]}
         timezone: {type: string}
+    WritingSubmitRequest:
+      type: object
+      required: [submissionId, promptSource, text]
+      properties:
+        submissionId: {type: string, format: uuid, description: Do client sinh; gửi lại cùng id là an toàn}
+        promptSource: {type: string, enum: [bank, ai_generated, freeform], description: 'ai_generated chưa hỗ trợ (UC-24)'}
+        promptQuestionId: {type: [string, 'null'], format: uuid, description: Bắt buộc khi promptSource = bank}
+        text: {type: string, maxLength: 5000}
+    WritingSubmitResult:
+      type: object
+      required: [submissionId, status]
+      properties:
+        submissionId: {type: string, format: uuid}
+        status: {type: string, enum: [pending, retry_queued, graded, failed]}
+    WritingIssue:
+      type: object
+      required: [issueId, sentenceIndex, startOffset, endOffset, original, suggestion, category, severity, explanationVi]
+      properties:
+        issueId: {type: string, format: uuid}
+        sentenceIndex: {type: integer, minimum: 0}
+        startOffset: {type: integer, minimum: 0}
+        endOffset: {type: integer, description: Không gồm ký tự tại vị trí này}
+        original: {type: string}
+        suggestion: {type: string, description: Rỗng = nên xoá đoạn này}
+        category: {type: string, enum: [grammar, spelling, word_choice, repetition, punctuation, style]}
+        severity: {type: string, enum: [error, suggestion], description: style luôn là suggestion (không trừ điểm)}
+        explanationVi: {type: string}
+    WritingVocabSuggestion:
+      type: object
+      required: [suggestionId, learnerForm, word, reason, meaningVi, status]
+      properties:
+        suggestionId: {type: string, format: uuid}
+        learnerForm: {type: string}
+        word: {type: string}
+        reason: {type: string, enum: [misspelled, misused, wrong_form, better_alternative]}
+        meaningVi: {type: string}
+        cefrLevel: {type: [string, 'null'], enum: [A1, A2, B1, B2, C1, C2, null]}
+        status: {type: string, enum: [suggested, added, dismissed, auto_added]}
+    WritingSubmission:
+      type: object
+      required: [submissionId, status, promptSource, submittedText, wordCount, rewrites, issues, vocabSuggestions]
+      properties:
+        submissionId: {type: string, format: uuid}
+        status: {type: string, enum: [draft, pending, retry_queued, graded, failed]}
+        promptSource: {type: string, enum: [bank, ai_generated, freeform]}
+        promptText: {type: [string, 'null']}
+        submittedText: {type: string}
+        wordCount: {type: integer}
+        score: {type: [integer, 'null'], minimum: 0, maximum: 100}
+        starsEarned: {type: [integer, 'null'], minimum: 0, maximum: 5}
+        criteria:
+          type: [object, 'null']
+          description: Mỗi tiêu chí 0–25
+          properties:
+            task_achievement: {type: integer}
+            coherence: {type: integer}
+            vocabulary: {type: integer}
+            grammar: {type: integer}
+        comment: {type: [string, 'null'], description: null nếu bị bộ lọc BR-15 chặn}
+        rewrites: {type: array, items: {type: string}}
+        issues: {type: array, items: {$ref: '#/components/schemas/WritingIssue'}}
+        vocabSuggestions: {type: array, items: {$ref: '#/components/schemas/WritingVocabSuggestion'}}
+        submittedAt: {type: [string, 'null'], format: date-time}
+        gradedAt: {type: [string, 'null'], format: date-time}
+        nextRetryAt: {type: [string, 'null'], format: date-time}
+    WritingHistory:
+      type: object
+      required: [items, scoreTrend, topIssueCategories]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [submissionId, status, promptSource, wordCount]
+            properties:
+              submissionId: {type: string, format: uuid}
+              status: {type: string, enum: [draft, pending, retry_queued, graded, failed]}
+              promptSource: {type: string, enum: [bank, ai_generated, freeform]}
+              promptText: {type: [string, 'null']}
+              wordCount: {type: integer}
+              score: {type: [integer, 'null']}
+              starsEarned: {type: [integer, 'null']}
+              submittedAt: {type: [string, 'null'], format: date-time}
+              gradedAt: {type: [string, 'null'], format: date-time}
+        scoreTrend:
+          type: array
+          items:
+            type: object
+            required: [submissionId, gradedAt, score]
+            properties:
+              submissionId: {type: string, format: uuid}
+              gradedAt: {type: string, format: date-time}
+              score: {type: integer}
+        topIssueCategories:
+          type: array
+          description: Tối đa 3 loại lỗi (severity error) gặp nhiều nhất
+          items:
+            type: object
+            required: [category, count]
+            properties:
+              category: {type: string}
+              count: {type: integer}
