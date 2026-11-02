@@ -20,3 +20,10 @@ Việc đã biết phải làm nhưng chưa tới lượt. Khi bắt đầu mộ
   - bộ đếm sao mở khoá Final Test (BR-20);
   - thông báo `writing_graded`.
   Kèm job tạo bù cho các bài `graded` trước khi có adapter (đọc `writing_submission` có `graded_at`, `stars_earned`).
+
+## RAG
+
+- **P7 bỏ @Disabled RAG evaluation 3–4 và chạy đo:** khi có UC-24 (RAG.Generate, RAG.Cache, fallback BR-7), hiện thực
+  `RagLatencyTest` (P95 generate ≤ 4 s — PER-3; P95 cache hit ≤ 300 ms không tính embed — PER-9) và
+  `RagGenerationSampleTest` (sinh 50 đề ra `generated.csv`), bỏ `@Disabled("Chờ UC-24 (P7)")`, chạy trên Supabase dev,
+  rồi cho 2 người chấm và chạy `RagRatingReportTest`. Xem `docs/evaluation/rag/README.md`.
