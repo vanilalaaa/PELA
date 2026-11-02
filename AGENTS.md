@@ -7,7 +7,7 @@ Quy tắc cho mọi AI agent (Claude Code, Codex, Cursor, …) làm việc trong
 - PELA — ứng dụng học tiếng Anh cá nhân hoá (CEFR, SM-2, Challenge, Writing chấm bằng AI, RAG tạo đề Writing, Listening, gamification, offline-first). Đồ án SE121 — UIT.
 - `backend/`: Java 21 + Spring Boot 3, REST `/v1`, modular monolith Clean Architecture, package `com.pela`, 16 module.
 - `frontend/`: pnpm workspace — `apps/mobile` (React Native + Expo dev build), `apps/admin-web` (React + Vite), `packages/domain`, `packages/api-contract`, `packages/fixtures`.
-- Hạ tầng: Supabase (PostgreSQL 17 + pgvector, Auth, Storage). AI: Gemini `gemini-2.5-flash`, `gemini-embedding-001` (768 chiều), model TTS cho Listening (đọc từ `system_setting` `ai.model.tts`). Push: FCM/APNs.
+- Hạ tầng: Supabase (PostgreSQL 17 + pgvector, Auth, Storage). AI: Gemini `gemini-3.8-flash` (từ V6; trước là `gemini-2.5-flash`, đã ngừng cho người dùng mới), `gemini-embedding-001` (768 chiều), model TTS cho Listening (đọc từ `system_setting` `ai.model.tts`). Push: FCM/APNs.
 - Nguồn sự thật: `docs/srs/`, `docs/architecture/`, `docs/api/openapi.yaml`, `db/migrations/`.
 
 ## 2. Source of truth & thứ tự ưu tiên

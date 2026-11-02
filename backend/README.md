@@ -23,8 +23,8 @@ Windows PowerShell dùng `.\gradlew.bat` thay cho `./gradlew`.
 `GeminiExternalTest` gọi Gemini thật để xác nhận định dạng request/response của 3 adapter (`generateContent` structured output, `embedContent` 768 chiều, TTS qua Interactions API).
 
 1. Có Gemini API key: biến môi trường `GEMINI_API_KEY`, hoặc dòng `GEMINI_API_KEY=` trong `backend/.env`. Test không in key ra.
-2. Tuỳ chọn đổi model (mặc định theo seed V3): `GEMINI_TEXT_MODEL`, `GEMINI_EMBEDDING_MODEL`.
-3. Kiểm TTS cần đặt `GEMINI_TTS_MODEL` (model mặc định của hệ thống là `gemini-3.8-flash-tts`, seed ở migration V5; `gemini-3.8-flash-tts-lite` là dự phòng). Không đặt thì test TTS được bỏ qua, hai test còn lại vẫn chạy.
+2. Tuỳ chọn đổi model (mặc định theo seed: `gemini-3.8-flash` từ V6, `gemini-embedding-001`): `GEMINI_TEXT_MODEL`, `GEMINI_EMBEDDING_MODEL`.
+3. Kiểm TTS cần đặt `GEMINI_TTS_MODEL` (model mặc định của hệ thống là `gemini-3.8-flash-tts`, seed ở migration V5; `gemini-3.8-flash-lite-tts` là dự phòng). Không đặt thì test TTS được bỏ qua, hai test còn lại vẫn chạy.
 4. Hai biến thể request TTS đang chờ xác nhận: `GEMINI_TTS_VARIANT` = `SPEECH_CONFIG` (mặc định, theo hướng dẫn) hoặc `STRUCTURED_SPEECH_CONFIG` (theo tham chiếu). Chạy cả hai rồi gửi kết quả; biến thể sai sẽ bị xoá.
 5. Chạy trên Windows (PowerShell, trong thư mục `backend/`):
 

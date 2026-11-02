@@ -9,7 +9,7 @@ PELA cần LLM để chấm bài Writing, tạo đề Writing mới, xử lý fi
 
 ## Quyết định
 
-- Sinh văn bản: `gemini-2.5-flash` (chấm Writing, tạo đề, xử lý file nhập).
+- Sinh văn bản: `gemini-3.8-flash` (chấm Writing, tạo đề, xử lý file nhập), đặt bằng migration V6. Ban đầu chọn `gemini-2.5-flash`, nhưng gọi thật (01/11/2026) trả 404 "no longer available to new users" và Gemini gợi ý `gemini-3.8-flash`.
 - Embedding: `gemini-embedding-001`, 768 chiều, lưu bằng pgvector trên Supabase.
 - Tên model, ngưỡng, giới hạn đọc từ bảng `system_setting`; prompt lưu ở `prompt_template` có version. Không hard-code.
 - Sinh văn bản gọi `models/{model}:generateContent`, không dùng Interactions API. Lý do: tài liệu Interactions chưa ghi rõ cách đặt `temperature` và cách báo nội dung bị chặn an toàn, trong khi BR-15 và prompt có version cần cả hai. Port `LlmPort` giữ nguyên nên có thể đổi adapter sau khi Interactions đủ tài liệu. (TTS vẫn dùng Interactions, xem ADR 0005.)
