@@ -1,0 +1,53 @@
+sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant Web as Admin Web Portal
+    participant API as Content Import (admin role check)
+    participant ST as Supabase Storage
+    participant JOB as Import Worker (background)
+    participant LLM as Gemini (Writing extraction)
+    participant TTS as Gemini Text-to-Speech
+    participant EMB as Gemini Embedding
+    participant DB as Supabase PostgreSQL
+    A->>Web: Download template, upload Listening CSV or Writing prompt file
+    Web->>API: POST /v1/admin/imports {kind, file}
+    API->>API: Check role, file type and size
+    API->>ST: Store file (private bucket)
+    API->>DB: INSERT import_job (queued)
+    API-->>Web: 202 {job_id}
+    JOB->>DB: Take job, status = processing
+    alt Listening (CSV file)
+        JOB->>JOB: Parse rows (clip_code, line or question), group into clips
+        JOB->>JOB: Validate (columns, max 2 speakers, length limit, 4 distinct options, 1 answer, explanation) - BR-37
+    else Writing
+        JOB->>LLM: Split prompts, scoring note, word range, topic, level
+        JOB->>EMB: Embed each prompt
+        JOB->>DB: Compare with active prompts, similarity ≥ 0.95 → duplicate warning
+    end
+    JOB->>DB: preview + warnings, status = preview_ready
+    A->>Web: Edit cards (errors shown by row), delete or "Process again"
+    opt Listening
+        A->>Web: Check or change the voice of each speaker, "Generate audio"
+        Web->>API: POST /v1/admin/imports/{id}/clips/{n}/tts
+        API->>TTS: Transcript, voices, style by CEFR level
+        TTS-->>API: Audio (WAV)
+        API->>ST: Store draft audio (private bucket)
+        API-->>Web: Signed URL, duration
+        A->>Web: Listen, and generate again after any change to text or voices
+    end
+    A->>Web: Save
+    Web->>API: POST /v1/admin/imports/{id}/save
+    API->>DB: BEGIN
+    alt Listening
+        API->>API: Every clip has audio for its current text and voices
+        API->>ST: Copy audio to listening-audio bucket
+        API->>DB: INSERT listening_clip (voice_config, tts_model) + question_bank (active)
+    else Writing
+        API->>EMB: Re-embed edited prompts
+        API->>DB: INSERT question_bank (writing_prompt, active, embedding)
+    end
+    API->>DB: import_job saved, INSERT admin_action_log, COMMIT
+    API-->>Web: 201, content available to learners immediately
+    A->>Web: Retire an item
+    Web->>API: POST /v1/admin/question-bank/{id}/retire
+    API->>DB: status = retired, expire cache entries generated from it (BR-25), log

@@ -23,7 +23,20 @@
     },
     "scheme": "pela",
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withWatermelonDB",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Nunito-SemiBold.ttf",
+            "./assets/fonts/Nunito-Bold.ttf",
+            "./assets/fonts/Nunito-ExtraBold.ttf",
+            "./assets/fonts/Baloo2-Bold.ttf",
+            "./assets/fonts/Baloo2-ExtraBold.ttf"
+          ]
+        }
+      ]
     ]
   }
 }

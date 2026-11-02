@@ -1,9 +1,0 @@
--- V2__seed.sql — dữ liệu khởi tạo cho môi trường dev.
--- Khung rỗng: chưa có dữ liệu. Chỉ thêm sau khi V1__init.sql (schema.sql v1.3) đã có.
---
--- Gợi ý thứ tự:
---   1. system_setting   — ngưỡng RAG (0.65 / 0.92), giới hạn, tên model Gemini
---   2. prompt_template  — prompt chấm Writing, tạo đề Writing (có version)
---   3. Dữ liệu học mẫu  — topic, level CEFR, lesson, đề Writing mẫu
---
--- Không đưa dữ liệu cá nhân thật hay secret vào file này.

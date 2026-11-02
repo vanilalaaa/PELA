@@ -1,13 +1,19 @@
 spring:
   application:
     name: pela-backend
+  config:
+    # Đọc backend/.env (gitignore) khi chạy từ thư mục backend/; không có file thì dùng biến môi trường
+    import: optional:file:.env[.properties]
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5 # Supabase gói Free giới hạn số kết nối
   flyway:
     # Migration dùng chung với thư mục db/ ở gốc repo (chạy app từ thư mục backend/)
     locations: ${FLYWAY_LOCATIONS:filesystem:../db/migrations}
+    baseline-on-migrate: false
   security:
     oauth2:
       resourceserver:
@@ -21,6 +27,36 @@ management:
       exposure:
         include: health
 
+# Swagger UI / OpenAPI sinh tự động: tắt mặc định, profile dev bật lại.
+# Hợp đồng API chính thức vẫn là docs/api/openapi.yaml.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 pela:
+  jobs:
+    enabled: true
+    # UC-16 A2: mở khoá tài khoản có suspended_until đã qua (mặc định đầu mỗi giờ)
+    suspension-release-cron: "0 0 * * * *"
+    # Dọn reset token quá hạn và thu hồi phiên khôi phục (khoảng nghỉ giữa 2 lần chạy)
+    password-reset-cleanup-delay: PT1M
+  supabase:
+    url: ${SUPABASE_URL:}
+    # apikey cho endpoint auth công khai (signup, token, recover, verify…)
+    anon-key: ${SUPABASE_ANON_KEY:}
+    # Chỉ dùng cho Admin API của Supabase Auth (xoá user)
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
   gemini:
     api-key: ${GEMINI_API_KEY:}
+    # Tên model, ngưỡng an toàn… nằm ở system_setting (MNT-3); đây chỉ là kết nối
+    base-url: https://generativelanguage.googleapis.com/v1beta
+    # TTS: speech_config (theo hướng dẫn) hoặc structured_speech_config (theo tham chiếu); tạm thời, chờ test external
+    tts-variant: ${GEMINI_TTS_VARIANT:SPEECH_CONFIG}
+    connect-timeout: PT5S
+    # Chờ tối đa cho embedding/TTS; LLM dùng timeout do use case truyền vào
+    request-timeout: PT60S
+  content-filter:
+    # Danh sách từ cấm (BR-15), mỗi dòng một từ/cụm từ
+    files: classpath:content-filter/blocklist-en.txt,classpath:content-filter/blocklist-vi.txt

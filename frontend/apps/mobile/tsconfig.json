@@ -1,6 +1,8 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    // Cần cho decorator của WatermelonDB (@field, @date, @json, ...) — xem babel.config.js.
+    "experimentalDecorators": true
   }
 }

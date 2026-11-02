@@ -1,0 +1,53 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "error": "Something went wrong"
+  },
+  "uiKit": {
+    "title": "UI Kit (dev)",
+    "subtitle": "Internal screen to compare components against Figma — not a user-facing screen.",
+    "sectionButton": "Button",
+    "sectionCard": "Card",
+    "sectionInput": "Input",
+    "sectionProgress": "ProgressBar",
+    "sectionStar": "StarRating",
+    "sectionSheet": "BottomSheet",
+    "sectionQuestion": "QuestionOption",
+    "openSheet": "Open BottomSheet",
+    "inputLabel": "Your name",
+    "inputPlaceholder": "Enter your name...",
+    "inputError": "This field cannot be empty",
+    "open": "Open UI Kit",
+    "buttonPrimary": "Primary",
+    "buttonSecondary": "Secondary",
+    "buttonGhost": "Ghost",
+    "buttonDisabled": "Disabled",
+    "buttonLoading": "Loading",
+    "cardStatic": "Static card (not pressable)",
+    "cardPressable": "Pressable card (has pressed state)",
+    "cardDisabled": "Disabled card",
+    "inputReadonly": "Read-only",
+    "questionOption": "Option — {{state}}",
+    "sheetTitle": "BottomSheet",
+    "sheetBody": "Built with React Native's Modal and Animated, no extra native library."
+  },
+  "dbCheck": {
+    "title": "DB check (dev)",
+    "open": "DB check",
+    "subtitle": "Write a sample review_card to WatermelonDB, read it back and compare each field. Fully close the app, reopen it and tap \"Read back\" to check the data persisted.",
+    "write": "Write sample review_card",
+    "read": "Read back and compare",
+    "delete": "Delete sample record",
+    "written": "Sample record written.",
+    "deleted": "Sample record deleted.",
+    "missing": "Sample record not found.",
+    "error": "Error: {{message}}",
+    "passed": "PASSED: all fields match",
+    "failed": "FAILED: some fields differ"
+  }
+}
