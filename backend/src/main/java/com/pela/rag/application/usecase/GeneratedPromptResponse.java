@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Output JSON của prompt rag_question_generation v2 (khớp response_schema trong V11). LlmPort parse vào record này và
+ * Output JSON của prompt rag_question_generation v2 (khớp response_schema trong V10). LlmPort parse vào record này và
  * chạy Bean Validation; không khớp → INVALID_JSON, không dùng output.
  */
 public record GeneratedPromptResponse(

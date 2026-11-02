@@ -1,6 +1,5 @@
--- V11: UC-24 (RAG tạo đề Writing): prompt rag_question_generation v2, ngưỡng "quá giống đề kho" và nhật ký sinh đề.
--- Không sửa V3 (prompt v1 'TODO v1'). Số V11 vì V10 đang do nhánh Listening dùng; nếu V10 chưa có trên develop lúc merge
--- thì đổi tên file thành số kế tiếp sau số lớn nhất trên develop (không chạy migration này lên DB chung trước đó).
+-- V10: UC-24 (RAG tạo đề Writing): prompt rag_question_generation v2, ngưỡng "quá giống đề kho" và nhật ký sinh đề.
+-- Không sửa V3 (prompt v1 'TODO v1').
 
 -- ---------------------------------------------------------------------
 -- 1. Prompt rag_question_generation v2 (RAG.Generate.Prompt, MNT-4)
