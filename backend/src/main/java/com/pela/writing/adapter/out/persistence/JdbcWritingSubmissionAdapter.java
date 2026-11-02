@@ -48,23 +48,23 @@ public class JdbcWritingSubmissionAdapter implements WritingSubmissionPort {
     @Override
     public boolean insert(NewSubmission s) {
         return jdbc.update("""
-                INSERT INTO writing_submission (submission_id, user_id, prompt_question_id, prompt_source, prompt_text,
-                                                submitted_text, word_count, grading_status, submitted_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO writing_submission (submission_id, user_id, prompt_question_id, rag_cache_id, prompt_source,
+                                                prompt_text, submitted_text, word_count, grading_status, submitted_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (submission_id) DO NOTHING
-                """, s.submissionId(), s.userId(), s.promptQuestionId(), s.promptSource(), s.promptText(), s.text(),
-                s.wordCount(), s.status(), timestamp(s.submittedAt())) > 0;
+                """, s.submissionId(), s.userId(), s.promptQuestionId(), s.ragCacheId(), s.promptSource(),
+                s.promptText(), s.text(), s.wordCount(), s.status(), timestamp(s.submittedAt())) > 0;
     }
 
     @Override
     public boolean updateDraft(NewSubmission s) {
         return jdbc.update("""
                 UPDATE writing_submission
-                SET prompt_question_id = ?, prompt_source = ?, prompt_text = ?, submitted_text = ?, word_count = ?,
-                    grading_status = ?, submitted_at = ?
+                SET prompt_question_id = ?, rag_cache_id = ?, prompt_source = ?, prompt_text = ?, submitted_text = ?,
+                    word_count = ?, grading_status = ?, submitted_at = ?
                 WHERE submission_id = ? AND user_id = ? AND grading_status = 'draft'
-                """, s.promptQuestionId(), s.promptSource(), s.promptText(), s.text(), s.wordCount(), s.status(),
-                timestamp(s.submittedAt()), s.submissionId(), s.userId()) > 0;
+                """, s.promptQuestionId(), s.ragCacheId(), s.promptSource(), s.promptText(), s.text(), s.wordCount(),
+                s.status(), timestamp(s.submittedAt()), s.submissionId(), s.userId()) > 0;
     }
 
     @Override

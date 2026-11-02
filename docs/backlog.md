@@ -10,9 +10,6 @@ Việc đã biết phải làm nhưng chưa tới lượt. Khi bắt đầu mộ
 
 ## Writing
 
-- **P7/UC-24 bỏ chặn ai_generated:** `POST /v1/practice/writing/submissions` đang trả 422 `PROMPT_SOURCE_NOT_SUPPORTED`
-  cho `promptSource = ai_generated` (`WritingSubmissionService.resolvePrompt`). Khi có UC-24 (RAG tạo đề), nhận đề từ
-  `rag_question_cache`, lưu `rag_cache_id` + snapshot `prompt_text`, cập nhật OpenAPI.
 - **Gamification nhận sự kiện chấm Writing:** cài adapter thật cho `WritingGradedEventPort` (hiện là
   `NoOpWritingGradedEventAdapter`), gọi ngay sau khi lưu kết quả chấm:
   - `star_event` với unique theo (source `writing`, `submission_id`), để gửi lại không cộng trùng (BR-36);
@@ -23,6 +20,9 @@ Việc đã biết phải làm nhưng chưa tới lượt. Khi bắt đầu mộ
 
 ## RAG
 
+- **Admin.QuestionBank.Retire phải hết hạn cache (BR-25):** khi Admin retire một đề Writing, gọi
+  `ExpireRagCacheUseCase.expireBySourceTemplate(questionId)` (module rag, `port/in`) để các entry `rag_question_cache` có
+  `source_template_id` đó chuyển sang `expired`. Hàm đã có và có test; module admin chưa gọi vì chưa có.
 - **P7 bỏ @Disabled RAG evaluation 3–4 và chạy đo:** khi có UC-24 (RAG.Generate, RAG.Cache, fallback BR-7), hiện thực
   `RagLatencyTest` (P95 generate ≤ 4 s — PER-3; P95 cache hit ≤ 300 ms không tính embed — PER-9) và
   `RagGenerationSampleTest` (sinh 50 đề ra `generated.csv`), bỏ `@Disabled("Chờ UC-24 (P7)")`, chạy trên Supabase dev,

@@ -1,6 +1,8 @@
 package com.pela.writing.application.usecase;
 
 import com.pela.identity.application.port.in.GetCurrentUserUseCase;
+import com.pela.rag.application.port.in.GetServedPromptUseCase;
+import com.pela.rag.application.port.in.ServedPrompt;
 import com.pela.roadmap.application.port.in.VocabularyCatalogUseCase;
 import com.pela.shared.application.port.out.ClockPort;
 import com.pela.shared.application.port.out.SettingsPort;
@@ -46,10 +48,12 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
     private final ReviewQueueUseCase reviewQueue;
     private final SettingsPort settings;
     private final ClockPort clock;
+    private final GetServedPromptUseCase servedPrompts;
 
     public WritingSubmissionService(WritingSubmissionPort submissions, WritingPromptPort prompts,
             GradingTriggerPort trigger, GetCurrentUserUseCase users, VocabularyCatalogUseCase vocabulary,
-            ReviewQueueUseCase reviewQueue, SettingsPort settings, ClockPort clock) {
+            ReviewQueueUseCase reviewQueue, SettingsPort settings, ClockPort clock,
+            GetServedPromptUseCase servedPrompts) {
         this.submissions = submissions;
         this.prompts = prompts;
         this.trigger = trigger;
@@ -58,6 +62,7 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
         this.reviewQueue = reviewQueue;
         this.settings = settings;
         this.clock = clock;
+        this.servedPrompts = servedPrompts;
     }
 
     @Override
@@ -72,7 +77,7 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
         }
 
         String promptSource = command.promptSource() == null ? "freeform" : command.promptSource();
-        BankPrompt prompt = resolvePrompt(promptSource, command.promptQuestionId());
+        ResolvedPrompt prompt = resolvePrompt(userId, promptSource, command.promptQuestionId(), command.ragCacheId());
         String text = command.text() == null ? "" : command.text().strip();
         int wordCount = TextAnalysis.countWords(text);
         int min = prompt != null && prompt.minWords() != null ? Math.max(MIN_WORDS, prompt.minWords()) : MIN_WORDS;
@@ -92,7 +97,8 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
         String status = usage.used() >= limit ? "draft" : "pending";
 
         NewSubmission submission = new NewSubmission(command.submissionId(), userId, promptSource,
-                prompt == null ? null : prompt.questionId(), prompt == null ? null : prompt.text(), text, wordCount,
+                prompt == null ? null : prompt.questionId(), prompt == null ? null : prompt.ragCacheId(),
+                prompt == null ? null : prompt.text(), text, wordCount,
                 status, status.equals("pending") ? now : null);
         boolean stored = existing == null ? submissions.insert(submission) : submissions.updateDraft(submission);
         if (!stored) {
@@ -149,7 +155,11 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
         return new AddedWord(suggestionId, "added", vocabId, cardId);
     }
 
-    private BankPrompt resolvePrompt(String promptSource, UUID promptQuestionId) {
+    /** Đề đã chọn: đề kho (questionId) hoặc đề AI đã phát cho đúng learner này (ragCacheId); null = tự do. */
+    private record ResolvedPrompt(UUID questionId, UUID ragCacheId, String text, Integer minWords, Integer maxWords) {
+    }
+
+    private ResolvedPrompt resolvePrompt(UUID userId, String promptSource, UUID promptQuestionId, UUID ragCacheId) {
         return switch (promptSource) {
             case "freeform" -> null;
             case "bank" -> {
@@ -157,12 +167,20 @@ public class WritingSubmissionService implements SubmitWritingUseCase, WritingQu
                     throw new ValidationFailedException("VALIDATION_FAILED", "promptQuestionId is required for bank prompts",
                             null);
                 }
-                yield prompts.activePrompt(promptQuestionId)
+                BankPrompt bank = prompts.activePrompt(promptQuestionId)
                         .orElseThrow(() -> new NotFoundException("PROMPT_NOT_FOUND", "Writing prompt not found", null));
+                yield new ResolvedPrompt(bank.questionId(), null, bank.text(), bank.minWords(), bank.maxWords());
             }
-            // UC-24 (đề do AI tạo) chưa có: chưa nhận bài cho loại đề này
-            case "ai_generated" -> throw new ValidationFailedException("PROMPT_SOURCE_NOT_SUPPORTED",
-                    "AI-generated prompts are not available yet", null);
+            // UC-24: đề AI nằm ở rag_question_cache, chỉ dùng được nếu đã phát cho chính learner này
+            case "ai_generated" -> {
+                if (ragCacheId == null) {
+                    throw new ValidationFailedException("VALIDATION_FAILED", "ragCacheId is required for AI prompts", null);
+                }
+                ServedPrompt served = servedPrompts.servedTo(userId, ragCacheId)
+                        .orElseThrow(() -> new NotFoundException("PROMPT_NOT_FOUND", "Writing prompt not found", null));
+                yield new ResolvedPrompt(null, served.cacheId(), served.promptText(), served.minWords(),
+                        served.maxWords());
+            }
             default -> throw new ValidationFailedException("VALIDATION_FAILED", "Unknown promptSource", null);
         };
     }
