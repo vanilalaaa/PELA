@@ -1,0 +1,21 @@
+topic,level,interests,branch,millis
+Travel,A1,,fallback:TIMEOUT,5080
+Work,A1,school,fallback:TIMEOUT,4882
+Technology,A1,tech|movie,fallback:TIMEOUT,4855
+Daily Life,A1,tech,fallback:TIMEOUT,4846
+Travel,A2,school|health,fallback:TIMEOUT,4906
+Technology,A2,,fallback:TIMEOUT,4928
+Daily Life,A2,family,fallback:TIMEOUT,4836
+Travel,B1,travel|food,fallback:UPSTREAM_ERROR,4290
+Work,B1,animal,fallback:UPSTREAM_ERROR,4395
+Technology,B1,animal|food,fallback:UPSTREAM_ERROR,4307
+Technology,B2,,fallback:UPSTREAM_ERROR,4371
+Work,B2,school,fallback:UPSTREAM_ERROR,4404
+Society,B2,school|family,fallback:UPSTREAM_ERROR,4320
+Environment,B2,music,fallback:UPSTREAM_ERROR,4349
+Work,C1,animal|food,fallback:TIMEOUT,4888
+Technology,C1,,fallback:TIMEOUT,4812
+Society,C1,school,fallback:TIMEOUT,4816
+Society,C2,school|family,fallback:TIMEOUT,4845
+Technology,C2,animal,fallback:TIMEOUT,4816
+Work,C2,animal|food,fallback:TIMEOUT,4896

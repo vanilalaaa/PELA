@@ -9,11 +9,18 @@ import com.pela.rag.adapter.out.persistence.JdbcGenerationLogAdapter;
 import com.pela.rag.adapter.out.persistence.JdbcPromptCacheAdapter;
 import com.pela.rag.adapter.out.persistence.JdbcPromptExampleDetailsAdapter;
 import com.pela.rag.adapter.out.persistence.JdbcWritingPromptVectorAdapter;
+import com.pela.rag.application.port.out.GenerationLogPort;
+import com.pela.rag.application.port.out.LearnerContextPort;
 import com.pela.rag.application.port.out.LearnerContextPort.LearnerContext;
+import com.pela.rag.application.port.out.PromptCachePort;
+import com.pela.rag.application.port.out.PromptExampleDetailsPort;
+import com.pela.rag.application.port.out.WritingPromptVectorPort;
 import com.pela.rag.application.usecase.GenerateWritingPromptService;
 import com.pela.rag.domain.RagQueryBuilder;
 import com.pela.shared.adapter.out.SystemClockAdapter;
+import com.pela.shared.application.port.out.ContentFilterPort;
 import com.pela.shared.application.port.out.EmbeddingPort;
+import com.pela.shared.application.port.out.LlmPort;
 import com.pela.shared.application.port.out.SettingsPort;
 import com.pela.writing.adapter.out.persistence.JdbcCuratedPromptAdapter;
 import com.pela.writing.application.usecase.PickCuratedPromptService;
@@ -80,6 +87,12 @@ final class RagEvalSupport implements AutoCloseable {
         Assumptions.assumeTrue(url != null && user != null && password != null,
                 "DB_URL / DB_USER / DB_PASSWORD not set (environment or backend/.env): skipping RAG evaluation");
         return new RagEvalSupport(url, user, password);
+    }
+
+    /** Postgres local (Testcontainers) nạp embedding từ fixture; xem {@link RagLocalDatabase}. Skip nếu thiếu Docker hoặc fixture. */
+    static RagEvalSupport connectLocal() throws IOException {
+        String[] connection = RagLocalDatabase.prepare(RagLocalDatabase.FIXTURE);
+        return new RagEvalSupport(connection[0], connection[1], connection[2]);
     }
 
     /** Skip test nếu thiếu GEMINI_API_KEY. Model và số chiều đọc từ system_setting của DB. */
@@ -212,6 +225,11 @@ final class RagEvalSupport implements AutoCloseable {
      * (R__dev_seed.sql) làm người nhận; thiếu thì skip. Chỉ giới hạn "đề AI mỗi ngày" bị nâng lên để đo liên tục.
      */
     Pipeline pipeline() throws IOException {
+        return pipeline(null);
+    }
+
+    /** Như {@link #pipeline()}; có {@code timer} thì gói các port để đo thời gian từng bước (db, embed, llm, filter, cache_write). */
+    Pipeline pipeline(StageTimer timer) throws IOException {
         UUID user = UUID.fromString(SEED_USER);
         Assumptions.assumeTrue(Boolean.TRUE.equals(readOnly(() -> jdbc.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM users WHERE user_id = ?)", Boolean.class, user))),
@@ -238,13 +256,34 @@ final class RagEvalSupport implements AutoCloseable {
             throw new IllegalStateException(e);
         }
         JdbcPromptCacheAdapter cache = new JdbcPromptCacheAdapter(jdbc, writable);
-        GenerateWritingPromptService generate = new GenerateWritingPromptService(
-                id -> new LearnerContext(interests.get(), ZoneId.of("Asia/Ho_Chi_Minh")), cache,
-                new JdbcWritingPromptVectorAdapter(jdbc, writable), new JdbcPromptExampleDetailsAdapter(jdbc),
-                new JdbcGenerationLogAdapter(jdbc), embedding, llm,
-                new BlocklistContentFilterAdapter(new DefaultResourceLoader(), List.of(
-                        "classpath:content-filter/blocklist-en.txt", "classpath:content-filter/blocklist-vi.txt")),
-                evalSettings, clock, UUID::randomUUID);
+        // Learner giả lập nhưng vẫn chạy hai câu SQL mà UC-24 thật chạy (múi giờ, sở thích) để chi phí DB đúng
+        LearnerContextPort learners = id -> {
+            jdbc.queryForObject("SELECT timezone FROM users WHERE user_id = ?", String.class, id);
+            jdbc.queryForList("SELECT interests FROM learner_profile WHERE user_id = ?", id);
+            return new LearnerContext(interests.get(), ZoneId.of("Asia/Ho_Chi_Minh"));
+        };
+        PromptCachePort cachePort = cache;
+        WritingPromptVectorPort vectorPort = new JdbcWritingPromptVectorAdapter(jdbc, writable);
+        PromptExampleDetailsPort detailsPort = new JdbcPromptExampleDetailsAdapter(jdbc);
+        GenerationLogPort logPort = new JdbcGenerationLogAdapter(jdbc);
+        EmbeddingPort embeddingPort = embedding;
+        LlmPort llmPort = llm;
+        ContentFilterPort filterPort = new BlocklistContentFilterAdapter(new DefaultResourceLoader(),
+                List.of("classpath:content-filter/blocklist-en.txt", "classpath:content-filter/blocklist-vi.txt"));
+        if (timer != null) {
+            learners = timer.wrap(LearnerContextPort.class, learners, StageTimer.DB);
+            cachePort = timer.wrap(PromptCachePort.class, cachePort, method ->
+                    method.getName().equals("storeAndServe") || method.getName().equals("serveHit")
+                            ? StageTimer.CACHE_WRITE : StageTimer.DB);
+            vectorPort = timer.wrap(WritingPromptVectorPort.class, vectorPort, StageTimer.DB);
+            detailsPort = timer.wrap(PromptExampleDetailsPort.class, detailsPort, StageTimer.DB);
+            logPort = timer.wrap(GenerationLogPort.class, logPort, StageTimer.DB);
+            embeddingPort = timer.wrap(EmbeddingPort.class, embeddingPort, StageTimer.EMBED);
+            llmPort = timer.wrap(LlmPort.class, llmPort, StageTimer.LLM);
+            filterPort = timer.wrap(ContentFilterPort.class, filterPort, StageTimer.FILTER);
+        }
+        GenerateWritingPromptService generate = new GenerateWritingPromptService(learners, cachePort, vectorPort,
+                detailsPort, logPort, embeddingPort, llmPort, filterPort, evalSettings, clock, UUID::randomUUID);
         return new Pipeline(user, writable, interests, generate, new PickCuratedPromptService(new JdbcCuratedPromptAdapter(jdbc)),
                 cache, embedding, settings);
     }

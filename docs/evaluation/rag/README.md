@@ -7,7 +7,7 @@ Bộ công cụ đo phần truy hồi và sinh đề Writing bằng RAG. Các b�
 | --- | --- | --- | --- | --- |
 | 1 | Hiệu chỉnh ngưỡng truy hồi | AS-7, BR-8 | `RagThresholdCalibrationTest` + `queries.csv` | Chạy được |
 | 2 | Recall@5 của HNSW ≥ 0.90 | COM-3 | `RagHnswRecallTest` | Chạy được |
-| 3 | P95 sinh đề ≤ 4 s; P95 cache hit ≤ 300 ms (không tính embed) | PER-3, PER-9 | `RagLatencyTest` | Chạy được (UC-24 đã có) |
+| 3 | P95 sinh đề ≤ 4 s; P95 cache hit ≤ 300 ms (không tính embed) | PER-3, PER-9 | `RagLatencyTest` (chế độ `local` để kết luận) | Chạy được; lần đo từ máy dev chưa kết luận được |
 | 4 | ≥ 90% đề sinh ra đúng chủ đề và đúng trình độ (mẫu 50 đề, 2 người chấm) | PER-3 | `RagGenerationSampleTest`, `RagRatingReportTest`, `generated.csv` | Sinh đề và script chấm đều chạy được |
 
 Mục 3 và mục sinh đề của mục 4 chạy trên pipeline UC-24 thật (`GenerateWritingPromptService` nối với DB Supabase dev và
@@ -120,14 +120,39 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 
 ### 3. Độ trễ (PER-3, PER-9)
 
-`RagLatencyTest` đo trên một mẫu truy vấn on_topic rải đều các cặp topic + level:
+`RagLatencyTest` đo trên một mẫu truy vấn on_topic rải đều các cặp topic + level (mặc định 20, đổi bằng `RAG_LATENCY_SAMPLES`),
+Gemini luôn gọi thật. Hai chế độ (`RAG_LATENCY_MODE`):
 
-- `generateP95IsWithin4Seconds`: thời gian end-to-end của UC-24 (embed, cache, truy hồi, LLM, kiểm tra, lưu cache), gồm cả
-  chọn đề dự phòng BR-7 khi pipeline báo cần fallback; P95 phải ≤ 4 s. Ghi `latency-generate.csv`
-  (`topic,level,interests,branch,millis`; `branch` = generated, cache_hit hoặc fallback:<lý do>) và in số lượt theo nhánh.
-- `cacheHitP95IsWithin300MillisExcludingEmbedding`: dựng trước một entry cache cho mỗi truy vấn mẫu, rồi đo tra cache +
-  ghi lần phát, **không tính** bước embed truy vấn; P95 phải ≤ 300 ms và mọi truy vấn phải trúng entry của chính nó. Ghi
-  `latency-cache-hit.csv`.
+- `remote` (mặc định): DB là Supabase dev, đo từ máy dev. Độ trễ mạng tới DB và tới Gemini chiếm phần lớn, nên **chỉ để tham
+  khảo, không kiểm ngưỡng PER-3/PER-9**. Lần đo 03/11/2026 ở chế độ này: `docs/evaluation/results/2026-11-03-latency-dev/`.
+- `local`: Postgres local (Testcontainers `pgvector/pgvector:pg17`, cần Docker): chạy migration và seed dev, rồi nạp embedding của
+  150 đề từ fixture `docs/evaluation/rag/fixtures/question-bank-embeddings.csv`. Gemini vẫn gọi thật, nên số đo gần môi trường
+  triển khai hơn (DB gần server, server gọi ra Google). **Kiểm** P95 ≤ 4 s và ≤ 300 ms. Dùng số này để kết luận.
+
+Nội dung đo:
+
+- `generateP95IsWithin4Seconds`: thời gian end-to-end của UC-24 (embed, cache, truy hồi, LLM, kiểm tra, lưu cache), gồm cả chọn
+  đề dự phòng BR-7. Ghi `latency-generate.csv` (`topic,level,interests,branch,total_ms,db_ms,embed_ms,llm_ms,filter_ms,
+  cache_write_ms,other_ms`) và in p50/p95 từng bước, độ trễ một vòng đi về tới DB (`SELECT 1`) và số lượt theo nhánh
+  (generated, cache_hit hoặc fallback:<lý do>). Nếu LLM chiếm gần hết 4 s thì xem xét model nhẹ hơn cho riêng việc tạo đề.
+- `cacheHitP95IsWithin300MillisExcludingEmbedding`: dựng trước một entry cache cho mỗi truy vấn mẫu, đo tra cache + ghi lần phát,
+  **không tính** bước embed truy vấn; mọi truy vấn phải trúng entry của chính nó. Ghi `latency-cache-hit.csv`.
+- Biến tuỳ chọn: `RAG_LATENCY_PAUSE_MS` (nghỉ giữa các lượt sinh đề để tránh hạn mức Gemini; không tính vào thời gian đo).
+- Hai thiết lập giữ UC-24 trong ngân sách và tiết kiệm hạn mức: `rag.generation.min_llm_ms` (V11, mặc định 2000: còn ít hơn thì phát
+  đề có sẵn ngay với lý do `BUDGET_EXHAUSTED`, không gọi Gemini) và `prompt_template.thinking_level` (V11: `rag_question_generation`
+  v2 dùng `LOW`, mức thấp nhất của `gemini-3.8-flash`).
+
+**Xuất fixture cho chế độ local** (chỉ đọc, không gọi Gemini; chạy một lần, hỏi trước khi chạy vì chạm Supabase dev):
+
+```bash
+./gradlew externalTest --tests "com.pela.rag.evaluation.RagFixtureExportTest"
+```
+
+Kết quả: `docs/evaluation/rag/fixtures/question-bank-embeddings.csv` (cột `question_id,embedding_model,embedding`). Chạy đo local:
+
+```bash
+RAG_LATENCY_MODE=local ./gradlew externalTest --tests "com.pela.rag.evaluation.RagLatencyTest" --rerun-tasks -i
+```
 
 Bảng `rag_generation_log` (mỗi lần UC-24 chạy ghi outcome, lý do fallback, top-1 similarity, latency) dùng để thống kê tỉ lệ
 fallback và cache hit trên dữ liệu thật; các bài đo ở đây rollback nên không ghi vào bảng này. **Lưu ý khi đọc số liệu:**
@@ -136,7 +161,8 @@ fallback và cache hit trên dữ liệu thật; các bài đo ở đây rollbac
 
 ### 4. Chất lượng đề sinh ra (PER-3): CẦN NGƯỜI CHẤM
 
-1. `RagGenerationSampleTest` sinh 50 đề do AI mới tạo (xen kẽ các cặp topic + level và các sở thích) vào `generated.csv` với cột
+1. `RagGenerationSampleTest` (**đo chất lượng đề, không đo thời gian**: hạn chót mỗi lượt là `RAG_SAMPLE_DEADLINE_MS`, mặc định
+   60000 ms, và nghỉ giữa các lượt bằng `RAG_SAMPLE_PAUSE_MS`, mặc định 0, để không vượt hạn mức Gemini) sinh 50 đề do AI mới tạo (xen kẽ các cặp topic + level và các sở thích) vào `generated.csv` với cột
    `id,topic,level,prompt_text,on_topic_r1,right_level_r1,on_topic_r2,right_level_r2`; 4 cột cuối để trống.
 2. **Hai người chấm độc lập** điền `y`/`n` vào cột của mình (`_r1` hoặc `_r2`), không xem cột của người kia:
    - `on_topic`: đề đúng chủ đề được yêu cầu;

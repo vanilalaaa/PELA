@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
     }
 
     @Test
@@ -98,6 +98,23 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 String.class)).isEqualTo("0.95");
         assertThat(columns("rag_generation_log")).containsExactlyInAnyOrder("log_id", "user_id", "topic", "cefr_level",
                 "outcome", "reason", "top1_similarity", "latency_ms", "created_at");
+    }
+
+    @Test
+    void v11AddsMinLlmBudgetSettingAndBudgetExhaustedReason() {
+        assertThat(jdbc.queryForObject("SELECT value::text FROM system_setting WHERE setting_key = 'rag.generation.min_llm_ms'",
+                String.class)).isEqualTo("2000");
+        assertThat(jdbc.queryForObject("""
+                SELECT pg_get_constraintdef(oid) FROM pg_constraint
+                WHERE conrelid = 'rag_generation_log'::regclass AND conname = 'rag_generation_log_reason_check'
+                """, String.class)).contains("BUDGET_EXHAUSTED", "BELOW_THRESHOLD", "UPSTREAM_ERROR");
+    }
+
+    @Test
+    void v11AddsThinkingLevelAndSetsItForRagQuestionGeneration() {
+        assertThat(columns("prompt_template")).contains("thinking_level");
+        assertThat(jdbc.queryForList("SELECT name || ' v' || version || '=' || thinking_level FROM prompt_template "
+                + "WHERE thinking_level IS NOT NULL", String.class)).containsExactly("rag_question_generation v2=LOW");
     }
 
     @Test

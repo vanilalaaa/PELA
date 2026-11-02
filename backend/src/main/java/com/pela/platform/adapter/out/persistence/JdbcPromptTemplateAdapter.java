@@ -25,14 +25,15 @@ public class JdbcPromptTemplateAdapter implements PromptTemplatePort {
     @Override
     public Optional<PromptTemplate> active(String name) {
         return cache.get(name, n -> jdbc.query("""
-                        SELECT name, version, system_text, body, response_schema::text AS response_schema, temperature
+                        SELECT name, version, system_text, body, response_schema::text AS response_schema, temperature,
+                               thinking_level
                         FROM prompt_template WHERE name = ? AND is_active
                         """,
                 (rs, i) -> {
                     BigDecimal temperature = rs.getBigDecimal("temperature");
                     return new PromptTemplate(rs.getString("name"), rs.getInt("version"), rs.getString("system_text"),
                             rs.getString("body"), rs.getString("response_schema"),
-                            temperature == null ? null : temperature.doubleValue());
+                            temperature == null ? null : temperature.doubleValue(), rs.getString("thinking_level"));
                 }, n).stream().findFirst());
     }
 }

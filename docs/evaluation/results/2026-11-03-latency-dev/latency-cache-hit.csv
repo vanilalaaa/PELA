@@ -1,0 +1,21 @@
+topic,level,interests,millis
+Travel,A1,,900
+Work,A1,school,855
+Technology,A1,tech|movie,845
+Daily Life,A1,tech,852
+Travel,A2,school|health,829
+Technology,A2,,1031
+Daily Life,A2,family,1045
+Travel,B1,travel|food,1054
+Work,B1,animal,1046
+Technology,B1,animal|food,1050
+Technology,B2,,1043
+Work,B2,school,1053
+Society,B2,school|family,1046
+Environment,B2,music,1062
+Work,C1,animal|food,1039
+Technology,C1,,1059
+Society,C1,school,1033
+Society,C2,school|family,1055
+Technology,C2,animal,1041
+Work,C2,animal|food,1063

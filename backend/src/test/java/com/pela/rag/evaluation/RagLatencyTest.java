@@ -21,10 +21,18 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * PER-3 / PER-9: độ trễ P95 của pipeline sinh đề Writing (UC-24) trên Supabase dev và Gemini thật. Mỗi test chạy trong MỘT
- * transaction ghi rồi rollback ({@link RagEvalSupport.Pipeline#inRolledBackTransaction}): không để lại cache, lần phát
- * hay nhật ký. Số mẫu: biến {@code RAG_LATENCY_SAMPLES} (mặc định 20), lấy rải đều các dòng on_topic của queries.csv.
- * Tốn quota Gemini; không chạy trong ./gradlew build.
+ * PER-3 / PER-9: độ trễ P95 của pipeline sinh đề Writing (UC-24), đo chi tiết từng bước (db, embed, llm, filter, cache_write)
+ * và độ trễ một vòng đi về tới DB ({@code SELECT 1}). Gemini luôn được gọi thật (tốn quota).
+ *
+ * <p>Chế độ ({@code RAG_LATENCY_MODE}):
+ * <ul>
+ *   <li>{@code remote} (mặc định): DB là Supabase dev, đo từ máy dev. Độ trễ mạng tới DB chiếm phần lớn, nên chỉ để tham khảo
+ *       và KHÔNG kiểm tra ngưỡng PER-3/PER-9.</li>
+ *   <li>{@code local}: Postgres local (Testcontainers pgvector) nạp 150 đề + embedding từ fixture
+ *       {@code docs/evaluation/rag/fixtures/question-bank-embeddings.csv}; kiểm tra P95 ≤ 4 s và ≤ 300 ms.</li>
+ * </ul>
+ * Mọi thứ chạy trong một transaction ghi rồi rollback. Biến: {@code RAG_LATENCY_SAMPLES} (mặc định 20) và
+ * {@code RAG_LATENCY_PAUSE_MS} (nghỉ giữa các lượt sinh đề để tránh hạn mức Gemini, mặc định 0; không tính vào thời gian đo).
  */
 @Tag("external")
 class RagLatencyTest {
@@ -33,58 +41,90 @@ class RagLatencyTest {
     private static final double CACHE_HIT_P95_BUDGET_MS = 300;
     private static final double CACHE_MIN_SIMILARITY = 0.92;
     private static final int DEFAULT_SAMPLES = 20;
+    private static final int RTT_PROBES = 20;
+    private static final List<String> STAGES = List.of(StageTimer.DB, StageTimer.EMBED, StageTimer.LLM,
+            StageTimer.FILTER, StageTimer.CACHE_WRITE);
 
-    /** PER-3: end-to-end gồm cả chọn đề dự phòng BR-7 khi rag báo cần fallback. P95 ≤ 4 s. */
+    /** PER-3: end-to-end gồm cả chọn đề dự phòng BR-7 khi rag báo cần fallback. P95 ≤ 4 s (chỉ kiểm ở chế độ local). */
     @Test
     void generateP95IsWithin4Seconds() throws Exception {
-        try (RagEvalSupport support = RagEvalSupport.connect()) {
-            RagEvalSupport.Pipeline pipeline = support.pipeline();
+        boolean local = isLocal();
+        try (RagEvalSupport support = local ? RagEvalSupport.connectLocal() : RagEvalSupport.connect()) {
+            StageTimer timer = new StageTimer();
+            RagEvalSupport.Pipeline pipeline = support.pipeline(timer);
             List<RagEvalSupport.QueryRow> sample = sample(RagEvalSupport.readQueries());
             long budgetMillis = pipeline.settings().requiredInt("ai.question_gen_p95_budget_ms");
+            long pauseMillis = Long.parseLong(Optional.ofNullable(RagEvalSupport.config("RAG_LATENCY_PAUSE_MS")).orElse("0"));
+            double rtt = roundTripMillis(support);
 
             List<Double> millis = new ArrayList<>();
+            Map<String, List<Double>> byStage = new LinkedHashMap<>();
+            STAGES.forEach(stage -> byStage.put(stage, new ArrayList<>()));
             Map<String, Integer> outcomes = new LinkedHashMap<>();
             List<String> rows = new ArrayList<>();
-            rows.add("topic,level,interests,branch,millis");
+            rows.add("topic,level,interests,branch,total_ms,db_ms,embed_ms,llm_ms,filter_ms,cache_write_ms,other_ms");
             pipeline.inRolledBackTransaction(() -> {
-                for (RagEvalSupport.QueryRow row : sample) {
+                for (int i = 0; i < sample.size(); i++) {
+                    RagEvalSupport.QueryRow row = sample.get(i);
                     pipeline.interests().set(row.interests());
+                    timer.reset();
                     long start = System.nanoTime();
                     GenerationResult result = pipeline.generate().generate(pipeline.userId(), new GenerateCommand(
                             row.topic(), row.level(), null, Instant.now().plusMillis(budgetMillis)));
                     if (result instanceof NeedsFallback) {
                         pipeline.curated().pick(pipeline.userId(), row.topic(), row.level());
                     }
-                    double elapsed = (System.nanoTime() - start) / 1_000_000.0;
+                    double total = (System.nanoTime() - start) / 1_000_000.0;
                     String branch = result instanceof Generated generated ? generated.source().name().toLowerCase(Locale.ROOT)
                             : "fallback:" + ((NeedsFallback) result).reason();
-                    millis.add(elapsed);
+                    millis.add(total);
                     outcomes.merge(branch, 1, Integer::sum);
-                    rows.add(String.join(",", RagEvalSupport.csvCell(row.topic()), row.level(),
-                            RagEvalSupport.csvCell(String.join("|", row.interests())), branch,
-                            String.format(Locale.ROOT, "%.0f", elapsed)));
+                    List<String> cells = new ArrayList<>(List.of(RagEvalSupport.csvCell(row.topic()), row.level(),
+                            RagEvalSupport.csvCell(String.join("|", row.interests())), branch, ms(total)));
+                    for (String stage : STAGES) {
+                        byStage.get(stage).add(timer.millis(stage));
+                        cells.add(ms(timer.millis(stage)));
+                    }
+                    cells.add(ms(total - timer.totalMillis()));
+                    rows.add(String.join(",", cells));
+                    if (pauseMillis > 0 && i < sample.size() - 1) {
+                        sleep(pauseMillis);
+                    }
                 }
                 return null;
             });
 
             double p95 = EvalStats.percentile(millis, 95);
             var out = RagEvalSupport.write("latency-generate.csv", rows);
-            System.out.println("PER-3 generate latency -> " + out);
+            System.out.println("PER-3 generate latency (" + (local ? "local Postgres" : "REMOTE Supabase dev, network dominated")
+                    + ") -> " + out);
             System.out.printf(Locale.ROOT, "  n=%d, p50=%.0f ms, p95=%.0f ms (target <= %.0f ms), outcomes=%s%n", millis.size(),
                     EvalStats.percentile(millis, 50), p95, GENERATE_P95_BUDGET_MS, outcomes);
-            assertThat(p95).as("P95 generate latency (ms)").isLessThanOrEqualTo(GENERATE_P95_BUDGET_MS);
+            System.out.printf(Locale.ROOT, "  DB round trip (SELECT 1) p50 = %.1f ms%n", rtt);
+            for (String stage : STAGES) {
+                List<Double> values = byStage.get(stage);
+                System.out.printf(Locale.ROOT, "  stage %-11s p50=%6.0f ms  p95=%6.0f ms%n", stage,
+                        EvalStats.percentile(values, 50), EvalStats.percentile(values, 95));
+            }
+            if (local) {
+                assertThat(p95).as("P95 generate latency (ms)").isLessThanOrEqualTo(GENERATE_P95_BUDGET_MS);
+            } else {
+                System.out.println("  remote mode: PER-3 not asserted (use RAG_LATENCY_MODE=local for a comparable figure)");
+            }
         }
     }
 
     /**
-     * PER-9: nhánh cache hit (tra cache + ghi lần phát), KHÔNG tính bước embed truy vấn. Dựng trước entry cache cho mỗi
-     * truy vấn mẫu, rồi đo findHit + serveHit. P95 ≤ 300 ms.
+     * PER-9: nhánh cache hit (tra cache + ghi lần phát), KHÔNG tính bước embed truy vấn. Dựng trước entry cache cho mỗi truy vấn
+     * mẫu, rồi đo findHit + serveHit. P95 ≤ 300 ms (chỉ kiểm ở chế độ local).
      */
     @Test
     void cacheHitP95IsWithin300MillisExcludingEmbedding() throws Exception {
-        try (RagEvalSupport support = RagEvalSupport.connect()) {
+        boolean local = isLocal();
+        try (RagEvalSupport support = local ? RagEvalSupport.connectLocal() : RagEvalSupport.connect()) {
             RagEvalSupport.Pipeline pipeline = support.pipeline();
             List<RagEvalSupport.QueryRow> sample = sample(RagEvalSupport.readQueries());
+            double rtt = roundTripMillis(support);
 
             List<Double> millis = new ArrayList<>();
             List<String> rows = new ArrayList<>();
@@ -116,19 +156,50 @@ class RagLatencyTest {
                     }
                     millis.add(elapsed);
                     rows.add(String.join(",", RagEvalSupport.csvCell(row.topic()), row.level(),
-                            RagEvalSupport.csvCell(String.join("|", row.interests())),
-                            String.format(Locale.ROOT, "%.0f", elapsed)));
+                            RagEvalSupport.csvCell(String.join("|", row.interests())), ms(elapsed)));
                 }
                 return missed;
             });
 
             double p95 = EvalStats.percentile(millis, 95);
             var out = RagEvalSupport.write("latency-cache-hit.csv", rows);
-            System.out.println("PER-9 cache-hit latency (excluding embedding) -> " + out);
-            System.out.printf(Locale.ROOT, "  n=%d, p50=%.0f ms, p95=%.0f ms (target <= %.0f ms), misses=%d%n", millis.size(),
-                    EvalStats.percentile(millis, 50), p95, CACHE_HIT_P95_BUDGET_MS, misses);
+            System.out.println("PER-9 cache-hit latency excluding embedding (" + (local ? "local Postgres"
+                    : "REMOTE Supabase dev, network dominated") + ") -> " + out);
+            System.out.printf(Locale.ROOT, "  n=%d, p50=%.0f ms, p95=%.0f ms (target <= %.0f ms), misses=%d, DB round trip p50 = %.1f ms%n",
+                    millis.size(), EvalStats.percentile(millis, 50), p95, CACHE_HIT_P95_BUDGET_MS, misses, rtt);
             assertThat(misses).as("every probe query must hit its own cache entry").isZero();
-            assertThat(p95).as("P95 cache-hit latency (ms)").isLessThanOrEqualTo(CACHE_HIT_P95_BUDGET_MS);
+            if (local) {
+                assertThat(p95).as("P95 cache-hit latency (ms)").isLessThanOrEqualTo(CACHE_HIT_P95_BUDGET_MS);
+            } else {
+                System.out.println("  remote mode: PER-9 not asserted (use RAG_LATENCY_MODE=local for a comparable figure)");
+            }
+        }
+    }
+
+    private static boolean isLocal() throws Exception {
+        return "local".equalsIgnoreCase(RagEvalSupport.config("RAG_LATENCY_MODE"));
+    }
+
+    /** p50 của {@value #RTT_PROBES} lần {@code SELECT 1}: độ trễ một vòng đi về tới DB. */
+    private static double roundTripMillis(RagEvalSupport support) {
+        List<Double> probes = new ArrayList<>();
+        for (int i = 0; i < RTT_PROBES; i++) {
+            long start = System.nanoTime();
+            support.jdbc.queryForObject("SELECT 1", Integer.class);
+            probes.add((System.nanoTime() - start) / 1_000_000.0);
+        }
+        return EvalStats.percentile(probes, 50);
+    }
+
+    private static String ms(double value) {
+        return String.format(Locale.ROOT, "%.0f", value);
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

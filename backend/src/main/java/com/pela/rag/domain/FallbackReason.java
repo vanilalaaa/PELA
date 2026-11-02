@@ -22,5 +22,7 @@ public enum FallbackReason {
     /** JSON hợp lệ nhưng sai dạng bài, sai khoảng từ hoặc quá giống đề kho. */
     INVALID_OUTPUT,
     /** Nhà cung cấp AI lỗi hoặc giới hạn tốc độ. */
-    UPSTREAM_ERROR
+    UPSTREAM_ERROR,
+    /** Ngân sách thời gian còn ít hơn rag.generation.min_llm_ms nên không gọi LLM (tránh tốn hạn mức vô ích). */
+    BUDGET_EXHAUSTED
 }

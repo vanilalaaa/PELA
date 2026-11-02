@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -20,11 +21,16 @@ import org.junit.jupiter.api.Test;
  * docs/evaluation/rag/generated.csv (id, topic, level, prompt_text + 4 cột trống cho 2 người chấm). Chạy trong MỘT
  * transaction rồi rollback: không để lại cache hay nhật ký. Chỉ đề do AI mới tạo ("generated") được đưa vào mẫu; lượt
  * fallback hay cache hit chỉ được đếm. Chấm xong thì chạy {@link RagRatingReportTest}. Tốn quota Gemini.
+ *
+ * <p>Bài này đo CHẤT LƯỢNG đề, KHÔNG đo thời gian (dùng {@link RagLatencyTest} cho độ trễ), nên hạn chót mỗi lượt là
+ * {@code RAG_SAMPLE_DEADLINE_MS} (mặc định 60000 ms, không phải ngân sách 4 s của UC-24) và có thể nghỉ giữa các lượt bằng
+ * {@code RAG_SAMPLE_PAUSE_MS} (mặc định 0) để không vượt hạn mức Gemini (RPM).
  */
 @Tag("external")
 class RagGenerationSampleTest {
 
     static final int SAMPLE_SIZE = 50;
+    static final long DEFAULT_DEADLINE_MS = 60_000;
     static final String HEADER = "id,topic,level,prompt_text,on_topic_r1,right_level_r1,on_topic_r2,right_level_r2";
 
     @Test
@@ -32,20 +38,26 @@ class RagGenerationSampleTest {
         try (RagEvalSupport support = RagEvalSupport.connect()) {
             RagEvalSupport.Pipeline pipeline = support.pipeline();
             List<RagEvalSupport.QueryRow> requests = interleavedByPair(RagEvalSupport.readQueries());
-            long budgetMillis = pipeline.settings().requiredInt("ai.question_gen_p95_budget_ms");
+            long deadlineMillis = Long.parseLong(Optional.ofNullable(RagEvalSupport.config("RAG_SAMPLE_DEADLINE_MS"))
+                    .orElse(String.valueOf(DEFAULT_DEADLINE_MS)));
+            long pauseMillis = Long.parseLong(Optional.ofNullable(RagEvalSupport.config("RAG_SAMPLE_PAUSE_MS")).orElse("0"));
 
             List<String> rows = new ArrayList<>();
             rows.add(HEADER);
             Map<String, Integer> outcomes = new LinkedHashMap<>();
             pipeline.inRolledBackTransaction(() -> {
                 int generated = 0;
+                int made = 0;
                 for (RagEvalSupport.QueryRow row : requests) {
                     if (generated >= SAMPLE_SIZE) {
                         break;
                     }
+                    if (made++ > 0 && pauseMillis > 0) {
+                        sleep(pauseMillis);
+                    }
                     pipeline.interests().set(row.interests());
                     GenerationResult result = pipeline.generate().generate(pipeline.userId(), new GenerateCommand(
-                            row.topic(), row.level(), null, Instant.now().plusMillis(budgetMillis)));
+                            row.topic(), row.level(), null, Instant.now().plusMillis(deadlineMillis)));
                     if (result instanceof Generated g && g.source() == GenerationResult.Source.GENERATED) {
                         generated++;
                         outcomes.merge("generated", 1, Integer::sum);
@@ -63,6 +75,14 @@ class RagGenerationSampleTest {
             System.out.println("PER-3 generated sample -> " + out);
             System.out.println("  outcomes = " + outcomes + " (two reviewers fill the 4 empty columns independently)");
             assertThat(rows.size() - 1).as("generated prompts for review (outcomes: %s)", outcomes).isEqualTo(SAMPLE_SIZE);
+        }
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

@@ -233,6 +233,28 @@ class GeminiLlmAdapterTest {
         server.verify();
     }
 
+    @Test
+    void sendsTheThinkingLevelOfThePromptTemplate() {
+        PromptTemplatePort withThinking = name -> Optional.of(new PromptTemplate(name, 7, "System.", "Grade:\n{{essay}}",
+                SCHEMA, 0.3, "LOW"));
+        GeminiLlmAdapter thinking = new GeminiLlmAdapter(RestClient.builder().baseUrl(BASE).build(), withThinking, settings,
+                Validation.buildDefaultValidatorFactory().getValidator(), new ObjectMapper());
+
+        var body = thinking.requestBody(withThinking.active("t").orElseThrow().render(Map.of("essay", "x")),
+                "BLOCK_LOW_AND_ABOVE");
+
+        assertThat(body.at("/generationConfig/thinkingConfig/thinkingLevel").asText()).isEqualTo("LOW");
+    }
+
+    @Test
+    void omitsThinkingConfigWhenThePromptTemplateHasNoThinkingLevel() {
+        var body = adapter.requestBody(prompts.active("t").orElseThrow().render(Map.of("level", "B1", "essay", "x")),
+                "BLOCK_LOW_AND_ABOVE");
+
+        assertThat(body.at("/generationConfig").has("thinkingConfig")).isFalse();
+        assertThat(body.at("/generationConfig").has("temperature")).isTrue();
+    }
+
     private void assertKind(Kind expected) {
         assertThatThrownBy(this::call)
                 .isInstanceOf(AiCallException.class)
