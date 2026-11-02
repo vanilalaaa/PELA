@@ -70,10 +70,19 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 
 ### 1. Ngưỡng truy hồi (AS-7)
 
-- `queries.csv` có 133 truy vấn (cột `topic,level,query,expected`): 96 `on_topic` và 37 `off_topic`, phủ đủ 24 cặp
-  topic + level của bộ 138 đề (mỗi cặp ít nhất 2 `on_topic` và 1 `off_topic`). 45 dòng đầu là của hai cặp Travel/A2 và
-  Work/B1; 88 dòng sau thêm cho 22 cặp còn lại. Truy vấn `off_topic` vẫn lọc theo topic + level nhưng nội dung lạc đề,
-  mô phỏng việc truy hồi không tìm được đề phù hợp. Nhãn do người duyệt, không để AI gắn.
+- `queries.csv` có 133 truy vấn (cột `topic,level,query,expected,note`): 96 `on_topic` và 37 `off_topic`, phủ đủ 24
+  cặp topic + level của bộ 138 đề (mỗi cặp ít nhất 2 `on_topic` và 1 `off_topic`). 45 dòng đầu là của hai cặp
+  Travel/A2 và Work/B1; 88 dòng sau thêm cho 22 cặp còn lại. Truy vấn `off_topic` vẫn lọc theo topic + level nhưng nội
+  dung lạc đề, mô phỏng việc truy hồi không tìm được đề phù hợp. Nhãn do người duyệt, không để AI gắn.
+- **Cột `note`:** `kho_gap` đánh dấu truy vấn đúng nhãn nhưng **kho Writing chưa có đề gần chủ đề đó**, nên similarity
+  thấp và fallback BR-7 (trả đề có sẵn cùng topic + level) là hành vi đúng, không phải lỗi ngưỡng. Dòng `kho_gap` vẫn
+  được đo và ghi vào `threshold.csv`, nhưng **loại khỏi phần tính ngưỡng đề xuất** (in riêng một dòng). Ví dụ hiện có:
+  `Society,C2,Is a universal basic income better than targeted welfare?` (0.582): kho Writing không có đề nào về
+  thu nhập cơ bản phổ quát (chủ đề này chỉ có trong bài nghe `C2-SOC-03`).
+- **Truy vấn tự do chỉ để tham khảo.** SRS (`RAG.Embed.Input`) dựng truy vấn thật từ topic + level + sở thích của
+  người học, không phải câu tự do như `queries.csv` hiện tại. Kết quả đo bằng câu tự do (mốc 03/11/2026:
+  `docs/evaluation/results/2026-11-03-content/`) không dùng để chốt ngưỡng. Chốt ngưỡng sau khi UC-24 (P7) có hàm
+  dựng truy vấn duy nhất và bài đo gọi lại đúng hàm đó (xem `docs/backlog.md`, mục RAG).
 - `threshold.csv`: similarity Top-1 của từng truy vấn, sau khi lọc topic + level như RAG.Retrieve.
 - Phần in ra gồm phân bố (min/p25/median/p75/max) của từng nhóm, giá trị `rag.retrieval.min_similarity` hiện tại và
   **ngưỡng đề xuất**:

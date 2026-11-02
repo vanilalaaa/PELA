@@ -95,6 +95,11 @@ class EvalHelpersTest {
         assertThat(rows).filteredOn(r -> r.endsWith("/on_topic")).hasSize(96);
         assertThat(rows).filteredOn(r -> r.endsWith("/off_topic")).hasSize(37);
 
+        // kho_gap: truy vấn on_topic mà kho Writing chưa có đề gần (xem README); loại khỏi phần tính ngưỡng
+        List<String> notes = RagEvalSupport.readCsv(RagEvalSupport.EVAL_DIR.resolve("queries.csv"),
+                c -> c.size() > 4 ? c.get(4).trim() : "");
+        assertThat(notes).filteredOn("kho_gap"::equals).hasSize(1);
+
         List<String> pairs = rows.stream().map(r -> r.substring(0, r.lastIndexOf('/'))).distinct().toList();
         assertThat(pairs).hasSize(24);
         for (String pair : pairs) {
