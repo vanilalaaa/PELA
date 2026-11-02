@@ -46,6 +46,12 @@ class AiConfigAdaptersIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void readsThinkingLevelPerPromptTemplate() {
+        assertThat(prompts.active("rag_question_generation").orElseThrow().thinkingLevel()).isEqualTo("LOW");
+        assertThat(prompts.active("writing_grading").orElseThrow().thinkingLevel()).isNull();
+    }
+
+    @Test
     void readsActivePromptTemplate() {
         var template = prompts.active("writing_grading").orElseThrow();
 

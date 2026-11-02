@@ -95,6 +95,10 @@ public class GeminiLlmAdapter implements LlmPort {
         if (prompt.temperature() != null) {
             generationConfig.put("temperature", prompt.temperature());
         }
+        if (prompt.thinkingLevel() != null && !prompt.thinkingLevel().isBlank()) {
+            // Mức suy nghĩ cấu hình theo prompt_template.thinking_level; không gửi thì model dùng mặc định
+            generationConfig.putObject("thinkingConfig").put("thinkingLevel", prompt.thinkingLevel());
+        }
         ObjectNode textFormat = generationConfig.putObject("responseFormat").putObject("text");
         textFormat.put("mimeType", "APPLICATION_JSON");
         if (prompt.responseSchema() != null && !prompt.responseSchema().isBlank()) {
