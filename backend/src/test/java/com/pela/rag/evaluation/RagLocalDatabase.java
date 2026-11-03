@@ -27,11 +27,16 @@ final class RagLocalDatabase {
 
     /** Thông tin kết nối: {url, user, password}. Skip test nếu không có Docker hoặc thiếu fixture. */
     static String[] prepare(Path fixture) throws IOException {
+        return prepare(fixture, DATABASE);
+    }
+
+    /** Như {@link #prepare(Path)} nhưng trên database riêng {@code database} (để các test không dùng chung dữ liệu). */
+    static String[] prepare(Path fixture, String database) throws IOException {
         Assumptions.assumeTrue(org.testcontainers.DockerClientFactory.instance().isDockerAvailable(),
                 "Docker is not available: local mode needs Testcontainers");
         Assumptions.assumeTrue(Files.exists(fixture), "Fixture not found: " + fixture
                 + " (export it from Supabase dev with RagFixtureExportTest, see docs/evaluation/rag/README.md)");
-        String url = PgvectorContainer.jdbcUrlFor(DATABASE);
+        String url = PgvectorContainer.jdbcUrlFor(database);
         String user = PgvectorContainer.instance().getUsername();
         String password = PgvectorContainer.instance().getPassword();
         DriverManagerDataSource dataSource = new DriverManagerDataSource(url, user, password);

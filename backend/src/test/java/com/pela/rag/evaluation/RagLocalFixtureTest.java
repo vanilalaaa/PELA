@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -55,6 +56,36 @@ class RagLocalFixtureTest {
                 RagEvalSupport.SEED_USER)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT value::text FROM system_setting WHERE setting_key = 'ai.model.embedding'",
                 String.class)).isEqualTo("\"gemini-embedding-001\"");
+    }
+
+    /**
+     * Fixture thật (docs/evaluation/rag/fixtures, xuất từ Supabase dev): nạp vào Postgres local phải kích hoạt đủ mọi đề, mọi
+     * vector 768 chiều, đúng model embedding của hệ thống, và mỗi cặp topic + level có đủ 5 đề (RAG lấy Top-5). Bỏ qua nếu chưa
+     * có file fixture.
+     */
+    @Test
+    void theExportedFixtureActivatesEveryPromptWithValidVectors() throws Exception {
+        Assumptions.assumeTrue(Files.exists(RagLocalDatabase.FIXTURE), "fixture not exported yet");
+        List<List<String>> fixtureRows = RagEvalSupport.readCsv(RagLocalDatabase.FIXTURE, cells -> cells);
+
+        String[] connection = RagLocalDatabase.prepare(RagLocalDatabase.FIXTURE, "rag_real_fixture");
+
+        JdbcTemplate jdbc = new JdbcTemplate(new DriverManagerDataSource(connection[0], connection[1], connection[2]));
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM question_bank
+                WHERE question_purpose = 'writing_prompt' AND status = 'active' AND embedding_vector IS NOT NULL
+                """, Integer.class)).isEqualTo(fixtureRows.size());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM question_bank WHERE embedding_vector IS NOT NULL "
+                + "AND vector_dims(embedding_vector) <> 768", Integer.class)).isZero();
+        String modelSetting = jdbc.queryForObject("SELECT value::text FROM system_setting WHERE setting_key = "
+                + "'ai.model.embedding'", String.class);
+        assertThat(fixtureRows.stream().map(row -> "\"" + row.get(1) + "\"").distinct().toList())
+                .as("embedding model of the fixture vs system_setting ai.model.embedding").containsExactly(modelSetting);
+        assertThat(jdbc.queryForList("""
+                SELECT topic || ' ' || cefr_level || ' ' || count(*) FROM question_bank
+                WHERE question_purpose = 'writing_prompt' AND status = 'active'
+                GROUP BY topic, cefr_level HAVING count(*) < 5
+                """, String.class)).as("topic + level pairs with fewer than 5 active prompts").isEmpty();
     }
 
     private static String vector(Random random) {

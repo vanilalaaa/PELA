@@ -118,6 +118,18 @@ Kết quả nằm trong `backend/build/evaluation/rag/`. Phần tóm tắt in ra
 - Phần in ra có `HNSW index used`. Với ít đề, planner thường quét tuần tự nên recall luôn bằng 1, tức là chưa đo được
   gì. COM-3 nhắm tới 10.000 đề, nên cần chạy lại khi kho đề đủ lớn.
 
+**COM-3 ở quy mô 10.000 đề** (`RagIndexScaleTest`, Testcontainers, vector tổng hợp, không gọi Gemini, không chạm Supabase; mặc định
+bị bỏ qua trong build vì mất khoảng 1 phút rưỡi):
+
+```bash
+RAG_SCALE_TEST=true ./gradlew test --tests "com.pela.rag.evaluation.RagIndexScaleTest" -i
+```
+
+Nạp 10.000 đề và 10.000 entry cache vào Postgres local, kiểm tra: Recall@5 của index HNSW ≥ 0.90 (ép dùng index để đo chính index),
+P95 truy hồi ≤ 1000 ms, P95 cache hit ≤ 300 ms và mọi truy vấn trúng cache. Ghi `com3-scale.csv`. Kết quả 03/11/2026:
+`docs/evaluation/results/2026-11-03-com3-scale/` (recall 0.990, truy hồi P95 82 ms, cache hit P95 91 ms). Lưu ý: ở 10.000 đề Postgres
+chọn kế hoạch chính xác (B-tree hoặc quét tuần tự) cho các câu hỏi thật, nên HNSW chỉ được dùng khi kho lớn hơn hoặc khi bị ép.
+
 ### 3. Độ trễ (PER-3, PER-9)
 
 `RagLatencyTest` đo trên một mẫu truy vấn on_topic rải đều các cặp topic + level (mặc định 20, đổi bằng `RAG_LATENCY_SAMPLES`),
@@ -148,7 +160,11 @@ Nội dung đo:
 ./gradlew externalTest --tests "com.pela.rag.evaluation.RagFixtureExportTest"
 ```
 
-Kết quả: `docs/evaluation/rag/fixtures/question-bank-embeddings.csv` (cột `question_id,embedding_model,embedding`). Chạy đo local:
+Kết quả: `docs/evaluation/rag/fixtures/question-bank-embeddings.csv` (cột `question_id,embedding_model,embedding`), **được commit vào
+repo** (khoảng 1,4 MB, 150 đề) để mọi người chạy được chế độ local mà không cần Supabase. Fixture gắn với model embedding lúc xuất
+(`gemini-embedding-001`, 768 chiều) và với bộ 138 + 12 đề seed: **xuất lại khi đổi `ai.model.embedding` hoặc đổi nội dung đề**.
+`RagLocalFixtureTest` (chạy trong `./gradlew build`, Docker, không gọi Gemini) kiểm tra fixture nạp được vào Postgres local: kích
+hoạt đủ đề, vector 768 chiều, đúng model, mỗi cặp topic + level có ≥ 5 đề. Chạy đo local:
 
 ```bash
 RAG_LATENCY_MODE=local ./gradlew externalTest --tests "com.pela.rag.evaluation.RagLatencyTest" --rerun-tasks -i
