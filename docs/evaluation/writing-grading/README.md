@@ -6,7 +6,30 @@ grammar, spelling, word_choice, repetition, punctuation.
 
 ## Bộ dữ liệu — `dataset.csv`
 
-Hiện có 10 câu mẫu để kiểm tra công cụ. Cần bổ sung lên 100–150 câu trước khi kết luận PER-2.
+Hiện có **148 câu** (10 câu mẫu đầu file và 138 câu bổ sung, nằm trong khoảng 100–150 của PER-2):
+
+| Loại | Số câu / số lỗi |
+| --- | --- |
+| Lỗi grammar | 40 lỗi |
+| Lỗi spelling | 30 lỗi |
+| Lỗi word_choice | 30 lỗi |
+| Lỗi repetition | 19 lỗi |
+| Lỗi punctuation | 20 lỗi |
+| Câu đúng hoàn toàn (không có lỗi) | 21 câu |
+
+Một số câu có hai đến ba lỗi (khoảng 8 câu cuối nhóm bổ sung). **138 câu bổ sung là bản nháp do trợ lý AI soạn với lỗi cài có chủ
+đích** theo kiểu người học Việt Nam hay mắc (chia động từ, mạo từ, giới từ đi với từ, chính tả hay sai, nối câu bằng dấu phẩy,
+thiếu dấu hỏi). Mỗi câu chỉ có đúng các lỗi đã ghi. **SRS yêu cầu đáp án do người chú thích**, nên người phụ trách phải đọc từng
+dòng, sửa hoặc thay những câu không đồng ý, và chỉ coi bộ này là bộ kiểm thử PER-2 sau khi rà soát xong.
+
+Quy ước gán loại lỗi (để các câu ranh giới nhất quán):
+
+- Giới từ hoặc từ đi kèm sai (`interested on`, `since three years`, `looked the window`, `on 8 o'clock`) và dùng sai từ
+  (`strictly`, `hardly`, `machine`) là `word_choice`.
+- Nối hai mệnh đề độc lập chỉ bằng dấu phẩy (`It was raining, we stayed at home.`) và thiếu dấu câu cuối câu là
+  `punctuation`.
+- Chia sai động từ, thiếu hoặc sai mạo từ (`is teacher`, `a elephant`), sai số ít/nhiều là `grammar`.
+- Các câu `repetition` gồm cả khuôn "X is …, X is …" và lặp từ cách xa nhau trong đoạn dài.
 
 | Cột | Ý nghĩa |
 | --- | --- |
