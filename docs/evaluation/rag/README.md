@@ -148,7 +148,11 @@ Nội dung đo:
 ./gradlew externalTest --tests "com.pela.rag.evaluation.RagFixtureExportTest"
 ```
 
-Kết quả: `docs/evaluation/rag/fixtures/question-bank-embeddings.csv` (cột `question_id,embedding_model,embedding`). Chạy đo local:
+Kết quả: `docs/evaluation/rag/fixtures/question-bank-embeddings.csv` (cột `question_id,embedding_model,embedding`), **được commit vào
+repo** (khoảng 1,4 MB, 150 đề) để mọi người chạy được chế độ local mà không cần Supabase. Fixture gắn với model embedding lúc xuất
+(`gemini-embedding-001`, 768 chiều) và với bộ 138 + 12 đề seed: **xuất lại khi đổi `ai.model.embedding` hoặc đổi nội dung đề**.
+`RagLocalFixtureTest` (chạy trong `./gradlew build`, Docker, không gọi Gemini) kiểm tra fixture nạp được vào Postgres local: kích
+hoạt đủ đề, vector 768 chiều, đúng model, mỗi cặp topic + level có ≥ 5 đề. Chạy đo local:
 
 ```bash
 RAG_LATENCY_MODE=local ./gradlew externalTest --tests "com.pela.rag.evaluation.RagLatencyTest" --rerun-tasks -i
