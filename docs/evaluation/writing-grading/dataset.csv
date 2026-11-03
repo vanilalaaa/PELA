@@ -6,7 +6,7 @@ sentence,expected_issues
 "There is many people in the park today.",grammar:is
 "I like this movie because the movie is funny and the movie is short.",repetition:movie
 "Yesterday I buy a new phone, it is very expensive.","grammar:buy|punctuation:, it"
-"Can you borrow me your pen please?",word_choice:borrow
+"Can you borrow me your pen?",word_choice:borrow
 "My freind and I usually goes to the library on Sundays.",spelling:freind|grammar:goes
 "The weather was beautiful and we had a great time at the beach.",
 "My mother work in a hospital near my house.",grammar:work
@@ -37,7 +37,7 @@ sentence,expected_issues
 "She gave me many informations about the course.",grammar:informations
 "She didn't see nobody at the station.",grammar:didn't see nobody
 "I enjoy to watch movies on weekends.",grammar:to watch
-"My freind lives in a small village near Hue.",spelling:freind
+"My neigbour lives in a small village near Hue.",spelling:neigbour
 "I will recieve my exam results next week.",spelling:recieve
 "She is definately the best singer in our class.",spelling:definately
 "The weather was beautifull on the day of our trip.",spelling:beautifull
@@ -96,12 +96,12 @@ sentence,expected_issues
 "On Sunday I visited my grandmother. On Monday I visited the market. On Tuesday I visited a museum.",repetition:visited
 "The book was long, the story was sad, and the ending was sad, so I felt sad.",repetition:sad
 "People in my town are friendly, so I think the people here are kind, and the people never fight.",repetition:people
-"The beach is wide, the beach is quiet, and the beach is clean.",repetition:beach
-"My phone is old, my phone is slow, and my phone is broken.",repetition:phone
-"The street is noisy, the street is dirty, and the street is crowded.",repetition:street
-"The room is small, the room is dark, and the room is cold.",repetition:room
-"The lesson was long, the lesson was boring, and the lesson ended late.",repetition:lesson
-"My dog is small, my dog is brown, and my dog is very friendly.",repetition:dog
+"Last weekend my family went to the beach, and we spent the morning swimming. After lunch we stayed near the beach to read, and in the evening we walked along the beach.",repetition:beach
+"I really like my new school because the teachers are really kind and the lessons are really interesting.",repetition:really
+"My friend told me that the film was good, and I think the film was good because the actors were good.",repetition:good
+"We visited many places in Hue, and the places we liked most were the old places near the river.",repetition:places
+"My uncle has a small shop. In his shop he sells fruit, and every morning I help him in the shop.",repetition:shop
+"She said it was a nice day, so we had a nice picnic and ate nice food in a nice place.",repetition:nice
 "The hotel is clean, the hotel is cheap, and the hotel is near the beach.",repetition:hotel
 "It was raining, we stayed at home all day.","punctuation:, we"
 "She likes coffee, he prefers tea.","punctuation:, he"
@@ -119,13 +119,13 @@ sentence,expected_issues
 "Can you help me with this exercise.",punctuation:exercise.
 "Do you like spicy food.",punctuation:food.
 "Why are you so late today.",punctuation:today.
-"My sister have a beautifull dress for the party.",grammar:have|spelling:beautifull
-"He go to the restaurent every Friday evening.",grammar:go|spelling:restaurent
+"My sister have a lovley dress for the party.",grammar:have|spelling:lovley
+"He go to the cafetaria every Friday evening.",grammar:go|spelling:cafetaria
 "Tomorow I will visit my grandparents, we will cook dinner together.","spelling:Tomorow|punctuation:, we"
 "The students is interested on the new project.",grammar:students is|word_choice:interested on
 "I saw a elephant and a monkeys at the zoo.",grammar:a elephant|grammar:a monkeys
 "She is afraid with dogs, she never go outside alone.","word_choice:afraid with|punctuation:, she|grammar:go"
-"We did a lot of mistakes in the intresting test.",word_choice:did a lot of mistakes|spelling:intresting
+"We did a lot of mistakes in the dificult test.",word_choice:did a lot of mistakes|spelling:dificult
 "My brother is proud with his new bike, he ride it every day.","word_choice:proud with|punctuation:, he|grammar:ride"
 "I usually walk to school with my best friend.",
 "My grandmother cooks delicious noodles every Sunday.",
