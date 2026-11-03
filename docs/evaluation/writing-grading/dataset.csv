@@ -9,3 +9,141 @@ sentence,expected_issues
 "Can you borrow me your pen please?",word_choice:borrow
 "My freind and I usually goes to the library on Sundays.",spelling:freind|grammar:goes
 "The weather was beautiful and we had a great time at the beach.",
+"My mother work in a hospital near my house.",grammar:work
+"She don't like spicy food at all.",grammar:don't
+"Yesterday we go to the beach with our cousins.",grammar:go
+"He have a new bike for his birthday.",grammar:have
+"There are a cat sleeping under the table.",grammar:are a
+"I am agree with your opinion about this topic.",grammar:am agree
+"My brothers plays football every Saturday.",grammar:plays
+"I have visited Hue last summer with my family.",grammar:have visited
+"She can speaks three languages very well.",grammar:can speaks
+"We is going to the cinema tonight.",grammar:We is
+"He doesn't has any brothers or sisters.",grammar:doesn't has
+"I want to buying a new phone next month.",grammar:to buying
+"My sister is more taller than me.",grammar:more taller
+"I saw a elephant at the zoo yesterday.",grammar:a elephant
+"She always help other students with their homework.",grammar:help
+"I didn't went to school because I was sick.",grammar:didn't went
+"They was very tired after the long trip.",grammar:was
+"He asked me where did I buy this jacket.",grammar:did I buy
+"If it will rain tomorrow, we will stay at home.",grammar:will rain
+"I have two brother and one sister.",grammar:two brother
+"Many peoples visit this old temple every year.",grammar:peoples
+"The news are very surprising for everyone.",grammar:news are
+"I look forward to see you next week.",grammar:to see
+"He suggested to go to the park after lunch.",grammar:to go
+"My father is teacher in a small high school.",grammar:is teacher
+"She gave me many informations about the course.",grammar:informations
+"She didn't see nobody at the station.",grammar:didn't see nobody
+"I enjoy to watch movies on weekends.",grammar:to watch
+"My freind lives in a small village near Hue.",spelling:freind
+"I will recieve my exam results next week.",spelling:recieve
+"She is definately the best singer in our class.",spelling:definately
+"The weather was beautifull on the day of our trip.",spelling:beautifull
+"We will visit our grandparents tommorow morning.",spelling:tommorow
+"We must protect the enviroment for future generations.",spelling:enviroment
+"There is a nice restaurent next to my school.",spelling:restaurent
+"I read an intresting story about a brave girl.",spelling:intresting
+"I can't beleive that the holiday is over already.",spelling:beleive
+"He is a very responsable person at work.",spelling:responsable
+"It is necesary to drink enough water every day.",spelling:necesary
+"The hotel offers cheap accomodation for students.",spelling:accomodation
+"Please write your adress on the form below.",spelling:adress
+"The goverment built a new bridge in our city.",spelling:goverment
+"I keep my books and my notes in seperate boxes.",spelling:seperate
+"The accident occured near the bus station at night.",spelling:occured
+"My sister is good at mathmatics and physics.",spelling:mathmatics
+"She has a lot of experiance in teaching children.",spelling:experiance
+"Our teacher gave us a differrent task today.",spelling:differrent
+"I bought a new dictionery for my English class.",spelling:dictionery
+"We had a wonderfull time at the concert.",spelling:wonderfull
+"He was embarassed when he forgot his lines.",spelling:embarassed
+"I usualy go to bed before eleven o'clock.",spelling:usualy
+"My brother likes to play footbal with his classmates.",spelling:footbal
+"I am interested on learning English with native speakers.",word_choice:interested on
+"She is afraid with spiders and snakes.",word_choice:afraid with
+"My father is very bad in singing.",word_choice:bad in
+"We watched the match in the television last night.",word_choice:in the television
+"I will go to home after the meeting ends.",word_choice:to home
+"He is married with a doctor from Hanoi.",word_choice:married with
+"He passed the exam, so his family was very proud with him.",word_choice:proud with
+"She was born in 1999 at Ho Chi Minh City.",word_choice:at Ho Chi Minh City
+"My house is near of the train station.",word_choice:near of
+"The lesson begins on 8 o'clock every morning.",word_choice:on 8 o'clock
+"I have been living here since three years.",word_choice:since three years
+"I stayed in the hotel during three days.",word_choice:during three days
+"I did a lot of mistakes in the last test.",word_choice:did a lot of mistakes
+"Please make your homework before dinner.",word_choice:make your homework
+"I lent a book from the library yesterday.",word_choice:lent
+"Someone robbed my bicycle last night.",word_choice:robbed
+"My teacher is very kind, so I like her strictly.",word_choice:strictly
+"I am very pleasant to meet you today.",word_choice:pleasant
+"He took a photo with his new machine.",word_choice:machine
+"I will do a party for my birthday next week.",word_choice:do a party
+"My grandmother likes to look TV after dinner.",word_choice:look TV
+"She gets very good marks because she studies hardly.",word_choice:hardly
+"I heard some noise and looked the window.",word_choice:looked the window
+"Please open the light because it is too dark here.",word_choice:open the light
+"My teacher is kind. My teacher is funny. My teacher helps every student.",repetition:teacher
+"The park is big and the park is clean, and I love the park in my city.",repetition:park
+"I bought a bag, and my sister bought a bag, and my mother also bought a bag.",repetition:bag
+"We went to the market, and then we went to the shop, and then we went to school.",repetition:went
+"She likes music, her brother likes music, and their parents like music too.",repetition:music
+"My city has many shops, many shops sell clothes, and many shops sell shoes.",repetition:shops
+"I study English every day because English is important and English helps me find a job.",repetition:English
+"The weather was cold, so I wore a coat, and my brother wore a coat, and my father wore a coat.",repetition:coat
+"On Sunday I visited my grandmother. On Monday I visited the market. On Tuesday I visited a museum.",repetition:visited
+"The book was long, the story was sad, and the ending was sad, so I felt sad.",repetition:sad
+"People in my town are friendly, so I think the people here are kind, and the people never fight.",repetition:people
+"The beach is wide, the beach is quiet, and the beach is clean.",repetition:beach
+"My phone is old, my phone is slow, and my phone is broken.",repetition:phone
+"The street is noisy, the street is dirty, and the street is crowded.",repetition:street
+"The room is small, the room is dark, and the room is cold.",repetition:room
+"The lesson was long, the lesson was boring, and the lesson ended late.",repetition:lesson
+"My dog is small, my dog is brown, and my dog is very friendly.",repetition:dog
+"The hotel is clean, the hotel is cheap, and the hotel is near the beach.",repetition:hotel
+"It was raining, we stayed at home all day.","punctuation:, we"
+"She likes coffee, he prefers tea.","punctuation:, he"
+"The shop was closed, I went home.","punctuation:, I"
+"I finished my homework, I watched a film.","punctuation:, I"
+"Our train was late, we missed the first class.","punctuation:, we"
+"My brother is a doctor, my sister is a nurse.","punctuation:, my"
+"The weather was bad, the match was cancelled.","punctuation:, the"
+"He was very hungry, he ate three bowls of rice.","punctuation:, he"
+"She was nervous, she forgot her speech.","punctuation:, she"
+"My phone broke, I bought a new one.","punctuation:, I"
+"Where do you live.",punctuation:live.
+"What time does the film start.",punctuation:start.
+"How old is your sister.",punctuation:sister.
+"Can you help me with this exercise.",punctuation:exercise.
+"Do you like spicy food.",punctuation:food.
+"Why are you so late today.",punctuation:today.
+"My sister have a beautifull dress for the party.",grammar:have|spelling:beautifull
+"He go to the restaurent every Friday evening.",grammar:go|spelling:restaurent
+"Tomorow I will visit my grandparents, we will cook dinner together.","spelling:Tomorow|punctuation:, we"
+"The students is interested on the new project.",grammar:students is|word_choice:interested on
+"I saw a elephant and a monkeys at the zoo.",grammar:a elephant|grammar:a monkeys
+"She is afraid with dogs, she never go outside alone.","word_choice:afraid with|punctuation:, she|grammar:go"
+"We did a lot of mistakes in the intresting test.",word_choice:did a lot of mistakes|spelling:intresting
+"My brother is proud with his new bike, he ride it every day.","word_choice:proud with|punctuation:, he|grammar:ride"
+"I usually walk to school with my best friend.",
+"My grandmother cooks delicious noodles every Sunday.",
+"We are planning a short trip to Da Lat next month.",
+"She has been learning English for three years.",
+"The library closes at nine o'clock on weekdays.",
+"Last summer I visited my cousins in the countryside.",
+"He didn't have enough money to buy the ticket.",
+"There are many beautiful temples in this old city.",
+"If you study hard, you will pass the exam.",
+"My brother wants to become an engineer one day.",
+"Could you tell me how to get to the bus station?",
+"They are watching a football match at the stadium.",
+"It is important to drink enough water in hot weather.",
+"I have never seen such a big spider before.",
+"Our teacher asked us to write a short story.",
+"She was reading a book when the phone rang.",
+"The children played in the garden until it got dark.",
+"I would like a cup of tea with a little sugar, please.",
+"My parents often take me to the park on Saturdays.",
+"The new shopping centre is bigger than the old one.",
