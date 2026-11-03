@@ -1,0 +1,169 @@
+topic,level,interests,filter_topic,expected,query,top1_question_id,top1_similarity,note
+Travel,A1,,,on_topic,Writing prompt. Topic: Travel. CEFR level: A1.,9b000000-0000-4000-8000-001021000000,0.7877,
+Travel,A1,travel,,on_topic,Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: travel.,9b000000-0000-4000-8000-001021000000,0.7837,
+Travel,A1,travel|food,,on_topic,"Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: travel, food.",9b000000-0000-4000-8000-001021000000,0.7720,
+Travel,A1,school,,on_topic,Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: school.,9b000000-0000-4000-8000-001021000000,0.7767,interest_far
+Travel,A1,school|health,,on_topic,"Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: school, health.",9b000000-0000-4000-8000-001021000000,0.7666,interest_far
+Travel,A1,,Work,off_topic,Writing prompt. Topic: Travel. CEFR level: A1.,9b000000-0000-4000-8000-001008000000,0.7066,
+Travel,A1,travel,Technology,off_topic,Writing prompt. Topic: Travel. CEFR level: A1. Learner interests: travel.,9b000000-0000-4000-8000-001028000000,0.7175,
+Work,A1,,,on_topic,Writing prompt. Topic: Work. CEFR level: A1.,9b000000-0000-4000-8000-001008000000,0.7850,
+Work,A1,school,,on_topic,Writing prompt. Topic: Work. CEFR level: A1. Learner interests: school.,9b000000-0000-4000-8000-001008000000,0.8108,
+Work,A1,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: A1. Learner interests: school, tech.",9b000000-0000-4000-8000-001008000000,0.7999,
+Work,A1,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: A1. Learner interests: animal.,9b000000-0000-4000-8000-001008000000,0.7661,interest_far
+Work,A1,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: A1. Learner interests: animal, food.",9b000000-0000-4000-8000-001008000000,0.7655,interest_far
+Work,A1,,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: A1.,9b000000-0000-4000-8000-001006000000,0.7029,
+Work,A1,school,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: A1. Learner interests: school.,9b000000-0000-4000-8000-001006000000,0.7045,
+Technology,A1,,,on_topic,Writing prompt. Topic: Technology. CEFR level: A1.,9b000000-0000-4000-8000-001028000000,0.7837,
+Technology,A1,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: A1. Learner interests: tech.,9b000000-0000-4000-8000-001028000000,0.7923,
+Technology,A1,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: A1. Learner interests: tech, movie.",9b000000-0000-4000-8000-001028000000,0.7645,
+Technology,A1,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: A1. Learner interests: animal.,9b000000-0000-4000-8000-001028000000,0.7654,interest_far
+Technology,A1,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: A1. Learner interests: animal, food.",9b000000-0000-4000-8000-001028000000,0.7683,interest_far
+Technology,A1,,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: A1.,9b000000-0000-4000-8000-001022000000,0.7226,
+Technology,A1,tech,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: A1. Learner interests: tech.,9b000000-0000-4000-8000-001022000000,0.7255,
+Daily Life,A1,,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A1.,9b000000-0000-4000-8000-001002000000,0.7940,
+Daily Life,A1,family,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A1. Learner interests: family.,9b000000-0000-4000-8000-001005000000,0.7955,
+Daily Life,A1,family|food,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: A1. Learner interests: family, food.",9b000000-0000-4000-8000-001005000000,0.7770,
+Daily Life,A1,tech,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A1. Learner interests: tech.,9b000000-0000-4000-8000-001002000000,0.7710,interest_far
+Daily Life,A1,tech|school,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: A1. Learner interests: tech, school.",9b000000-0000-4000-8000-001002000000,0.7820,interest_far
+Daily Life,A1,,Technology,off_topic,Writing prompt. Topic: Daily Life. CEFR level: A1.,9b000000-0000-4000-8000-001027000000,0.7356,
+Daily Life,A1,family,Travel,off_topic,Writing prompt. Topic: Daily Life. CEFR level: A1. Learner interests: family.,9b000000-0000-4000-8000-001006000000,0.7208,
+Travel,A2,,,on_topic,Writing prompt. Topic: Travel. CEFR level: A2.,9b000000-0000-4000-8000-002001000000,0.7838,
+Travel,A2,travel,,on_topic,Writing prompt. Topic: Travel. CEFR level: A2. Learner interests: travel.,9b000000-0000-4000-8000-002001000000,0.7825,
+Travel,A2,travel|food,,on_topic,"Writing prompt. Topic: Travel. CEFR level: A2. Learner interests: travel, food.",9b000000-0000-4000-8000-002001000000,0.7672,
+Travel,A2,school,,on_topic,Writing prompt. Topic: Travel. CEFR level: A2. Learner interests: school.,9b000000-0000-4000-8000-002001000000,0.7788,interest_far
+Travel,A2,school|health,,on_topic,"Writing prompt. Topic: Travel. CEFR level: A2. Learner interests: school, health.",9b000000-0000-4000-8000-002001000000,0.7667,interest_far
+Travel,A2,,Work,off_topic,Writing prompt. Topic: Travel. CEFR level: A2.,9b000000-0000-4000-8000-002002000000,0.6879,
+Travel,A2,travel,Technology,off_topic,Writing prompt. Topic: Travel. CEFR level: A2. Learner interests: travel.,9b000000-0000-4000-8000-002004000000,0.6913,
+Work,A2,,,on_topic,Writing prompt. Topic: Work. CEFR level: A2.,9b000000-0000-4000-8000-002020000000,0.7497,
+Work,A2,school,,on_topic,Writing prompt. Topic: Work. CEFR level: A2. Learner interests: school.,9b000000-0000-4000-8000-002020000000,0.7621,
+Work,A2,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: A2. Learner interests: school, tech.",9b000000-0000-4000-8000-002020000000,0.7717,
+Work,A2,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: A2. Learner interests: animal.,9b000000-0000-4000-8000-002020000000,0.7377,interest_far
+Work,A2,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: A2. Learner interests: animal, food.",9b000000-0000-4000-8000-002020000000,0.7380,interest_far
+Work,A2,,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: A2.,9b000000-0000-4000-8000-002001000000,0.7119,
+Work,A2,school,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: A2. Learner interests: school.,9b000000-0000-4000-8000-002001000000,0.7132,
+Technology,A2,,,on_topic,Writing prompt. Topic: Technology. CEFR level: A2.,9b000000-0000-4000-8000-002024000000,0.8055,
+Technology,A2,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: A2. Learner interests: tech.,9b000000-0000-4000-8000-002024000000,0.8076,
+Technology,A2,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: A2. Learner interests: tech, movie.",9b000000-0000-4000-8000-002024000000,0.7738,
+Technology,A2,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: A2. Learner interests: animal.,9b000000-0000-4000-8000-002024000000,0.7798,interest_far
+Technology,A2,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: A2. Learner interests: animal, food.",9b000000-0000-4000-8000-002024000000,0.7763,interest_far
+Technology,A2,,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: A2.,9b000000-0000-4000-8000-002001000000,0.7179,
+Technology,A2,tech,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: A2. Learner interests: tech.,9b000000-0000-4000-8000-002001000000,0.7191,
+Daily Life,A2,,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A2.,9b000000-0000-4000-8000-002016000000,0.7417,
+Daily Life,A2,family,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A2. Learner interests: family.,9b000000-0000-4000-8000-002016000000,0.7310,
+Daily Life,A2,family|food,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: A2. Learner interests: family, food.",9b000000-0000-4000-8000-002016000000,0.7208,
+Daily Life,A2,tech,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: A2. Learner interests: tech.,9b000000-0000-4000-8000-002016000000,0.7397,interest_far
+Daily Life,A2,tech|school,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: A2. Learner interests: tech, school.",9b000000-0000-4000-8000-002016000000,0.7351,interest_far
+Daily Life,A2,,Technology,off_topic,Writing prompt. Topic: Daily Life. CEFR level: A2.,9b000000-0000-4000-8000-002008000000,0.7423,
+Daily Life,A2,family,Travel,off_topic,Writing prompt. Topic: Daily Life. CEFR level: A2. Learner interests: family.,9b000000-0000-4000-8000-002001000000,0.7268,
+Travel,B1,,,on_topic,Writing prompt. Topic: Travel. CEFR level: B1.,9b000000-0000-4000-8000-003021000000,0.7357,
+Travel,B1,travel,,on_topic,Writing prompt. Topic: Travel. CEFR level: B1. Learner interests: travel.,9b000000-0000-4000-8000-003022000000,0.7284,
+Travel,B1,travel|food,,on_topic,"Writing prompt. Topic: Travel. CEFR level: B1. Learner interests: travel, food.",9b000000-0000-4000-8000-003022000000,0.7119,
+Travel,B1,school,,on_topic,Writing prompt. Topic: Travel. CEFR level: B1. Learner interests: school.,9b000000-0000-4000-8000-003023000000,0.7139,interest_far
+Travel,B1,school|health,,on_topic,"Writing prompt. Topic: Travel. CEFR level: B1. Learner interests: school, health.",9b000000-0000-4000-8000-003023000000,0.7102,interest_far
+Travel,B1,,Work,off_topic,Writing prompt. Topic: Travel. CEFR level: B1.,9a000000-0000-4000-8000-000000000204,0.6983,
+Travel,B1,travel,Technology,off_topic,Writing prompt. Topic: Travel. CEFR level: B1. Learner interests: travel.,9b000000-0000-4000-8000-003024000000,0.6644,
+Work,B1,,,on_topic,Writing prompt. Topic: Work. CEFR level: B1.,9a000000-0000-4000-8000-000000000204,0.7392,
+Work,B1,school,,on_topic,Writing prompt. Topic: Work. CEFR level: B1. Learner interests: school.,9a000000-0000-4000-8000-000000000205,0.7298,
+Work,B1,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: B1. Learner interests: school, tech.",9b000000-0000-4000-8000-003002000000,0.7367,
+Work,B1,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: B1. Learner interests: animal.,9a000000-0000-4000-8000-000000000204,0.7093,interest_far
+Work,B1,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: B1. Learner interests: animal, food.",9a000000-0000-4000-8000-000000000205,0.7100,interest_far
+Work,B1,,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: B1.,9b000000-0000-4000-8000-003023000000,0.6619,
+Work,B1,school,Travel,off_topic,Writing prompt. Topic: Work. CEFR level: B1. Learner interests: school.,9b000000-0000-4000-8000-003023000000,0.6562,
+Technology,B1,,,on_topic,Writing prompt. Topic: Technology. CEFR level: B1.,9b000000-0000-4000-8000-003020000000,0.7615,
+Technology,B1,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: B1. Learner interests: tech.,9b000000-0000-4000-8000-003020000000,0.7720,
+Technology,B1,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: B1. Learner interests: tech, movie.",9b000000-0000-4000-8000-003020000000,0.7379,
+Technology,B1,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: B1. Learner interests: animal.,9b000000-0000-4000-8000-003020000000,0.7396,interest_far
+Technology,B1,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: B1. Learner interests: animal, food.",9b000000-0000-4000-8000-003020000000,0.7345,interest_far
+Technology,B1,,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: B1.,9b000000-0000-4000-8000-003021000000,0.6754,
+Technology,B1,tech,Travel,off_topic,Writing prompt. Topic: Technology. CEFR level: B1. Learner interests: tech.,9b000000-0000-4000-8000-003023000000,0.6772,
+Daily Life,B1,,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: B1.,9b000000-0000-4000-8000-003003000000,0.7423,
+Daily Life,B1,family,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: B1. Learner interests: family.,9b000000-0000-4000-8000-003007000000,0.7335,
+Daily Life,B1,family|food,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: B1. Learner interests: family, food.",9b000000-0000-4000-8000-003007000000,0.7231,
+Daily Life,B1,tech,,on_topic,Writing prompt. Topic: Daily Life. CEFR level: B1. Learner interests: tech.,9b000000-0000-4000-8000-003007000000,0.7128,interest_far
+Daily Life,B1,tech|school,,on_topic,"Writing prompt. Topic: Daily Life. CEFR level: B1. Learner interests: tech, school.",9b000000-0000-4000-8000-003003000000,0.7078,interest_far
+Daily Life,B1,,Technology,off_topic,Writing prompt. Topic: Daily Life. CEFR level: B1.,9b000000-0000-4000-8000-003025000000,0.7109,
+Daily Life,B1,family,Travel,off_topic,Writing prompt. Topic: Daily Life. CEFR level: B1. Learner interests: family.,9b000000-0000-4000-8000-003023000000,0.6918,
+Technology,B2,,,on_topic,Writing prompt. Topic: Technology. CEFR level: B2.,9b000000-0000-4000-8000-004001000000,0.7208,
+Technology,B2,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: B2. Learner interests: tech.,9b000000-0000-4000-8000-004018000000,0.7169,
+Technology,B2,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: B2. Learner interests: tech, movie.",9b000000-0000-4000-8000-004018000000,0.6894,
+Technology,B2,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: B2. Learner interests: animal.,9b000000-0000-4000-8000-004008000000,0.6986,interest_far
+Technology,B2,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: B2. Learner interests: animal, food.",9b000000-0000-4000-8000-004008000000,0.6932,interest_far
+Technology,B2,,Environment,off_topic,Writing prompt. Topic: Technology. CEFR level: B2.,9b000000-0000-4000-8000-004015000000,0.6922,
+Technology,B2,tech,Environment,off_topic,Writing prompt. Topic: Technology. CEFR level: B2. Learner interests: tech.,9b000000-0000-4000-8000-004015000000,0.6883,
+Work,B2,,,on_topic,Writing prompt. Topic: Work. CEFR level: B2.,9b000000-0000-4000-8000-004002000000,0.7311,
+Work,B2,school,,on_topic,Writing prompt. Topic: Work. CEFR level: B2. Learner interests: school.,9b000000-0000-4000-8000-004006000000,0.7230,
+Work,B2,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: B2. Learner interests: school, tech.",9b000000-0000-4000-8000-004002000000,0.7225,
+Work,B2,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: B2. Learner interests: animal.,9b000000-0000-4000-8000-004006000000,0.7189,interest_far
+Work,B2,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: B2. Learner interests: animal, food.",9b000000-0000-4000-8000-004006000000,0.7057,interest_far
+Work,B2,,Environment,off_topic,Writing prompt. Topic: Work. CEFR level: B2.,9b000000-0000-4000-8000-004020000000,0.6714,
+Work,B2,school,Society,off_topic,Writing prompt. Topic: Work. CEFR level: B2. Learner interests: school.,9b000000-0000-4000-8000-004003000000,0.6836,
+Society,B2,,,on_topic,Writing prompt. Topic: Society. CEFR level: B2.,9b000000-0000-4000-8000-004009000000,0.7011,
+Society,B2,school,,on_topic,Writing prompt. Topic: Society. CEFR level: B2. Learner interests: school.,9b000000-0000-4000-8000-004003000000,0.7161,
+Society,B2,school|family,,on_topic,"Writing prompt. Topic: Society. CEFR level: B2. Learner interests: school, family.",9b000000-0000-4000-8000-004003000000,0.6967,
+Society,B2,animal,,on_topic,Writing prompt. Topic: Society. CEFR level: B2. Learner interests: animal.,9b000000-0000-4000-8000-004009000000,0.6845,interest_far
+Society,B2,animal|sport,,on_topic,"Writing prompt. Topic: Society. CEFR level: B2. Learner interests: animal, sport.",9b000000-0000-4000-8000-004009000000,0.6781,interest_far
+Society,B2,,Environment,off_topic,Writing prompt. Topic: Society. CEFR level: B2.,9b000000-0000-4000-8000-004020000000,0.7178,
+Society,B2,school,Work,off_topic,Writing prompt. Topic: Society. CEFR level: B2. Learner interests: school.,9b000000-0000-4000-8000-004002000000,0.6849,
+Environment,B2,,,on_topic,Writing prompt. Topic: Environment. CEFR level: B2.,9b000000-0000-4000-8000-004020000000,0.7636,
+Environment,B2,animal,,on_topic,Writing prompt. Topic: Environment. CEFR level: B2. Learner interests: animal.,9b000000-0000-4000-8000-004020000000,0.7513,
+Environment,B2,animal|travel,,on_topic,"Writing prompt. Topic: Environment. CEFR level: B2. Learner interests: animal, travel.",9b000000-0000-4000-8000-004020000000,0.7385,
+Environment,B2,music,,on_topic,Writing prompt. Topic: Environment. CEFR level: B2. Learner interests: music.,9b000000-0000-4000-8000-004020000000,0.7327,interest_far
+Environment,B2,music|movie,,on_topic,"Writing prompt. Topic: Environment. CEFR level: B2. Learner interests: music, movie.",9b000000-0000-4000-8000-004020000000,0.7240,interest_far
+Environment,B2,,Work,off_topic,Writing prompt. Topic: Environment. CEFR level: B2.,9b000000-0000-4000-8000-004006000000,0.6754,
+Environment,B2,animal,Technology,off_topic,Writing prompt. Topic: Environment. CEFR level: B2. Learner interests: animal.,9b000000-0000-4000-8000-004001000000,0.6572,
+Work,C1,,,on_topic,Writing prompt. Topic: Work. CEFR level: C1.,9b000000-0000-4000-8000-005017000000,0.7233,
+Work,C1,school,,on_topic,Writing prompt. Topic: Work. CEFR level: C1. Learner interests: school.,9b000000-0000-4000-8000-005017000000,0.7114,
+Work,C1,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: C1. Learner interests: school, tech.",9b000000-0000-4000-8000-005017000000,0.7100,
+Work,C1,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: C1. Learner interests: animal.,9b000000-0000-4000-8000-005017000000,0.7068,interest_far
+Work,C1,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: C1. Learner interests: animal, food.",9b000000-0000-4000-8000-005017000000,0.6965,interest_far
+Work,C1,,Environment,off_topic,Writing prompt. Topic: Work. CEFR level: C1.,9b000000-0000-4000-8000-005010000000,0.6890,
+Work,C1,school,Environment,off_topic,Writing prompt. Topic: Work. CEFR level: C1. Learner interests: school.,9b000000-0000-4000-8000-005010000000,0.6825,
+Environment,C1,,,on_topic,Writing prompt. Topic: Environment. CEFR level: C1.,9b000000-0000-4000-8000-005002000000,0.7069,
+Environment,C1,animal,,on_topic,Writing prompt. Topic: Environment. CEFR level: C1. Learner interests: animal.,9b000000-0000-4000-8000-005015000000,0.6952,
+Environment,C1,animal|travel,,on_topic,"Writing prompt. Topic: Environment. CEFR level: C1. Learner interests: animal, travel.",9b000000-0000-4000-8000-005015000000,0.6794,
+Environment,C1,music,,on_topic,Writing prompt. Topic: Environment. CEFR level: C1. Learner interests: music.,9b000000-0000-4000-8000-005016000000,0.6791,interest_far
+Environment,C1,music|movie,,on_topic,"Writing prompt. Topic: Environment. CEFR level: C1. Learner interests: music, movie.",9b000000-0000-4000-8000-005016000000,0.6732,interest_far
+Environment,C1,,Work,off_topic,Writing prompt. Topic: Environment. CEFR level: C1.,9b000000-0000-4000-8000-005017000000,0.6806,
+Environment,C1,animal,Technology,off_topic,Writing prompt. Topic: Environment. CEFR level: C1. Learner interests: animal.,9b000000-0000-4000-8000-005013000000,0.6348,
+Technology,C1,,,on_topic,Writing prompt. Topic: Technology. CEFR level: C1.,9b000000-0000-4000-8000-005013000000,0.7523,
+Technology,C1,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: C1. Learner interests: tech.,9b000000-0000-4000-8000-005013000000,0.7399,
+Technology,C1,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: C1. Learner interests: tech, movie.",9b000000-0000-4000-8000-005013000000,0.7189,
+Technology,C1,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: C1. Learner interests: animal.,9b000000-0000-4000-8000-005013000000,0.7115,interest_far
+Technology,C1,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: C1. Learner interests: animal, food.",9b000000-0000-4000-8000-005013000000,0.7060,interest_far
+Technology,C1,,Environment,off_topic,Writing prompt. Topic: Technology. CEFR level: C1.,9b000000-0000-4000-8000-005010000000,0.6957,
+Technology,C1,tech,Work,off_topic,Writing prompt. Topic: Technology. CEFR level: C1. Learner interests: tech.,9b000000-0000-4000-8000-005006000000,0.6910,
+Society,C1,,,on_topic,Writing prompt. Topic: Society. CEFR level: C1.,9b000000-0000-4000-8000-005004000000,0.6834,
+Society,C1,school,,on_topic,Writing prompt. Topic: Society. CEFR level: C1. Learner interests: school.,9b000000-0000-4000-8000-005004000000,0.7019,
+Society,C1,school|family,,on_topic,"Writing prompt. Topic: Society. CEFR level: C1. Learner interests: school, family.",9b000000-0000-4000-8000-005004000000,0.6807,
+Society,C1,animal,,on_topic,Writing prompt. Topic: Society. CEFR level: C1. Learner interests: animal.,9b000000-0000-4000-8000-005004000000,0.6594,interest_far
+Society,C1,animal|sport,,on_topic,"Writing prompt. Topic: Society. CEFR level: C1. Learner interests: animal, sport.",9b000000-0000-4000-8000-005019000000,0.6544,interest_far
+Society,C1,,Technology,off_topic,Writing prompt. Topic: Society. CEFR level: C1.,9b000000-0000-4000-8000-005011000000,0.6914,
+Society,C1,school,Environment,off_topic,Writing prompt. Topic: Society. CEFR level: C1. Learner interests: school.,9b000000-0000-4000-8000-005010000000,0.6816,
+Society,C2,,,on_topic,Writing prompt. Topic: Society. CEFR level: C2.,9b000000-0000-4000-8000-006009000000,0.7003,
+Society,C2,school,,on_topic,Writing prompt. Topic: Society. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006009000000,0.6741,
+Society,C2,school|family,,on_topic,"Writing prompt. Topic: Society. CEFR level: C2. Learner interests: school, family.",9b000000-0000-4000-8000-006009000000,0.6572,
+Society,C2,animal,,on_topic,Writing prompt. Topic: Society. CEFR level: C2. Learner interests: animal.,9b000000-0000-4000-8000-006009000000,0.6776,interest_far
+Society,C2,animal|sport,,on_topic,"Writing prompt. Topic: Society. CEFR level: C2. Learner interests: animal, sport.",9b000000-0000-4000-8000-006009000000,0.6584,interest_far
+Society,C2,,Technology,off_topic,Writing prompt. Topic: Society. CEFR level: C2.,9b000000-0000-4000-8000-006013000000,0.6963,
+Society,C2,school,Work,off_topic,Writing prompt. Topic: Society. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006004000000,0.7003,
+Technology,C2,,,on_topic,Writing prompt. Topic: Technology. CEFR level: C2.,9b000000-0000-4000-8000-006013000000,0.7143,
+Technology,C2,tech,,on_topic,Writing prompt. Topic: Technology. CEFR level: C2. Learner interests: tech.,9b000000-0000-4000-8000-006013000000,0.7117,
+Technology,C2,tech|movie,,on_topic,"Writing prompt. Topic: Technology. CEFR level: C2. Learner interests: tech, movie.",9b000000-0000-4000-8000-006013000000,0.6844,
+Technology,C2,animal,,on_topic,Writing prompt. Topic: Technology. CEFR level: C2. Learner interests: animal.,9b000000-0000-4000-8000-006013000000,0.6961,interest_far
+Technology,C2,animal|food,,on_topic,"Writing prompt. Topic: Technology. CEFR level: C2. Learner interests: animal, food.",9b000000-0000-4000-8000-006013000000,0.6958,interest_far
+Technology,C2,,Education,off_topic,Writing prompt. Topic: Technology. CEFR level: C2.,9b000000-0000-4000-8000-006015000000,0.6637,
+Technology,C2,tech,Society,off_topic,Writing prompt. Topic: Technology. CEFR level: C2. Learner interests: tech.,9b000000-0000-4000-8000-006009000000,0.6646,
+Work,C2,,,on_topic,Writing prompt. Topic: Work. CEFR level: C2.,9b000000-0000-4000-8000-006004000000,0.7303,
+Work,C2,school,,on_topic,Writing prompt. Topic: Work. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006004000000,0.7218,
+Work,C2,school|tech,,on_topic,"Writing prompt. Topic: Work. CEFR level: C2. Learner interests: school, tech.",9b000000-0000-4000-8000-006004000000,0.7353,
+Work,C2,animal,,on_topic,Writing prompt. Topic: Work. CEFR level: C2. Learner interests: animal.,9b000000-0000-4000-8000-006004000000,0.7033,interest_far
+Work,C2,animal|food,,on_topic,"Writing prompt. Topic: Work. CEFR level: C2. Learner interests: animal, food.",9b000000-0000-4000-8000-006004000000,0.6962,interest_far
+Work,C2,,Education,off_topic,Writing prompt. Topic: Work. CEFR level: C2.,9b000000-0000-4000-8000-006006000000,0.6444,
+Work,C2,school,Society,off_topic,Writing prompt. Topic: Work. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006009000000,0.6379,
+Education,C2,,,on_topic,Writing prompt. Topic: Education. CEFR level: C2.,9b000000-0000-4000-8000-006005000000,0.7033,
+Education,C2,school,,on_topic,Writing prompt. Topic: Education. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006005000000,0.6990,
+Education,C2,school|tech,,on_topic,"Writing prompt. Topic: Education. CEFR level: C2. Learner interests: school, tech.",9b000000-0000-4000-8000-006005000000,0.6950,
+Education,C2,animal,,on_topic,Writing prompt. Topic: Education. CEFR level: C2. Learner interests: animal.,9b000000-0000-4000-8000-006005000000,0.6817,interest_far
+Education,C2,animal|music,,on_topic,"Writing prompt. Topic: Education. CEFR level: C2. Learner interests: animal, music.",9b000000-0000-4000-8000-006005000000,0.6773,interest_far
+Education,C2,,Society,off_topic,Writing prompt. Topic: Education. CEFR level: C2.,9b000000-0000-4000-8000-006009000000,0.6426,
+Education,C2,school,Technology,off_topic,Writing prompt. Topic: Education. CEFR level: C2. Learner interests: school.,9b000000-0000-4000-8000-006013000000,0.6499,
