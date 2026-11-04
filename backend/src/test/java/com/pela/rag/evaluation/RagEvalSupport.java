@@ -1,9 +1,29 @@
 package com.pela.rag.evaluation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pela.platform.adapter.out.contentfilter.BlocklistContentFilterAdapter;
 import com.pela.platform.adapter.out.gemini.GeminiEmbeddingAdapter;
+import com.pela.platform.adapter.out.gemini.GeminiLlmAdapter;
+import com.pela.platform.adapter.out.persistence.JdbcPromptTemplateAdapter;
+import com.pela.rag.adapter.out.persistence.JdbcGenerationLogAdapter;
+import com.pela.rag.adapter.out.persistence.JdbcPromptCacheAdapter;
+import com.pela.rag.adapter.out.persistence.JdbcPromptExampleDetailsAdapter;
 import com.pela.rag.adapter.out.persistence.JdbcWritingPromptVectorAdapter;
+import com.pela.rag.application.port.out.GenerationLogPort;
+import com.pela.rag.application.port.out.LearnerContextPort;
+import com.pela.rag.application.port.out.LearnerContextPort.LearnerContext;
+import com.pela.rag.application.port.out.PromptCachePort;
+import com.pela.rag.application.port.out.PromptExampleDetailsPort;
+import com.pela.rag.application.port.out.WritingPromptVectorPort;
+import com.pela.rag.application.usecase.GenerateWritingPromptService;
+import com.pela.rag.domain.RagQueryBuilder;
+import com.pela.shared.adapter.out.SystemClockAdapter;
+import com.pela.shared.application.port.out.ContentFilterPort;
 import com.pela.shared.application.port.out.EmbeddingPort;
+import com.pela.shared.application.port.out.LlmPort;
 import com.pela.shared.application.port.out.SettingsPort;
+import com.pela.writing.adapter.out.persistence.JdbcCuratedPromptAdapter;
+import com.pela.writing.application.usecase.PickCuratedPromptService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpClient;
@@ -11,12 +31,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.junit.jupiter.api.Assumptions;
+import jakarta.validation.Validation;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -62,6 +87,12 @@ final class RagEvalSupport implements AutoCloseable {
         Assumptions.assumeTrue(url != null && user != null && password != null,
                 "DB_URL / DB_USER / DB_PASSWORD not set (environment or backend/.env): skipping RAG evaluation");
         return new RagEvalSupport(url, user, password);
+    }
+
+    /** Postgres local (Testcontainers) nạp embedding từ fixture; xem {@link RagLocalDatabase}. Skip nếu thiếu Docker hoặc fixture. */
+    static RagEvalSupport connectLocal() throws IOException {
+        String[] connection = RagLocalDatabase.prepare(RagLocalDatabase.FIXTURE);
+        return new RagEvalSupport(connection[0], connection[1], connection[2]);
     }
 
     /** Skip test nếu thiếu GEMINI_API_KEY. Model và số chiều đọc từ system_setting của DB. */
@@ -142,6 +173,137 @@ final class RagEvalSupport implements AutoCloseable {
             }
         }
         return Optional.ofNullable(value).map(String::trim).filter(v -> !v.isEmpty()).orElse(null);
+    }
+
+
+    /**
+     * Một dòng queries.csv. Truy vấn thật dựng bằng {@link RagQueryBuilder} (RAG.Embed.Input) từ {@code topic} + level + sở
+     * thích, giống hệt UC-24; truy hồi lọc theo {@code filterTopic} + level.
+     *
+     * @param interests   cột {@code interests}, các sở thích ngăn bằng "|"; rỗng = learner không có sở thích
+     * @param filterTopic topic dùng để lọc truy hồi; cột trống = {@code topic}. Khác {@code topic} = mô phỏng kho không có
+     *                    đề sát yêu cầu (nhãn off_topic)
+     * @param note        {@code kho_gap}: kho chưa có đề gần chủ đề này, loại khỏi phần tính ngưỡng; {@code interest_far}:
+     *                    sở thích xa topic nhưng vẫn là yêu cầu bình thường (on_topic), thống kê riêng
+     */
+    record QueryRow(String topic, String level, List<String> interests, String filterTopic, boolean onTopic,
+            String note) {
+
+        String text() {
+            return RagQueryBuilder.build(topic, level, interests);
+        }
+
+        boolean khoGap() {
+            return "kho_gap".equals(note);
+        }
+
+        boolean interestFar() {
+            return "interest_far".equals(note);
+        }
+    }
+
+    /** Đọc docs/evaluation/rag/queries.csv (cột topic,level,interests,filter_topic,expected,note). */
+    static List<QueryRow> readQueries() throws IOException {
+        return readCsv(EVAL_DIR.resolve("queries.csv"), c -> new QueryRow(c.get(0).trim(), c.get(1).trim(),
+                c.get(2).isBlank() ? List.of() : List.of(c.get(2).trim().split("\\|")),
+                c.get(3).isBlank() ? c.get(0).trim() : c.get(3).trim(), c.get(4).trim().equals("on_topic"),
+                c.size() > 5 ? c.get(5).trim() : ""));
+    }
+
+    /** Dạng văn bản của pgvector: [x1,x2,...]. */
+    static String vectorLiteral(float[] vector) {
+        StringBuilder sb = new StringBuilder(vector.length * 12).append('[');
+        for (int i = 0; i < vector.length; i++) {
+            sb.append(i == 0 ? "" : ",").append(vector[i]);
+        }
+        return sb.append(']').toString();
+    }
+
+    /**
+     * UC-24 nối với adapter thật (DB Supabase dev, Gemini). Mọi thứ chạy trong MỘT transaction ghi rồi ROLLBACK
+     * ({@link Pipeline#inRolledBackTransaction}): cache, lần phát và nhật ký không để lại gì trong DB. Dùng learner seed
+     * (R__dev_seed.sql) làm người nhận; thiếu thì skip. Chỉ giới hạn "đề AI mỗi ngày" bị nâng lên để đo liên tục.
+     */
+    Pipeline pipeline() throws IOException {
+        return pipeline(null);
+    }
+
+    /** Như {@link #pipeline()}; có {@code timer} thì gói các port để đo thời gian từng bước (db, embed, llm, filter, cache_write). */
+    Pipeline pipeline(StageTimer timer) throws IOException {
+        UUID user = UUID.fromString(SEED_USER);
+        Assumptions.assumeTrue(Boolean.TRUE.equals(readOnly(() -> jdbc.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM users WHERE user_id = ?)", Boolean.class, user))),
+                "Seed learner " + SEED_USER + " not found: run the dev profile (R__dev_seed.sql) first");
+        String apiKey = config("GEMINI_API_KEY");
+        Assumptions.assumeTrue(apiKey != null, "GEMINI_API_KEY not set: skipping RAG evaluation");
+
+        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
+        TransactionTemplate writable = new TransactionTemplate(manager);
+        SystemClockAdapter clock = new SystemClockAdapter();
+        SettingsPort evalSettings = key -> key.equals("writing.ai_prompt_daily_limit") ? Optional.of("1000000")
+                : settings.rawJson(key);
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(HttpClient.newHttpClient());
+        factory.setReadTimeout(Duration.ofSeconds(90));
+        RestClient client = RestClient.builder().baseUrl(GEMINI_BASE_URL).requestFactory(factory)
+                .defaultHeader("x-goog-api-key", apiKey).build();
+        GeminiLlmAdapter llm = new GeminiLlmAdapter(client, new JdbcPromptTemplateAdapter(jdbc, clock), evalSettings,
+                Validation.buildDefaultValidatorFactory().getValidator(), new ObjectMapper());
+        AtomicReference<List<String>> interests = new AtomicReference<>(List.of());
+        EmbeddingPort embedding;
+        try {
+            embedding = embedding();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        JdbcPromptCacheAdapter cache = new JdbcPromptCacheAdapter(jdbc, writable);
+        // Learner giả lập nhưng vẫn chạy hai câu SQL mà UC-24 thật chạy (múi giờ, sở thích) để chi phí DB đúng
+        LearnerContextPort learners = id -> {
+            jdbc.queryForObject("SELECT timezone FROM users WHERE user_id = ?", String.class, id);
+            jdbc.queryForList("SELECT interests FROM learner_profile WHERE user_id = ?", id);
+            return new LearnerContext(interests.get(), ZoneId.of("Asia/Ho_Chi_Minh"));
+        };
+        PromptCachePort cachePort = cache;
+        WritingPromptVectorPort vectorPort = new JdbcWritingPromptVectorAdapter(jdbc, writable);
+        PromptExampleDetailsPort detailsPort = new JdbcPromptExampleDetailsAdapter(jdbc);
+        GenerationLogPort logPort = new JdbcGenerationLogAdapter(jdbc);
+        EmbeddingPort embeddingPort = embedding;
+        LlmPort llmPort = llm;
+        ContentFilterPort filterPort = new BlocklistContentFilterAdapter(new DefaultResourceLoader(),
+                List.of("classpath:content-filter/blocklist-en.txt", "classpath:content-filter/blocklist-vi.txt"));
+        if (timer != null) {
+            learners = timer.wrap(LearnerContextPort.class, learners, StageTimer.DB);
+            cachePort = timer.wrap(PromptCachePort.class, cachePort, method ->
+                    method.getName().equals("storeAndServe") || method.getName().equals("serveHit")
+                            ? StageTimer.CACHE_WRITE : StageTimer.DB);
+            vectorPort = timer.wrap(WritingPromptVectorPort.class, vectorPort, StageTimer.DB);
+            detailsPort = timer.wrap(PromptExampleDetailsPort.class, detailsPort, StageTimer.DB);
+            logPort = timer.wrap(GenerationLogPort.class, logPort, StageTimer.DB);
+            embeddingPort = timer.wrap(EmbeddingPort.class, embeddingPort, StageTimer.EMBED);
+            llmPort = timer.wrap(LlmPort.class, llmPort, StageTimer.LLM);
+            filterPort = timer.wrap(ContentFilterPort.class, filterPort, StageTimer.FILTER);
+        }
+        GenerateWritingPromptService generate = new GenerateWritingPromptService(learners, cachePort, vectorPort,
+                detailsPort, logPort, embeddingPort, llmPort, filterPort, evalSettings, clock, UUID::randomUUID);
+        return new Pipeline(user, writable, interests, generate, new PickCuratedPromptService(new JdbcCuratedPromptAdapter(jdbc)),
+                cache, embedding, settings);
+    }
+
+    static final String SEED_USER = "ad000000-0000-4000-8000-000000000001";
+
+    /**
+     * @param interests sở thích của learner giả lập; đặt trước mỗi lần gọi
+     * @param cache     adapter cache thật để đo nhánh cache hit và dựng entry
+     */
+    record Pipeline(UUID userId, TransactionTemplate writable, AtomicReference<List<String>> interests,
+            GenerateWritingPromptService generate, PickCuratedPromptService curated, JdbcPromptCacheAdapter cache,
+            EmbeddingPort embedding, SettingsPort settings) {
+
+        <T> T inRolledBackTransaction(java.util.function.Supplier<T> work) {
+            return writable.execute(status -> {
+                status.setRollbackOnly();
+                return work.get();
+            });
+        }
     }
 
     @Override

@@ -1,0 +1,13 @@
+metric,value
+prompts,10000
+cache_entries,10000
+load_seconds,24.5
+recall_at_5_hnsw_forced,0.990
+recall_at_5_unfiltered_actual_plan,1.000
+recall_at_5_filtered_retrieval,1.000
+unfiltered_p95_ms,78.2
+retrieval_p50_ms,67.9
+retrieval_p95_ms,82.2
+cache_hit_p50_ms,61.9
+cache_hit_p95_ms,90.9
+cache_misses,0

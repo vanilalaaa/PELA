@@ -254,6 +254,65 @@ paths:
         '403':
           description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/prompts/generate:
+    post:
+      summary: Để AI tạo đề Writing mới (UC-24, RAG.*, BR-7, BR-8, BR-24, BR-25)
+      description: |
+        Luôn trả một đề. Server tìm đề tương tự cùng topic + trình độ của learner, rồi nhờ AI viết đề mới; nếu được thì
+        `promptSource = ai_generated` kèm `ragCacheId` (đề nằm ở cache, không vào kho đề). Khi không tạo được (độ tương
+        đồng dưới ngưỡng, AI quá hạn/lỗi/bị chặn, đề sai dạng, hết lượt AI trong ngày `writing.ai_prompt_daily_limit`) thì
+        trả một đề có sẵn cùng topic + trình độ mà learner chưa làm: `promptSource = bank` kèm `questionId` và
+        `fallbackReason` (BELOW_THRESHOLD, TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, FILTERED, DAILY_LIMIT, NO_EMBEDDING,
+        INVALID_OUTPUT, UPSTREAM_ERROR, BUDGET_EXHAUSTED: còn ít hơn `rag.generation.min_llm_ms` của ngân sách thì không gọi AI). Toàn chuỗi nằm trong ngân sách `ai.question_gen_p95_budget_ms`.
+        Nộp bài (`POST /practice/writing/submissions`) gửi lại đúng `promptSource` và `ragCacheId` hoặc
+        `promptQuestionId`. `taskType` tuỳ chọn: không gửi thì AI giữ dạng bài của đề mẫu gần nhất.
+        Đề AI chỉ nộp được bởi chính learner đã nhận nó.
+      operationId: generateWritingPrompt
+      tags: [writing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/GenerateWritingPromptRequest'}
+      responses:
+        '200':
+          description: Đề để làm bài
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WritingPromptChoice'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Kho không có đề nào cho topic + trình độ. Mã: NO_PROMPT_AVAILABLE"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "LEVEL_REQUIRED (learner chưa có trình độ), INVALID_TASK_TYPE hoặc VALIDATION_FAILED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/writing/prompts:
+    get:
+      summary: Đề có sẵn gợi ý theo topic (UC-10, Writing.Prompt.Select)
+      description: |
+        Đề đang dùng của kho cùng topic + trình độ hiện tại của learner: đề chưa làm trước, rồi đề làm lâu nhất.
+      operationId: listWritingPrompts
+      tags: [writing]
+      parameters:
+        - {name: topic, in: query, required: true, schema: {type: string, maxLength: 100}}
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 20, default: 10}
+      responses:
+        '200':
+          description: Danh sách đề gợi ý
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/WritingBankPrompt'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '422':
+          description: "LEVEL_REQUIRED hoặc VALIDATION_FAILED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
   /practice/writing/submissions:
     post:
       summary: Nộp bài Writing để chấm (UC-10, Writing.Submit, BR-29)
@@ -280,15 +339,15 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/AccountBlocked'}
         '404':
-          description: "Đề trong kho không có hoặc đã ngừng dùng. Mã: PROMPT_NOT_FOUND"
+          description: "Đề trong kho không có hoặc đã ngừng dùng, hoặc đề AI chưa từng được phát cho người gọi. Mã: PROMPT_NOT_FOUND"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '409':
           description: "submissionId đã được người khác dùng. Mã: SUBMISSION_ID_CONFLICT"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '422':
           description: |
-            WORD_COUNT_OUT_OF_RANGE — details {wordCount, minWords, maxWords};
-            PROMPT_SOURCE_NOT_SUPPORTED — đề do AI tạo (UC-24) chưa hỗ trợ; hoặc VALIDATION_FAILED.
+            WORD_COUNT_OUT_OF_RANGE — details {wordCount, minWords, maxWords}; hoặc VALIDATION_FAILED (thiếu
+            `promptQuestionId` khi bank, thiếu `ragCacheId` khi ai_generated).
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
         '429':
           description: |
@@ -503,9 +562,42 @@ components:
       required: [submissionId, promptSource, text]
       properties:
         submissionId: {type: string, format: uuid, description: Do client sinh; gửi lại cùng id là an toàn}
-        promptSource: {type: string, enum: [bank, ai_generated, freeform], description: 'ai_generated chưa hỗ trợ (UC-24)'}
+        promptSource: {type: string, enum: [bank, ai_generated, freeform]}
         promptQuestionId: {type: [string, 'null'], format: uuid, description: Bắt buộc khi promptSource = bank}
+        ragCacheId: {type: [string, 'null'], format: uuid, description: 'Bắt buộc khi promptSource = ai_generated; đề phải đã được phát cho người gọi (UC-24)'}
         text: {type: string, maxLength: 5000}
+    GenerateWritingPromptRequest:
+      type: object
+      required: [topic]
+      properties:
+        topic: {type: string, maxLength: 100}
+        taskType: {type: [string, 'null'], enum: [email, paragraph, essay, null], description: Tuỳ chọn; không gửi thì AI giữ dạng bài của đề mẫu gần nhất (BR-24)}
+    WritingPromptChoice:
+      type: object
+      required: [promptSource, promptText, cacheHit]
+      properties:
+        promptSource: {type: string, enum: [ai_generated, bank], description: Dùng đúng giá trị này khi nộp bài}
+        ragCacheId: {type: [string, 'null'], format: uuid, description: Có khi promptSource = ai_generated}
+        questionId: {type: [string, 'null'], format: uuid, description: 'Có khi promptSource = bank (gửi là promptQuestionId khi nộp bài)'}
+        promptText: {type: string}
+        taskType: {type: [string, 'null'], enum: [email, paragraph, essay, null]}
+        minWords: {type: [integer, 'null']}
+        maxWords: {type: [integer, 'null']}
+        cacheHit: {type: boolean, description: Đề AI lấy từ cache thay vì mới tạo}
+        fallbackReason:
+          type: [string, 'null']
+          enum: [BELOW_THRESHOLD, TIMEOUT, INVALID_JSON, SAFETY_BLOCKED, FILTERED, DAILY_LIMIT, NO_EMBEDDING, INVALID_OUTPUT, UPSTREAM_ERROR, BUDGET_EXHAUSTED, null]
+          description: Có khi đề bank được phát vì không tạo được đề AI (BR-7)
+    WritingBankPrompt:
+      type: object
+      required: [questionId, text, done]
+      properties:
+        questionId: {type: string, format: uuid}
+        text: {type: string}
+        taskType: {type: [string, 'null'], enum: [email, paragraph, essay, null]}
+        minWords: {type: [integer, 'null']}
+        maxWords: {type: [integer, 'null']}
+        done: {type: boolean, description: Learner đã nộp bài với đề này}
     WritingSubmitResult:
       type: object
       required: [submissionId, status]

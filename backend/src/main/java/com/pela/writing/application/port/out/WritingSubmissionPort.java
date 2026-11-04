@@ -58,8 +58,8 @@ public interface WritingSubmissionPort {
     record Existing(UUID submissionId, UUID userId, String status) {
     }
 
-    record NewSubmission(UUID submissionId, UUID userId, String promptSource, UUID promptQuestionId, String promptText,
-            String text, int wordCount, String status, Instant submittedAt) {
+    record NewSubmission(UUID submissionId, UUID userId, String promptSource, UUID promptQuestionId, UUID ragCacheId,
+            String promptText, String text, int wordCount, String status, Instant submittedAt) {
 
         @Override
         public String toString() {

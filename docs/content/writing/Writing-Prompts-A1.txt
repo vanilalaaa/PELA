@@ -1,0 +1,58 @@
+PELA Writing Prompts - Level A1
+(28 prompts - for Admin upload test, UC-19 Writing import flow)
+
+1. [Travel - email] Write an email to a friend. Tell them where you want to go on your next trip and why. (~20-40 words)
+
+2. [Daily Life - paragraph] Write about your daily routine. What time do you wake up, eat breakfast, and go to school or work? (~20-40 words)
+
+3. [Work - email] Write an email to your teacher. Tell them you will be absent tomorrow and why. (~20-40 words)
+
+4. [Technology - paragraph] Write about your favorite app. What is it, and what do you use it for? (~20-40 words)
+
+5. [Daily Life - paragraph] Write about your family. How many people are in your family, and what are they like? (~20-40 words)
+
+6. [Travel - paragraph] Write about a place you like to visit in your city. (~20-40 words)
+
+7. [Daily Life - email] Write an email inviting a friend to your birthday party. (~20-40 words)
+
+8. [Work - paragraph] Write about your job or your school. What do you do there every day? (~20-40 words)
+
+9. [Technology - email] Write an email to a friend. Ask them to help you fix your phone. (~20-40 words)
+
+10. [Daily Life - paragraph] What food do you enjoy eating most, and why do you like it? (~20-40 words)
+
+11. [Daily Life - paragraph] Describe a shop you often visit. What do you usually buy there? (~20-40 words)
+
+12. [Daily Life - paragraph] Write about what you do to stay healthy. Do you exercise or eat healthy food? (~20-40 words)
+
+13. [Daily Life - email] Write an email to a friend. Invite them to play your favorite sport with you. (~20-40 words)
+
+14. [Daily Life - paragraph] Write about your hobby. What do you do, and when do you do it? (~20-40 words)
+
+15. [Daily Life - paragraph] Write about the weather in your city this week. (~20-40 words)
+
+16. [Work - email] Write an email to a classmate. Ask them for help with your homework. (~20-40 words)
+
+17. [Daily Life - paragraph] Write about your pet or an animal you like. (~20-40 words)
+
+18. [Daily Life - paragraph] Which season do you enjoy the most, and what makes it special to you? (~20-40 words)
+
+19. [Daily Life - email] Write an email to a shop. Ask what time they open and close. (~20-40 words)
+
+20. [Daily Life - paragraph] Write about your best friend. What do you do together? (~20-40 words)
+
+21. [Travel - paragraph] Write about your last trip to another city. What did you see there? (~20-40 words)
+
+22. [Travel - email] Write an email to a friend. Tell them about a fun trip you took last month. (~20-40 words)
+
+23. [Travel - paragraph] Write about how you usually travel — by bus, by car, or by plane. (~20-40 words)
+
+24. [Work - paragraph] Write about a task you do every day at work or school. (~20-40 words)
+
+25. [Work - email] Write an email to a coworker. Ask them to help you finish a task today. (~20-40 words)
+
+26. [Technology - email] Write an email to a friend. Recommend an app you think they would like. (~20-40 words)
+
+27. [Technology - paragraph] Write about how you use your phone every day. (~20-40 words)
+
+28. [Technology - paragraph] Write about a gadget you want to buy. Why do you want it? (~20-40 words)
