@@ -1,0 +1,183 @@
+erDiagram
+    USERS {
+        uuid user_id PK
+        varchar full_name
+        varchar username
+        varchar email
+        varchar avatar_url
+        varchar role
+        varchar status
+        timestamptz full_name_changed_at
+        timestamptz username_changed_at
+        timestamptz deletion_requested_at
+        varchar native_language
+        varchar cefr_level
+        varchar timezone
+        int failed_login_count
+        timestamptz locked_until
+        timestamptz suspended_until
+        varchar suspend_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    LEARNER_PROFILE {
+        uuid user_id PK,FK
+        varchar occupation
+        varchar occupation_other
+        text learning_goals
+        text interests
+        int daily_goal_minutes
+        varchar self_assessed_level
+        timestamptz updated_at
+    }
+    SURVEY_QUESTION {
+        uuid question_id PK
+        int position
+        text text
+        jsonb options
+        boolean is_active
+    }
+    SURVEY_LEVEL_RULE {
+        uuid rule_id PK
+        jsonb answer_pattern
+        varchar cefr_level
+        int priority
+        boolean is_active
+    }
+    SURVEY_RESPONSE {
+        uuid response_id PK
+        uuid user_id FK
+        jsonb answers
+        varchar oriented_level
+        timestamptz created_at
+    }
+    PLACEMENT_TEST_ATTEMPT {
+        uuid attempt_id PK
+        uuid user_id FK
+        varchar tested_level
+        int score
+        boolean passed
+        varchar oriented_level
+        varchar placed_level
+        timestamptz attempted_at
+    }
+    LEVEL_UP_ATTEMPT {
+        uuid attempt_id PK
+        uuid user_id FK
+        varchar from_level
+        varchar target_level
+        uuid question_ids
+        varchar status
+        int score
+        boolean passed
+        timestamptz started_at
+        timestamptz deadline_at
+        timestamptz submitted_at
+    }
+    LEVEL_PROGRESS {
+        uuid user_id PK,FK
+        varchar cefr_level PK
+        varchar status
+    }
+    TOPIC {
+        uuid topic_id PK
+        varchar cefr_level
+        varchar name
+        int order_index
+        varchar status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    LESSON {
+        uuid lesson_id PK
+        uuid topic_id FK
+        int order_index
+        int new_word_count
+        varchar status
+    }
+    VOCABULARY {
+        uuid vocab_id PK
+        varchar word
+        text meaning
+        varchar part_of_speech
+        varchar ipa
+        text example_sentence
+        text example_meaning
+        varchar audio_url
+        varchar image_url
+        varchar topic
+        varchar cefr_level
+        varchar source
+        uuid owner_user_id FK
+    }
+    LESSON_VOCAB {
+        uuid lesson_id PK,FK
+        uuid vocab_id PK,FK
+        boolean is_new_word
+    }
+    LESSON_PROGRESS {
+        uuid progress_id PK
+        uuid user_id FK
+        uuid lesson_id FK
+        varchar status
+        int stars_earned
+        int correct_count
+        int total_count
+        jsonb resume_state
+        timestamptz completed_at
+    }
+    TOPIC_PROGRESS {
+        uuid user_id PK,FK
+        uuid topic_id PK,FK
+        varchar status
+        int stars_earned_since_lock
+        int unlock_cycle
+        timestamptz locked_at
+        timestamptz unlocked_at
+        timestamptz completed_at
+    }
+    FINAL_TEST_ATTEMPT {
+        uuid attempt_id PK
+        uuid user_id FK
+        uuid topic_id FK
+        int unlock_cycle
+        int attempt_number
+        int score
+        boolean passed
+        timestamptz attempted_at
+    }
+    REVIEW_CARD {
+        uuid card_id PK
+        uuid user_id FK
+        uuid vocab_id FK
+        numeric easiness_factor
+        int interval_days
+        int repetition_count
+        int error_count
+        date next_review_date
+        timestamptz last_reviewed_at
+        varchar status
+        int consecutive_incorrect_count
+        boolean needs_reinforcement
+        varchar origin
+        boolean in_pool
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    USERS ||--o{ LEARNER_PROFILE : "user_id"
+    USERS ||--o{ SURVEY_RESPONSE : "user_id"
+    USERS ||--o{ PLACEMENT_TEST_ATTEMPT : "user_id"
+    USERS ||--o{ LEVEL_UP_ATTEMPT : "user_id"
+    USERS ||--o{ LEVEL_PROGRESS : "user_id"
+    TOPIC ||--o{ LESSON : "topic_id"
+    USERS ||--o{ VOCABULARY : "owner_user_id"
+    LESSON ||--o{ LESSON_VOCAB : "lesson_id"
+    VOCABULARY ||--o{ LESSON_VOCAB : "vocab_id"
+    USERS ||--o{ LESSON_PROGRESS : "user_id"
+    LESSON ||--o{ LESSON_PROGRESS : "lesson_id"
+    USERS ||--o{ TOPIC_PROGRESS : "user_id"
+    TOPIC ||--o{ TOPIC_PROGRESS : "topic_id"
+    USERS ||--o{ FINAL_TEST_ATTEMPT : "user_id"
+    TOPIC ||--o{ FINAL_TEST_ATTEMPT : "topic_id"
+    USERS ||--o{ REVIEW_CARD : "user_id"
+    VOCABULARY ||--o{ REVIEW_CARD : "vocab_id"

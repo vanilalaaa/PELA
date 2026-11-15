@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor L as Learner
+    participant App as Mobile App
+    participant API as Backend API
+    participant DB as Supabase (PostgreSQL)
+    L->>App: Register / Login
+    App->>API: POST /auth/register or /auth/login
+    API->>DB: Create/verify account (Supabase Auth)
+    DB-->>API: Access token + refresh token
+    API-->>App: Auth tokens (refreshed via /auth/refresh)
+    App->>API: GET /onboarding/survey
+    API-->>App: Survey questions
+    App-->>L: Present Onboarding Survey
+    L->>App: Answer survey questions
+    App->>API: POST /onboarding/survey {answers}
+    API->>API: Map answers to oriented CEFR level (AS-3)
+    alt Oriented level = A1, or learner chooses "Start from the beginning"
+        API->>DB: Set cefr_level = A1, LEVEL_PROGRESS unlocked at A1
+        API-->>App: Placed at A1, no test required (Placement.Test.SkipRule)
+    else Oriented level >= A2
+        API-->>App: next_step = placement_test
+        App->>API: POST /placement-test/start
+        API->>DB: Insert PLACEMENT_TEST_ATTEMPT (BR-19, one-time only)
+        API-->>App: attempt_id + 10-15 questions (level - 1, no answer keys) + deadline
+        App-->>L: Present Placement Test
+        L->>App: Submit answers
+        App->>API: POST /placement-test/{attempt_id}/submit {answers[]}
+        API->>API: Grade on the server (BR-23)
+        alt Score >= 80%
+            API->>DB: Set cefr_level = oriented level, mark lower levels completed
+        else Score < 80%
+            API->>DB: Calculate fallback cefr_level from score-tier table (BR-19) and set cefr_level accordingly
+        end
+        API-->>App: Placement result
+    end
+    App-->>L: Show assigned CEFR level & unlocked Vocabulary Roadmap
