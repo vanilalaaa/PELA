@@ -31,11 +31,11 @@ export function UiKitScreen() {
 
   return (
     <ScrollView
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ backgroundColor: theme.colors.bgCanvas }}
       contentContainerStyle={{ padding: theme.spacing.md, gap: theme.spacing.lg }}
     >
       <View>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.xl, fontWeight: '700' }}>
+        <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h2 }}>
           {t('uiKit.title')}
         </Text>
         <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>{t('uiKit.subtitle')}</Text>
@@ -98,7 +98,7 @@ export function UiKitScreen() {
       <Section title={t('uiKit.sectionSheet')}>
         <Button label={t('uiKit.openSheet')} onPress={() => setSheetVisible(true)} />
         <BottomSheet visible={sheetVisible} onClose={() => setSheetVisible(false)}>
-          <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg }}>{t('uiKit.sheetTitle')}</Text>
+          <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h3 }}>{t('uiKit.sheetTitle')}</Text>
           <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.sm }}>
             {t('uiKit.sheetBody')}
           </Text>
@@ -113,7 +113,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   const theme = useTheme();
   return (
     <View style={{ gap: theme.spacing.sm }}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg, fontWeight: '600' }}>
+      <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h3 }}>
         {title}
       </Text>
       {children}

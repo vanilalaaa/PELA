@@ -1,172 +1,317 @@
 /**
- * Design tokens cho mobile app.
+ * Design tokens cho mobile app, khớp 1:1 với Figma Design System (file "Personalized English
+ * Learning", page Design System 41:2). Nguồn: `get_variable_defs` trên Foundations / Colors
+ * (448:42) và Foundations / Effects & Motion (449:255), cùng tài liệu trong các frame
+ * Foundations, lấy ngày 2026-11-16. Tên biến Figma ghi trong comment để đối chiếu khi Figma đổi.
  *
- * Lấy THẬT từ Figma Variables (file "Personalized English Learning App", node 42:13) qua
- * Figma MCP (`get_variable_defs`), mẫu trên 8 màn: Welcome, Register Error, Lesson Question ·
- * Correct, Daily Challenge · Wrong, Roadmap, 32 Badges, Overlay · Đăng xuất, Practice Hub —
- * ngày 2026-10-28. Tên biến gốc được ghi lại trong comment mỗi dòng để dễ đối chiếu lại khi
- * Figma đổi.
+ * Release 1.0 chỉ có giao diện sáng (Figma: "App chỉ có một giao diện sáng").
  *
- * Chỉ có 1 bảng màu (light): Release 1.0 chỉ có giao diện sáng, team không làm dark mode.
- *
- * Quy ước: mọi màu sắc trong component PHẢI lấy từ đây (qua useTheme()), không hardcode hex.
+ * Quy ước:
+ * - Component và màn chỉ dùng token đã export (qua useTheme()), không hard-code hex hay số.
+ * - `palette` là giá trị gốc (Figma Primitives, ẩn khỏi picker), chỉ dùng trong file này.
+ * - Không dùng lại tên token cũ với giá trị mới: đổi giá trị thì đổi tên và sửa mọi chỗ dùng.
  */
 
+// ---------------------------------------------------------------------------------------------
+// Primitives (Figma collection Primitives) — KHÔNG export.
+// ---------------------------------------------------------------------------------------------
+const palette = {
+  white: '#ffffff',
+  blue: {
+    25: '#f5faff',
+    50: '#ebf5fe',
+    100: '#d7ecfc',
+    200: '#b0dafb',
+    300: '#84c6f9',
+    400: '#5cb6f7',
+    500: '#38a7f6',
+    600: '#1a8ceb',
+    700: '#0072df',
+    800: '#005bb3',
+    900: '#06437f',
+  },
+  // Figma "Ink · neutral" (biến gray/*): xám ánh xanh, không dùng đen.
+  ink: {
+    50: '#f7fafd',
+    100: '#f1f4f9',
+    200: '#e4e9f2',
+    300: '#c9d0de',
+    400: '#98a2ba',
+    500: '#6b7896',
+    600: '#546180',
+    700: '#3d4a66',
+    800: '#2e3a55',
+    900: '#1f2a44',
+  },
+  amber: { 100: '#fff4c8', 300: '#ffe38a', 500: '#ffc53d', 700: '#a86a00' },
+  coral: { 100: '#ffe1e6', 300: '#ffb3c0', 500: '#ff7a90', 700: '#c93b57' },
+  mint: { 100: '#dcf5e3', 300: '#a8e6ba', 500: '#4cc97a', 700: '#1e8548' },
+  sky: { 100: '#d7ecfc', 300: '#9fd0f8', 500: '#38a7f6', 700: '#0072df' },
+  lilac: { 100: '#efe6ff', 500: '#9b7bff', 700: '#6445d1' },
+  streak: { 100: '#ffe9d9', 500: '#ff8a3d' },
+  tier: {
+    1: { fill: '#e9a06c', ink: '#86461f' },
+    2: { fill: '#dce5f0', ink: '#5a6c86' },
+    3: { fill: '#ffd84a', ink: '#936400' },
+    4: { fill: '#e3f4f6', ink: '#44788c' },
+    5: { fill: '#9fe6ff', ink: '#155f97' },
+    6: { fill: '#c7a8ff', ink: '#5b34a8' },
+  },
+} as const;
+
+// ---------------------------------------------------------------------------------------------
+// Semantic colors (Figma collection Color).
+// ---------------------------------------------------------------------------------------------
 export interface ColorTokens {
-  background: string;
-  surface: string;
-  surfaceVariant: string;
-  overlay: string;
+  bgCanvas: string;
+  bgSurface: string;
+  bgSurfaceAlt: string;
+  bgDisabled: string;
+  bgPrimary: string;
+  bgPrimaryHover: string;
+  bgPrimaryPress: string;
+  bgPrimarySubtle: string;
+  bgTrack: string;
   textPrimary: string;
   textSecondary: string;
   textTertiary: string;
   textDisabled: string;
   textOnPrimary: string;
+  textLink: string;
+  textBrand: string;
   iconDefault: string;
-  primary: string;
-  primaryPressed: string;
-  primaryDisabled: string;
+  borderDefault: string;
+  borderStrong: string;
+  borderFocus: string;
+  borderError: string;
+  scrim: string;
+  starBg: string;
+  starFg: string;
+  starAccent: string;
+  warnBg: string;
+  warnFg: string;
+  warnAccent: string;
+  successBg: string;
+  successFg: string;
+  successAccent: string;
+  infoBg: string;
+  infoFg: string;
+  infoAccent: string;
+  streakBg: string;
+  streakFg: string;
+  /** @deprecated Alias tạm của `streakFg`; xoá ở bước components (Figma không có "secondary"). */
   secondary: string;
+  /** @deprecated Giá trị cũ, Figma không có `streak-ink`; xoá ở bước components. */
   secondaryPressed: string;
-  border: string;
-  borderFocused: string;
-  success: string;
-  warning: string;
-  danger: string;
-  disabledBackground: string;
-  disabledText: string;
-  starFilled: string;
-  starEmpty: string;
 }
 
-// Giá trị thật từ Figma Variables (collection Color, mode duy nhất).
 export const colorTokens: ColorTokens = {
-  background: '#f5faff', // var(--color-bg-canvas)
-  surface: '#ffffff', // var(--color-bg-surface)
-  surfaceVariant: '#f1f4f9', // var(--color-bg-surface-alt) = gray/100
-  overlay: 'rgba(31, 42, 68, 0.45)', // KHÔNG thấy biến overlay riêng trong Figma — suy ra từ gray/900
-  textPrimary: '#1f2a44', // var(--color-text-primary) = gray/900
-  textSecondary: '#3d4a66', // var(--color-text-secondary)
-  textTertiary: '#6b7896', // var(--color-text-tertiary)
-  textDisabled: '#98a2ba', // var(--color-text-disabled) = gray/400
-  textOnPrimary: '#ffffff', // var(--color-text-on-primary)
-  iconDefault: '#6b7896', // var(--color-icon-default)
-  primary: '#38a7f6', // var(--color-bg-primary) = blue/500
-  primaryPressed: '#0072df', // var(--primary-press) = blue/700
-  primaryDisabled: '#b0dafb', // var(--blue-200) — chưa thấy biến "primary disabled" riêng, dùng tint nhạt của primary
-  secondary: '#ff8a3d', // var(--streak) — KHÔNG có "secondary" brand riêng trong Figma; dùng màu streak (điểm nhấn gamification rõ nhất trong design)
-  secondaryPressed: '#d9560f', // var(--streak-ink)
-  border: '#e4e9f2', // var(--color-border-default) = gray/200
-  borderFocused: '#0072df', // var(--primary-ink)
-  success: '#1e8548', // var(--success-fg) = mint/700
-  warning: '#ffc53d', // var(--star-accent) = amber/500 — Figma không có "warning" riêng, dùng amber (cũng là màu star)
-  danger: '#c93b57', // var(--color-text-error) = coral/700
-  disabledBackground: '#e4e9f2', // var(--color-bg-disabled)
-  disabledText: '#98a2ba', // var(--color-text-disabled)
-  starFilled: '#ffc53d', // var(--star-accent) = amber/500
-  starEmpty: '#e4e9f2', // gray/200 (không có biến "star rỗng" riêng, dùng border-default cho nhất quán với các track rỗng khác)
+  bgCanvas: palette.blue[25], // var(--color-bg-canvas)
+  bgSurface: palette.white, // var(--color-bg-surface)
+  bgSurfaceAlt: palette.ink[100], // var(--color-bg-surface-alt)
+  bgDisabled: palette.ink[200], // var(--color-bg-disabled)
+  bgPrimary: palette.blue[500], // var(--color-bg-primary)
+  bgPrimaryHover: palette.blue[600], // var(--color-bg-primary-hover) (web)
+  bgPrimaryPress: palette.blue[700], // var(--primary-press)
+  bgPrimarySubtle: palette.blue[50], // var(--color-bg-primary-subtle)
+  bgTrack: palette.ink[200], // var(--color-bg-track)
+  textPrimary: palette.ink[900], // var(--color-text-primary)
+  textSecondary: palette.ink[700], // var(--color-text-secondary)
+  textTertiary: palette.ink[500], // var(--color-text-tertiary)
+  textDisabled: palette.ink[400], // var(--color-text-disabled)
+  textOnPrimary: palette.white, // var(--color-text-on-primary)
+  textLink: palette.blue[700], // var(--text-link)
+  textBrand: palette.blue[700], // var(--primary-ink) (text/brand)
+  iconDefault: palette.ink[500], // var(--color-icon-default)
+  borderDefault: palette.ink[200], // var(--color-border-default)
+  borderStrong: palette.ink[300], // var(--color-border-strong)
+  borderFocus: palette.blue[500], // var(--color-border-focus)
+  borderError: palette.coral[500], // var(--color-border-error)
+  scrim: 'rgba(31, 42, 68, 0.38)', // lớp phủ modal: ink-900 38% (Figma có thêm blur 4px; app không dùng blur)
+  starBg: palette.amber[100], // var(--star-bg)
+  starFg: palette.amber[700], // var(--star-fg)
+  starAccent: palette.amber[500], // star/accent — suy ra (tông 500), không có trong get_variable_defs
+  warnBg: palette.coral[100], // var(--warn-bg)
+  warnFg: palette.coral[700], // var(--warn-fg)
+  warnAccent: palette.coral[500], // warn/accent — suy ra (tông 500)
+  successBg: palette.mint[100], // var(--success-bg)
+  successFg: palette.mint[700], // var(--success-fg)
+  successAccent: palette.mint[500], // success/accent — suy ra (tông 500)
+  infoBg: palette.sky[100], // var(--info-bg)
+  infoFg: palette.sky[700], // var(--info-fg)
+  infoAccent: palette.blue[500], // info/accent — suy ra (tông 500)
+  streakBg: palette.streak[100], // var(--streak-bg)
+  streakFg: palette.streak[500], // var(--streak)
+  secondary: palette.streak[500],
+  secondaryPressed: '#d9560f',
 };
 
-/**
- * Figma không có scale spacing dạng biến riêng (không xuất hiện trong get_variable_defs ở các
- * màn đã lấy mẫu) — giữ scale chuẩn 4px đang dùng, có thể chỉnh lại nếu sau này thấy biến
- * spacing/* xuất hiện ở màn khác.
- */
+/** Cặp màu theo tone cho component có biến thể Tone (Card, Tag, Chip, IconCircle, Avatar, ProgressBar, Badge). */
+export interface ToneColors {
+  bg: string; // tông 100: nền pastel
+  fg: string; // tông 700: chữ/icon trên nền pastel
+  accent: string; // tông 500: điểm nhấn, thanh tiến độ
+}
+
+export const tones = {
+  blue: { bg: palette.blue[100], fg: palette.blue[700], accent: palette.blue[500] },
+  sky: { bg: palette.sky[100], fg: palette.sky[700], accent: palette.sky[500] },
+  amber: { bg: palette.amber[100], fg: palette.amber[700], accent: palette.amber[500] },
+  coral: { bg: palette.coral[100], fg: palette.coral[700], accent: palette.coral[500] },
+  mint: { bg: palette.mint[100], fg: palette.mint[700], accent: palette.mint[500] },
+  lilac: { bg: palette.lilac[100], fg: palette.lilac[700], accent: palette.lilac[500] },
+  streak: { bg: palette.streak[100], fg: palette.streak[500], accent: palette.streak[500] },
+  neutral: { bg: palette.ink[100], fg: palette.ink[700], accent: palette.ink[500] },
+} as const satisfies Record<string, ToneColors>;
+
+/** Huy hiệu cấp bậc 6 tier: Tập sự (Đồng) → … → Bậc thầy (Tinh Anh). Figma tier-N / tier-N-ink. */
+export const rankTiers = palette.tier;
+
+// ---------------------------------------------------------------------------------------------
+// Spacing (Figma Foundations / Spacing & Radius: lưới 4pt).
+// ---------------------------------------------------------------------------------------------
 export const spacing = {
+  '2xs': 2,
   xs: 4,
   sm: 8,
+  '2sm': 12,
   md: 16,
+  '2md': 20,
   lg: 24,
   xl: 32,
-  xxl: 48,
+  '2xl': 40,
+  '3xl': 48,
+  '4xl': 64,
+  '5xl': 80,
+  screenGutter: 20, // spacing/screen-gutter: lề màn hình
+  tapMin: 44, // spacing/tap-min: vùng chạm tối thiểu (UI-3)
+  bottomNavH: 76, // spacing/bottom-nav-h
 } as const;
 
-// Giá trị thật từ Figma Variables (radius/*, var(--radius-full)).
-export const radius = {
-  sm: 12, // radius/key (phím bàn phím ảo, chip nhỏ)
-  md: 16, // radius/input (input, button)
-  lg: 24, // radius/card
-  full: 9999, // var(--radius-full) (avatar tròn, pill)
-  answer: 20, // radius/answer (đáp án MCQ) — trùng giá trị radius/bubble
-  sheet: 28, // radius/sheet (bottom sheet)
+// ---------------------------------------------------------------------------------------------
+// Radius: thang + theo thành phần (Figma radius/*). Button, chip, tab, stat pill, thanh tiến
+// độ dùng `full` (pill). Chat bubble bo 20, góc hướng về mascot bo 6.
+// ---------------------------------------------------------------------------------------------
+export const radii = {
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  '2xl': 24,
+  '3xl': 32,
+  full: 9999,
+  checkbox: 8,
+  key: 12,
+  input: 16,
+  answer: 20,
+  bubble: 20,
+  card: 24,
+  dialog: 28,
+  sheet: 28,
 } as const;
 
-/**
- * Type scale — size/lineHeight lấy THẬT từ Figma (pela/font-size/*, pela/line-height/*).
- * 2 font family thật: "Baloo 2" (heading/button, Bold–ExtraBold) và "Nunito" (body/caption,
- * SemiBold–ExtraBold). File .ttf tĩnh nằm ở assets/fonts, được nhúng lúc build qua config
- * plugin expo-font (app.json). Mỗi độ đậm là một family riêng theo tên file (vd. 'Nunito-Bold'),
- * vì Android không tự chọn file theo fontWeight cho font tự thêm; không đặt thêm fontWeight để
- * tránh Android làm đậm giả lên font đã đậm.
- */
+// ---------------------------------------------------------------------------------------------
+// Typography. Mỗi độ đậm là một file font riêng (assets/fonts, nhúng qua expo-font trong
+// app.json); không đặt thêm fontWeight để Android không làm đậm giả.
+// ---------------------------------------------------------------------------------------------
 export const typography = {
   fontFamily: {
-    regular: 'Nunito-SemiBold',
-    medium: 'Nunito-Bold',
-    bold: 'Baloo2-Bold',
-    heavy: 'Baloo2-ExtraBold',
+    nunitoRegular: 'Nunito-Regular',
+    nunitoSemiBold: 'Nunito-SemiBold',
+    nunitoBold: 'Nunito-Bold',
+    nunitoExtraBold: 'Nunito-ExtraBold',
+    balooBold: 'Baloo2-Bold',
+    balooExtraBold: 'Baloo2-ExtraBold',
   },
-  // Scale chung (map gần nhất với scale thật: micro/caption/body/h3/h2/h1).
-  size: {
-    xs: 11, // pela/font-size/micro
-    sm: 13, // pela/font-size/caption
-    md: 15, // pela/font-size/body
-    lg: 18, // pela/font-size/h3
-    xl: 22, // pela/font-size/h2
-    xxl: 28, // pela/font-size/h1
-  },
-  lineHeight: {
-    xs: 14,
-    sm: 18,
-    md: 22,
-    lg: 24,
-    xl: 28,
-    xxl: 34,
-  },
-  weight: {
-    regular: '400' as const,
-    medium: '500' as const,
-    bold: '700' as const,
-  },
-};
-
-/**
- * Named text style thật từ Figma (PELA/display, PELA/h1, ...) — dùng khi cần khớp chính xác
- * với 1 text style cụ thể trong design, thay vì ghép tay size/lineHeight/weight ở trên.
- */
-export const textStyles = {
-  display: { fontFamily: 'Baloo2-ExtraBold', fontSize: 34, lineHeight: 40, letterSpacing: -1 },
-  h1: { fontFamily: 'Baloo2-ExtraBold', fontSize: 28, lineHeight: 34, letterSpacing: -1 },
-  h2: { fontFamily: 'Baloo2-Bold', fontSize: 22, lineHeight: 28, letterSpacing: -1 },
-  h3: { fontFamily: 'Baloo2-Bold', fontSize: 18, lineHeight: 24, letterSpacing: -1 },
-  eyebrow: { fontFamily: 'Nunito-ExtraBold', fontSize: 11, lineHeight: 14, letterSpacing: 6 },
-  body: { fontFamily: 'Nunito-SemiBold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyStrong: { fontFamily: 'Nunito-ExtraBold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyBold: { fontFamily: 'Nunito-Bold', fontSize: 15, lineHeight: 22, letterSpacing: 0 },
-  bodyLg: { fontFamily: 'Nunito-SemiBold', fontSize: 17, lineHeight: 26, letterSpacing: 0 },
-  caption: { fontFamily: 'Nunito-SemiBold', fontSize: 13, lineHeight: 18, letterSpacing: 0 },
-  captionBold: { fontFamily: 'Nunito-Bold', fontSize: 13, lineHeight: 18, letterSpacing: 0 },
-  micro: { fontFamily: 'Nunito-Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0 },
-  buttonSm: { fontFamily: 'Baloo2-Bold', fontSize: 14, lineHeight: 18, letterSpacing: 1 },
-  buttonMd: { fontFamily: 'Baloo2-Bold', fontSize: 16, lineHeight: 20, letterSpacing: 1 },
-  buttonLg: { fontFamily: 'Baloo2-Bold', fontSize: 18, lineHeight: 22, letterSpacing: 1 },
 } as const;
 
-/**
- * Effect style (DROP_SHADOW) thật từ Figma (PELA/shadow-*). Giá trị alpha giữ nguyên từ hex gốc
- * (vd. #38A7F659 -> opacity 0x59/255). Dùng qua shadow* + elevation (Android cần elevation riêng,
- * Figma không có khái niệm này nên elevation là suy ra hợp lý theo độ "nổi" của shadow).
- */
-export const shadows = {
-  xs: { shadowColor: '#1F4882', shadowOpacity: 0.06, shadowOffset: { width: 0, height: 1 }, shadowRadius: 2, elevation: 1 },
-  sm: { shadowColor: '#1F4882', shadowOpacity: 0.08, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2 },
-  lg: { shadowColor: '#1F4882', shadowOpacity: 0.14, shadowOffset: { width: 0, height: 14 }, shadowRadius: 36, elevation: 8 },
-  primary: { shadowColor: '#38A7F6', shadowOpacity: 0.35, shadowOffset: { width: 0, height: 6 }, shadowRadius: 16, elevation: 5 },
-  success: { shadowColor: '#4CC97A', shadowOpacity: 0.35, shadowOffset: { width: 0, height: 6 }, shadowRadius: 16, elevation: 5 },
+const font = typography.fontFamily;
+
+/** Figma ghi letterSpacing theo % cỡ chữ; RN dùng px → px = % × fontSize. */
+const ls = (percent: number, fontSize: number) => Math.round(percent * fontSize) / 100;
+
+export interface TextStyleToken {
+  fontFamily: string;
+  fontSize: number;
+  lineHeight: number;
+  letterSpacing: number;
+  textTransform?: 'uppercase';
+}
+
+/** Text style PELA/* trong Figma (Foundations / Typography). */
+export const typeScale = {
+  display: { fontFamily: font.balooExtraBold, fontSize: 34, lineHeight: 40, letterSpacing: ls(-1, 34) },
+  h1: { fontFamily: font.balooExtraBold, fontSize: 28, lineHeight: 34, letterSpacing: ls(-1, 28) },
+  h2: { fontFamily: font.balooBold, fontSize: 22, lineHeight: 28, letterSpacing: ls(-1, 22) },
+  h3: { fontFamily: font.balooBold, fontSize: 18, lineHeight: 24, letterSpacing: ls(-1, 18) },
+  numberLg: { fontFamily: font.balooExtraBold, fontSize: 40, lineHeight: 44, letterSpacing: 0 },
+  buttonLg: { fontFamily: font.balooBold, fontSize: 18, lineHeight: 22, letterSpacing: ls(1, 18) },
+  buttonMd: { fontFamily: font.balooBold, fontSize: 16, lineHeight: 20, letterSpacing: ls(1, 16) },
+  buttonSm: { fontFamily: font.balooBold, fontSize: 14, lineHeight: 18, letterSpacing: ls(1, 14) },
+  bodyLg: { fontFamily: font.nunitoSemiBold, fontSize: 17, lineHeight: 26, letterSpacing: 0 },
+  body: { fontFamily: font.nunitoSemiBold, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyStrong: { fontFamily: font.nunitoExtraBold, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyReading: { fontFamily: font.nunitoRegular, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  bodyBold: { fontFamily: font.nunitoBold, fontSize: 15, lineHeight: 22, letterSpacing: 0 },
+  caption: { fontFamily: font.nunitoSemiBold, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
+  captionBold: { fontFamily: font.nunitoBold, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
+  labelSpeaker: { fontFamily: font.balooExtraBold, fontSize: 12, lineHeight: 16, letterSpacing: 0 },
+  micro: { fontFamily: font.nunitoBold, fontSize: 11, lineHeight: 14, letterSpacing: 0 },
+  eyebrow: {
+    fontFamily: font.nunitoExtraBold,
+    fontSize: 11,
+    lineHeight: 14,
+    letterSpacing: ls(6, 11),
+    textTransform: 'uppercase',
+  },
+} as const satisfies Record<string, TextStyleToken>;
+
+// ---------------------------------------------------------------------------------------------
+// Elevation (Figma effect styles PELA/shadow-*). Bóng ánh xanh rgba(31,72,130). Opacity lấy
+// từ alpha hex (vd. #1F48820F → 0x0F/255). `elevation` cho Android là suy ra theo độ nổi.
+// ---------------------------------------------------------------------------------------------
+const shadow = (color: string, alphaHex: number, y: number, blur: number, androidElevation: number) => ({
+  shadowColor: color,
+  shadowOpacity: Math.round((alphaHex / 255) * 1000) / 1000,
+  shadowOffset: { width: 0, height: y },
+  shadowRadius: blur,
+  elevation: androidElevation,
+});
+
+export const elevation = {
+  xs: shadow('#1F4882', 0x0f, 1, 2, 1), // tách nhẹ phần tử phẳng
+  sm: shadow('#1F4882', 0x14, 2, 8, 2), // card trắng mặc định
+  md: shadow('#1F4882', 0x1a, 6, 18, 4), // card nổi, dropdown, toast
+  lg: shadow('#1F4882', 0x24, 14, 36, 8), // dialog, bottom sheet
+  primary: shadow(palette.blue[500], 0x59, 6, 16, 5), // button primary (mất khi press/disabled)
+  star: shadow(palette.amber[500], 0x59, 6, 16, 5), // button sao / phần thưởng
 } as const;
 
+/** PELA/ring-focus: viền 2px blue-500 + ring 4px #38A7F6 α47. RN không có spread → component vẽ viền ngoài. */
+export const focusRing = {
+  color: palette.blue[500],
+  opacity: Math.round((0x47 / 255) * 1000) / 1000,
+  width: 4,
+} as const;
+
+// ---------------------------------------------------------------------------------------------
+// Motion (Figma Foundations / Effects & Motion).
+// ---------------------------------------------------------------------------------------------
+export const motion = {
+  duration: { fast: 120, base: 200, slow: 360 },
+  easing: {
+    soft: [0.25, 0.8, 0.35, 1], // UI thông thường
+    bounce: [0.34, 1.56, 0.64, 1], // phần thưởng, chấm radio, núm switch, mở huy hiệu
+  },
+  pressScale: { button: 0.96, iconButton: 0.92, card: 0.98 },
+} as const;
+
+export type Tones = typeof tones;
+export type RankTiers = typeof rankTiers;
 export type Spacing = typeof spacing;
-export type Radius = typeof radius;
+export type Radii = typeof radii;
 export type Typography = typeof typography;
-export type TextStyles = typeof textStyles;
-export type Shadows = typeof shadows;
+export type TypeScale = typeof typeScale;
+export type Elevation = typeof elevation;
+export type FocusRing = typeof focusRing;
+export type Motion = typeof motion;

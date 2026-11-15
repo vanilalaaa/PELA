@@ -23,19 +23,20 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
 
   const getBackground = (pressed: boolean) => {
     if (variant === 'ghost') return 'transparent';
-    if (isDisabled) return variant === 'primary' ? theme.colors.primaryDisabled : theme.colors.disabledBackground;
-    if (variant === 'primary') return pressed ? theme.colors.primaryPressed : theme.colors.primary;
+    // Figma: Disabled = nền ink-200, chữ ink-400, không bóng (mọi variant).
+    if (isDisabled) return theme.colors.bgDisabled;
+    if (variant === 'primary') return pressed ? theme.colors.bgPrimaryPress : theme.colors.bgPrimary;
     return pressed ? theme.colors.secondaryPressed : theme.colors.secondary;
   };
 
   const getTextColor = (pressed: boolean) => {
-    if (isDisabled) return theme.colors.disabledText;
-    if (variant === 'ghost') return pressed ? theme.colors.primaryPressed : theme.colors.primary;
+    if (isDisabled) return theme.colors.textDisabled;
+    if (variant === 'ghost') return pressed ? theme.colors.bgPrimaryPress : theme.colors.bgPrimary;
     return theme.colors.textOnPrimary;
   };
 
   const getBorder = () => {
-    if (variant === 'ghost') return theme.colors.primary;
+    if (variant === 'ghost') return theme.colors.bgPrimary;
     return 'transparent';
   };
 
@@ -54,10 +55,11 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
           borderWidth: variant === 'ghost' ? 1 : 0,
           paddingVertical: theme.spacing.sm + 4,
           paddingHorizontal: theme.spacing.lg,
-          borderRadius: theme.radius.md, // radius/input (Figma) — PELA dùng chung radius input cho button
+          // Tạm giữ bo 16; Figma dùng radius/full (pill) cho button — đổi ở bước components.
+          borderRadius: theme.radii.xl,
           opacity: pressed && !isDisabled ? 0.9 : 1,
           // PELA/shadow-primary — chỉ CTA chính (primary, chưa disabled) có glow shadow theo Figma.
-          ...(variant === 'primary' && !isDisabled ? theme.shadows.primary : null),
+          ...(variant === 'primary' && !isDisabled ? theme.elevation.primary : null),
         },
       ]}
     >
@@ -70,11 +72,11 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
               styles.label,
               {
                 color: getTextColor(pressed),
-                // PELA/button-lg (Figma): Baloo 2 Bold 18/22, letterSpacing 1.
-                fontFamily: theme.textStyles.buttonLg.fontFamily,
-                fontSize: theme.textStyles.buttonLg.fontSize,
-                lineHeight: theme.textStyles.buttonLg.lineHeight,
-                letterSpacing: theme.textStyles.buttonLg.letterSpacing,
+                // PELA/button-lg (Figma): Baloo 2 Bold 18/22, letterSpacing 1%.
+                fontFamily: theme.typeScale.buttonLg.fontFamily,
+                fontSize: theme.typeScale.buttonLg.fontSize,
+                lineHeight: theme.typeScale.buttonLg.lineHeight,
+                letterSpacing: theme.typeScale.buttonLg.letterSpacing,
               },
             ]}
           >

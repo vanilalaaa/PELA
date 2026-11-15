@@ -18,12 +18,12 @@ export function Card({ children, onPress, disabled = false, style, testID }: Car
   const theme = useTheme();
 
   const base: ViewStyle = {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.lg, // radius/card (Figma)
+    backgroundColor: theme.colors.bgSurface,
+    borderRadius: theme.radii.card, // radius/card (Figma)
     padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    ...theme.shadows.sm, // PELA/shadow-sm — card trong Figma (32 Badges, Practice Hub) đều có shadow nhẹ này
+    borderColor: theme.colors.borderDefault,
+    ...theme.elevation.sm, // PELA/shadow-sm — card trong Figma (32 Badges, Practice Hub) đều có shadow nhẹ này
   };
 
   if (!onPress) {
@@ -44,7 +44,7 @@ export function Card({ children, onPress, disabled = false, style, testID }: Car
       style={({ pressed }) => [
         styles.base,
         base,
-        pressed && !disabled && { backgroundColor: theme.colors.surfaceVariant },
+        pressed && !disabled && { backgroundColor: theme.colors.bgSurfaceAlt },
         disabled && { opacity: 0.5 },
         style,
       ]}

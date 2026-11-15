@@ -33,8 +33,8 @@ function HomeScreen() {
   const theme = useTheme();
   const navigation = useNavigation();
   return (
-    <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg }}>PELA</Text>
+    <View style={[styles.center, { backgroundColor: theme.colors.bgCanvas }]}>
+      <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h3 }}>PELA</Text>
       <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>{t('common.loading')}</Text>
       {__DEV__ ? (
         <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.sm }}>
@@ -56,19 +56,19 @@ export function RootNavigator() {
       theme={{
         dark: false, // Figma chưa có dark mode — xem core/ui/theme/tokens.ts
         colors: {
-          primary: theme.colors.primary,
-          background: theme.colors.background,
-          card: theme.colors.surface,
+          primary: theme.colors.bgPrimary,
+          background: theme.colors.bgCanvas,
+          card: theme.colors.bgSurface,
           text: theme.colors.textPrimary,
-          border: theme.colors.border,
-          notification: theme.colors.danger,
+          border: theme.colors.borderDefault,
+          notification: theme.colors.warnFg,
         },
         fonts: {
           // Mỗi family đã là một độ đậm riêng (xem tokens.ts), nên fontWeight để '400'.
-          regular: { fontFamily: theme.typography.fontFamily.regular, fontWeight: '400' },
-          medium: { fontFamily: theme.typography.fontFamily.medium, fontWeight: '400' },
-          bold: { fontFamily: theme.typography.fontFamily.bold, fontWeight: '400' },
-          heavy: { fontFamily: theme.typography.fontFamily.heavy, fontWeight: '400' },
+          regular: { fontFamily: theme.typography.fontFamily.nunitoSemiBold, fontWeight: '400' },
+          medium: { fontFamily: theme.typography.fontFamily.nunitoBold, fontWeight: '400' },
+          bold: { fontFamily: theme.typography.fontFamily.balooBold, fontWeight: '400' },
+          heavy: { fontFamily: theme.typography.fontFamily.balooExtraBold, fontWeight: '400' },
         },
       }}
     >

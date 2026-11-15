@@ -16,7 +16,11 @@ export function ProgressBar({ progress, color = 'primary', heightPx = 8, testID 
   const clamped = Math.max(0, Math.min(1, progress));
 
   const fillColor =
-    color === 'success' ? theme.colors.success : color === 'warning' ? theme.colors.warning : theme.colors.primary;
+    color === 'success'
+      ? theme.colors.successFg
+      : color === 'warning'
+        ? theme.colors.starAccent
+        : theme.colors.bgPrimary;
 
   return (
     <View
@@ -28,7 +32,7 @@ export function ProgressBar({ progress, color = 'primary', heightPx = 8, testID 
         {
           height: heightPx,
           borderRadius: heightPx / 2,
-          backgroundColor: theme.colors.surfaceVariant,
+          backgroundColor: theme.colors.bgTrack, // var(--color-bg-track)
         },
       ]}
     >

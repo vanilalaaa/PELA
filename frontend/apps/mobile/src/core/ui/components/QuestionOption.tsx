@@ -22,15 +22,15 @@ export function QuestionOption({ label, state = 'default', onPress, testID }: Qu
   const getColors = () => {
     switch (state) {
       case 'selected':
-        return { bg: theme.colors.surfaceVariant, border: theme.colors.primary, text: theme.colors.textPrimary };
+        return { bg: theme.colors.bgSurfaceAlt, border: theme.colors.bgPrimary, text: theme.colors.textPrimary };
       case 'correct':
-        return { bg: theme.colors.success, border: theme.colors.success, text: theme.colors.textOnPrimary };
+        return { bg: theme.colors.successFg, border: theme.colors.successFg, text: theme.colors.textOnPrimary };
       case 'incorrect':
-        return { bg: theme.colors.danger, border: theme.colors.danger, text: theme.colors.textOnPrimary };
+        return { bg: theme.colors.warnFg, border: theme.colors.warnFg, text: theme.colors.textOnPrimary };
       case 'disabled':
-        return { bg: theme.colors.disabledBackground, border: theme.colors.border, text: theme.colors.disabledText };
+        return { bg: theme.colors.bgDisabled, border: theme.colors.borderDefault, text: theme.colors.textDisabled };
       default:
-        return { bg: theme.colors.background, border: theme.colors.border, text: theme.colors.textPrimary };
+        return { bg: theme.colors.bgCanvas, border: theme.colors.borderDefault, text: theme.colors.textPrimary };
     }
   };
 
@@ -48,7 +48,7 @@ export function QuestionOption({ label, state = 'default', onPress, testID }: Qu
         {
           backgroundColor: bg,
           borderColor: border,
-          borderRadius: theme.radius.answer, // radius/answer (Figma) — không phải radius.md
+          borderRadius: theme.radii.answer, // radius/answer (Figma)
           paddingVertical: theme.spacing.sm + 2,
           paddingHorizontal: theme.spacing.md,
           opacity: pressed && !disabled ? 0.85 : 1,
@@ -58,9 +58,7 @@ export function QuestionOption({ label, state = 'default', onPress, testID }: Qu
       <Text
         style={{
           color: text,
-          fontFamily: theme.textStyles.bodyBold.fontFamily,
-          fontSize: theme.textStyles.body.fontSize,
-          lineHeight: theme.textStyles.body.lineHeight,
+          ...theme.typeScale.bodyBold,
         }}
       >
         {label}

@@ -27,7 +27,7 @@ export function StarRating({ value, max = 5, size = 20, testID }: StarRatingProp
           key={i}
           style={{
             fontSize: size,
-            color: filled ? theme.colors.starFilled : theme.colors.starEmpty,
+            color: filled ? theme.colors.starAccent : theme.colors.bgTrack,
             marginRight: i < stars.length - 1 ? theme.spacing.xs / 2 : 0,
           }}
         >

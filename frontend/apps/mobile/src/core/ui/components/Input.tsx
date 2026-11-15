@@ -18,10 +18,10 @@ export function Input({ label, errorMessage, disabled = false, onFocus, onBlur, 
   const hasError = Boolean(errorMessage);
 
   const borderColor = hasError
-    ? theme.colors.danger
+    ? theme.colors.borderError
     : focused
-      ? theme.colors.borderFocused
-      : theme.colors.border;
+      ? theme.colors.borderFocus
+      : theme.colors.borderDefault;
 
   return (
     <View style={styles.container}>
@@ -29,7 +29,7 @@ export function Input({ label, errorMessage, disabled = false, onFocus, onBlur, 
         <Text
           style={{
             color: theme.colors.textSecondary,
-            fontSize: theme.typography.size.sm,
+            ...theme.typeScale.caption,
             marginBottom: theme.spacing.xs,
           }}
         >
@@ -52,20 +52,21 @@ export function Input({ label, errorMessage, disabled = false, onFocus, onBlur, 
           styles.input,
           {
             borderColor,
-            backgroundColor: disabled ? theme.colors.disabledBackground : theme.colors.background,
-            color: disabled ? theme.colors.disabledText : theme.colors.textPrimary,
-            borderRadius: theme.radius.md,
+            backgroundColor: disabled ? theme.colors.bgDisabled : theme.colors.bgCanvas,
+            color: disabled ? theme.colors.textDisabled : theme.colors.textPrimary,
+            borderRadius: theme.radii.input,
             paddingHorizontal: theme.spacing.md,
             paddingVertical: theme.spacing.sm,
-            fontSize: theme.typography.size.md,
+            fontFamily: theme.typeScale.body.fontFamily,
+            fontSize: theme.typeScale.body.fontSize,
           },
         ]}
       />
       {hasError ? (
         <Text
           style={{
-            color: theme.colors.danger,
-            fontSize: theme.typography.size.xs,
+            color: theme.colors.warnFg,
+            ...theme.typeScale.micro,
             marginTop: theme.spacing.xs,
           }}
         >
