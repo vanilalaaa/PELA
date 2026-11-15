@@ -28,7 +28,7 @@ pnpm --filter admin-web typecheck
 
 ## Quy tắc UI
 
-- Figma là nguồn chuẩn cho hình thức (UI-1); `docs/srs/SRS_1.md` là nguồn chuẩn cho nghiệp vụ.
+- Figma là nguồn chuẩn cho hình thức (UI-1); `docs/srs/SRS_1.md` (SRS v4.3) là nguồn chuẩn cho nghiệp vụ.
 - Trước khi dựng trang: lấy design context và ảnh chụp của node qua Figma MCP. Không đoán khoảng cách, màu hay nội dung chữ.
 - Code Figma MCP trả về chỉ để tham khảo: chuyển sang stack, token và component của dự án, không dán nguyên.
 - Ưu tiên desktop: dùng tốt ở 1366x768 trở lên (UI-4). Không cần responsive cho mobile ở R1.0. Bảng dài thì cuộn trong vùng nội dung, không cuộn ngang cả trang.

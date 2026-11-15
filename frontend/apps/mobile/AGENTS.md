@@ -35,7 +35,7 @@ npx expo-doctor
 
 ## Quy tắc UI
 
-- Figma là nguồn chuẩn cho hình thức (UI-1); `docs/srs/SRS_1.md` là nguồn chuẩn cho nghiệp vụ.
+- Figma là nguồn chuẩn cho hình thức (UI-1); `docs/srs/SRS_1.md` (SRS v4.3) là nguồn chuẩn cho nghiệp vụ.
 - Trước khi dựng màn: lấy design context và ảnh chụp của node qua Figma MCP. Không đoán khoảng cách, màu hay nội dung chữ.
 - Code Figma MCP trả về (thường React + Tailwind) chỉ để tham khảo: chuyển sang stack, token và component của dự án, không dán nguyên.
 - Chỉ dùng theme token (`src/core/ui/theme`). Không mã hex, cỡ chữ hay số cứng trong màn.
