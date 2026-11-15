@@ -1,0 +1,126 @@
+erDiagram
+    USERS {
+        uuid user_id PK
+        varchar full_name
+        varchar username
+        varchar email
+        varchar avatar_url
+        varchar role
+        varchar status
+        timestamptz full_name_changed_at
+        timestamptz username_changed_at
+        timestamptz deletion_requested_at
+        varchar native_language
+        varchar cefr_level
+        varchar timezone
+        int failed_login_count
+        timestamptz locked_until
+        timestamptz suspended_until
+        varchar suspend_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    IMPORT_JOB {
+        uuid job_id PK
+        varchar kind
+        jsonb files
+        int total_bytes
+        int attempts
+        varchar status
+        jsonb preview
+        jsonb warnings
+        text error
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz finished_at
+    }
+    LISTENING_CLIP {
+        uuid clip_id PK
+        varchar topic
+        varchar title
+        varchar cefr_level
+        int order_index
+        varchar audio_url
+        int duration_sec
+        jsonb transcript
+        jsonb voice_config
+        varchar tts_model
+        varchar audio_format
+        varchar status
+        uuid import_job_id FK
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz retired_at
+    }
+    QUESTION_BANK {
+        uuid question_id PK
+        uuid clip_id FK
+        text question_text
+        varchar question_type
+        varchar question_purpose
+        jsonb payload
+        vector embedding_vector
+        varchar embedding_model
+        varchar topic
+        varchar cefr_level
+        varchar status
+        uuid import_job_id FK
+        uuid created_by FK
+        timestamptz retired_at
+        timestamptz created_at
+    }
+    RAG_QUESTION_CACHE {
+        uuid cache_id PK
+        vector query_embedding
+        varchar topic
+        varchar cefr_level
+        varchar question_type
+        jsonb generated_question
+        uuid source_template_id FK
+        int hit_count
+        timestamptz created_at
+        timestamptz last_hit_at
+        timestamptz expires_at
+        varchar status
+    }
+    RAG_CACHE_SERVE {
+        uuid cache_id PK,FK
+        uuid user_id PK,FK
+        timestamptz served_at PK
+    }
+    LISTENING_SESSION {
+        uuid session_id PK
+        uuid user_id FK
+        uuid clip_id FK
+        int total_questions
+        int correct_count
+        int stars_earned
+        timestamptz started_at
+        timestamptz completed_at
+    }
+    LISTENING_ATTEMPT {
+        uuid attempt_id PK
+        uuid session_id FK
+        uuid question_id FK
+        varchar selected_answer
+        boolean is_correct
+        timestamptz attempted_at
+    }
+    TOPIC_FINAL_TEST_POOL {
+        uuid topic_id PK,FK
+        uuid question_id PK,FK
+    }
+    USERS ||--o{ IMPORT_JOB : "created_by"
+    IMPORT_JOB ||--o{ LISTENING_CLIP : "import_job_id"
+    USERS ||--o{ LISTENING_CLIP : "created_by"
+    LISTENING_CLIP ||--o{ QUESTION_BANK : "clip_id"
+    IMPORT_JOB ||--o{ QUESTION_BANK : "import_job_id"
+    USERS ||--o{ QUESTION_BANK : "created_by"
+    QUESTION_BANK ||--o{ RAG_QUESTION_CACHE : "source_template_id"
+    RAG_QUESTION_CACHE ||--o{ RAG_CACHE_SERVE : "cache_id"
+    USERS ||--o{ RAG_CACHE_SERVE : "user_id"
+    USERS ||--o{ LISTENING_SESSION : "user_id"
+    LISTENING_CLIP ||--o{ LISTENING_SESSION : "clip_id"
+    LISTENING_SESSION ||--o{ LISTENING_ATTEMPT : "session_id"
+    QUESTION_BANK ||--o{ LISTENING_ATTEMPT : "question_id"
+    QUESTION_BANK ||--o{ TOPIC_FINAL_TEST_POOL : "question_id"
