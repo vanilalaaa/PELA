@@ -26,3 +26,6 @@ pela:
   # Không chấm ngay trên virtual thread; test gọi GradeWritingUseCase trực tiếp
   writing:
     grade-immediately: false
+  # Không xử lý file nhập trên virtual thread; test gọi ListeningImportJobUseCase.process trực tiếp
+  imports:
+    process-immediately: false

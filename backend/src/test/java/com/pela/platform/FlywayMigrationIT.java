@@ -34,7 +34,7 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 .extracting(MigrationInfo::getState)
                 .containsOnly(MigrationState.SUCCESS);
         assertThat(Arrays.stream(all).map(m -> m.getVersion().getVersion()))
-                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
+                .containsExactly("0.1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12");
     }
 
     @Test
@@ -149,7 +149,8 @@ class FlywayMigrationIT extends PostgresIntegrationTest {
                 INSERT INTO import_job (kind, files, total_bytes, created_by)
                 VALUES ('listening_csv', '[{"path":"imports/sample.csv","bytes":10}]', 10, ?)
                 """, adminId);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM import_job WHERE kind = 'listening_csv'", Integer.class))
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM import_job WHERE kind = 'listening_csv' AND created_by = ?",
+                Integer.class, adminId))
                 .isEqualTo(1);
 
         assertThatThrownBy(() -> jdbc.update("""

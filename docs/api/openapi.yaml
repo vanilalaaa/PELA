@@ -451,6 +451,430 @@ paths:
         '409':
           description: "Đang có lượt tạo bù khác. Mã: BACKFILL_RUNNING"
           content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/listening/topics:
+    get:
+      summary: Topic có bài nghe ở một cấp CEFR (UC-11, Listening.Select)
+      operationId: listListeningTopics
+      tags: [listening]
+      parameters:
+        - name: level
+          in: query
+          required: true
+          schema: {$ref: '#/components/schemas/CefrLevel'}
+      responses:
+        '200':
+          description: Topic có ít nhất một bài nghe chơi được (published, đã có audio, còn câu hỏi), theo tên
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [topic, clipCount]
+                  properties:
+                    topic: {type: string}
+                    clipCount: {type: integer}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+  /practice/listening/clips:
+    get:
+      summary: Bài nghe của một topic + cấp, theo thứ tự Admin đặt (Listening.Select.Source)
+      description: Sắp theo `orderIndex`; không gợi ý, không lọc theo độ khó, không sắp lại (DE-5).
+      operationId: listListeningClips
+      tags: [listening]
+      parameters:
+        - {name: topic, in: query, required: true, schema: {type: string}}
+        - {name: level, in: query, required: true, schema: {$ref: '#/components/schemas/CefrLevel'}}
+      responses:
+        '200':
+          description: Danh sách bài nghe
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ListeningClipItem'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '422': {$ref: '#/components/responses/ValidationFailed'}
+  /practice/listening/clips/{clipId}:
+    get:
+      summary: Chi tiết bài nghe để làm bài (UC-11)
+      description: |
+        URL audio ký tạm (hết hạn sau `listening.audio_url_ttl_sec`) và câu hỏi. Không trả đáp án, giải thích hay
+        transcript trước khi nộp; chúng nằm trong kết quả `POST /practice/listening/sessions`.
+      operationId: getListeningClip
+      tags: [listening]
+      parameters:
+        - {name: clipId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Bài nghe
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ListeningClipView'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Không có, đã retire hoặc chưa có audio. Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /practice/listening/sessions:
+    post:
+      summary: Nộp đáp án một phiên nghe (UC-11, Listening.Score, BR-16, BR-23, BR-36)
+      description: |
+        `sessionId` do client sinh (UUID); client gửi đáp án thô (chữ cái A–D) của mọi câu hỏi theo một lô. Server
+        chấm lại, tính sao theo `star.bands` (BR-16). Làm lại bài: `starsAdded` chỉ là phần vượt sao tốt nhất trước đó
+        (BR-36). Gửi lại cùng `sessionId` trả đúng kết quả đã lưu, không chấm và không cộng sao lần hai. Kết quả
+        kèm đáp án đúng, giải thích và transcript có bản dịch.
+      operationId: submitListeningSession
+      tags: [listening]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ListeningSubmitRequest'}
+      responses:
+        '200':
+          description: Kết quả chấm
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ListeningSessionResult'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/AccountBlocked'}
+        '404':
+          description: "Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "sessionId đã dùng cho người khác hoặc bài khác. Mã: SESSION_ID_CONFLICT"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: |
+            ANSWERS_MISMATCH (thiếu / thừa / trùng câu hỏi; mỗi câu hỏi active của bài đúng một đáp án) hoặc
+            INVALID_ANSWER (không phải A–D).
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/imports:
+    post:
+      summary: Tải file nhập Listening (UC-19, Admin.QuestionBank.ImportListening)
+      description: |
+        Chỉ `kind = listening_csv`. Kiểm đuôi `.csv` + kiểu MIME và dung lượng (`import.max_csv_mb`), lưu file vào
+        bucket `imports`, tạo job `queued` rồi xử lý nền: đọc + kiểm theo mẫu và BR-37 → `preview_ready` (preview
+        theo bài + `warnings` theo dòng/cột), hoặc `failed` khi sai cột / không phải UTF-8 / không có bài nào.
+        Theo dõi bằng `GET /admin/imports/{jobId}`.
+      operationId: uploadImport
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [kind, file]
+              properties:
+                kind: {type: string, enum: [listening_csv]}
+                file: {type: string, format: binary}
+      responses:
+        '202':
+          description: Job đã tạo (status queued)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "UNSUPPORTED_IMPORT_KIND, UNSUPPORTED_FILE_TYPE, FILE_EMPTY, FILE_TOO_LARGE (details {maxBytes, bytes})"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/imports/templates/listening:
+    get:
+      summary: Tải file CSV mẫu nhập Listening
+      operationId: getListeningImportTemplate
+      tags: [admin]
+      responses:
+        '200':
+          description: "Cột: clip_code, title, topic, cefr_level, row_type, speaker, voice, text_en, text_vi, question_type, option_a…option_d, answer, explanation"
+          content:
+            text/csv:
+              schema: {type: string}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/imports/{jobId}:
+    get:
+      summary: Trạng thái và preview của job nhập
+      operationId: getImport
+      tags: [admin]
+      parameters:
+        - {name: jobId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Job
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: IMPORT_JOB_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/imports/{jobId}/preview:
+    patch:
+      summary: Admin sửa preview (Admin.QuestionBank.Preview, BR-34)
+      description: |
+        Thay toàn bộ danh sách bài; server kiểm lại BR-37 và trả `warnings` mới. Audio đã sinh được giữ theo vị trí
+        bài nhưng `audio.current = false` khi lời thoại hoặc giọng không còn khớp: phải sinh lại trước khi lưu.
+      operationId: updateImportPreview
+      tags: [admin]
+      parameters:
+        - {name: jobId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clips]
+              properties:
+                clips:
+                  type: array
+                  minItems: 1
+                  items: {$ref: '#/components/schemas/ListeningClipDraft'}
+      responses:
+        '200':
+          description: Job sau khi sửa
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: IMPORT_JOB_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "Job không ở preview_ready. Mã: IMPORT_NOT_EDITABLE"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "Mã: NO_CLIPS"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/imports/{jobId}/clips/{clipIndex}/tts:
+    post:
+      summary: Sinh audio TTS cho một bài của preview (Admin.QuestionBank.Tts, BR-37, AS-16)
+      description: |
+        Gọi TTS (`ai.model.tts`) với giọng của từng người nói và cách đọc theo cấp (`ai.tts.style_by_level`), lưu WAV
+        tạm ở bucket `imports`, trả URL ký tạm để nghe thử. `attempts` của job + 1. Audio được gắn dấu vân tay của
+        lời thoại + giọng hiện tại. Bài còn lỗi BR-37 hoặc người nói chưa có giọng thì không sinh.
+      operationId: generateImportClipAudio
+      tags: [admin]
+      parameters:
+        - {name: jobId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: clipIndex, in: path, required: true, schema: {type: integer, minimum: 0}}
+      responses:
+        '200':
+          description: Audio nghe thử
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [clipIndex, audioUrl, durationSec, fingerprint, attempts]
+                properties:
+                  clipIndex: {type: integer}
+                  audioUrl: {type: string, format: uri}
+                  durationSec: {type: integer}
+                  fingerprint: {type: string}
+                  attempts: {type: integer}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "IMPORT_JOB_NOT_FOUND hoặc CLIP_NOT_FOUND (không có bài ở vị trí này)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "Mã: IMPORT_NOT_EDITABLE"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "LISTENING_CLIP_INVALID (details.issues) hoặc VOICE_REQUIRED (details.speaker)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /admin/imports/{jobId}/save:
+    post:
+      summary: Lưu các bài nghe của job (Admin.QuestionBank.Save, BR-14, BR-35, BR-37)
+      description: |
+        Chỉ khi không còn lỗi BR-37 và mọi bài có audio khớp lời thoại + giọng hiện tại. Audio được chép sang bucket
+        `listening-audio`; mỗi bài tạo `listening_clip` (voice_config, tts_model, audio_format, duration_sec,
+        order_index tiếp theo trong topic + cấp) và `question_bank` (question_purpose = listening) trong một
+        transaction cùng nhật ký Admin và trạng thái job `saved`. Lỗi thì không lưu gì.
+      operationId: saveImport
+      tags: [admin]
+      parameters:
+        - {name: jobId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Đã lưu; bài hiển thị cho learner ngay
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [jobId, clipIds]
+                properties:
+                  jobId: {type: string, format: uuid}
+                  clipIds: {type: array, items: {type: string, format: uuid}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: IMPORT_JOB_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "AUDIO_OUT_OF_DATE (details.clipIndexes: bài chưa có audio hoặc audio không khớp) hoặc IMPORT_NOT_EDITABLE"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "Còn lỗi BR-37. Mã: IMPORT_HAS_ERRORS (details.issues)"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/listening/clips/{clipId}:
+    get:
+      summary: Chi tiết bài nghe đã lưu, kèm đáp án (UC-19)
+      operationId: getAdminListeningClip
+      tags: [admin, listening]
+      parameters:
+        - {name: clipId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Bài nghe
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AdminListeningClip'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+    patch:
+      summary: Sửa bài nghe đã lưu (UC-19, BR-35, BR-37)
+      description: |
+        Trường bỏ trống giữ nguyên; câu hỏi nhận diện bằng `questionId`. Đổi `lines` hoặc `voices` thì phải gửi
+        `audioToken` lấy từ `POST /admin/listening/clips/{clipId}/tts` với đúng lời thoại + giọng mới. Ghi nhật ký
+        trước/sau.
+      operationId: updateAdminListeningClip
+      tags: [admin, listening]
+      parameters:
+        - {name: clipId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: {type: string}
+                voices: {type: object, additionalProperties: {type: string}}
+                lines:
+                  type: array
+                  items: {$ref: '#/components/schemas/ListeningLineDraft'}
+                questions:
+                  type: array
+                  items:
+                    type: object
+                    required: [questionId]
+                    properties:
+                      questionId: {type: string, format: uuid}
+                      text: {type: string}
+                      options: {type: array, minItems: 4, maxItems: 4, items: {type: string}}
+                      answer: {type: string, enum: [A, B, C, D]}
+                      explanation: {type: string}
+                audioToken: {type: string}
+      responses:
+        '200':
+          description: Bài sau khi sửa
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AdminListeningClip'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '409':
+          description: "AUDIO_REGENERATION_REQUIRED (details.fingerprint) hoặc CLIP_RETIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "LISTENING_CLIP_INVALID (details.issues) hoặc QUESTION_NOT_IN_CLIP"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/listening/clips/{clipId}/tts:
+    post:
+      summary: Sinh audio nghe thử cho lời thoại + giọng mới của bài đã lưu (BR-37)
+      operationId: previewAdminListeningClipAudio
+      tags: [admin, listening]
+      parameters:
+        - {name: clipId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [voices, lines]
+              properties:
+                voices: {type: object, additionalProperties: {type: string}}
+                lines:
+                  type: array
+                  minItems: 1
+                  items: {$ref: '#/components/schemas/ListeningLineDraft'}
+      responses:
+        '200':
+          description: Audio nghe thử; gửi `audioToken` kèm bản sửa
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [audioToken, fingerprint, audioUrl, durationSec]
+                properties:
+                  audioToken: {type: string}
+                  fingerprint: {type: string}
+                  audioUrl: {type: string, format: uri}
+                  durationSec: {type: integer}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '422':
+          description: "LISTENING_CLIP_INVALID hoặc VOICE_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+  /admin/listening/clips/{clipId}/retire:
+    post:
+      summary: Retire bài nghe (BR-34, BR-35)
+      description: Ẩn bài và câu hỏi khỏi learner; không xoá bài, câu hỏi hay lịch sử làm bài. Gọi lại khi đã retire không đổi gì.
+      operationId: retireAdminListeningClip
+      tags: [admin, listening]
+      parameters:
+        - {name: clipId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Bài sau khi retire
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AdminListeningClip'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403':
+          description: "Mã: ADMIN_REQUIRED"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+        '404':
+          description: "Mã: CLIP_NOT_FOUND"
+          content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
 
 components:
   securitySchemes:
@@ -692,3 +1116,192 @@ components:
             properties:
               category: {type: string}
               count: {type: integer}
+    CefrLevel:
+      type: string
+      enum: [A1, A2, B1, B2, C1, C2]
+    ListeningClipItem:
+      type: object
+      required: [clipId, title, orderIndex, questionCount]
+      properties:
+        clipId: {type: string, format: uuid}
+        title: {type: string}
+        orderIndex: {type: integer}
+        durationSec: {type: [integer, 'null']}
+        questionCount: {type: integer}
+        bestStars: {type: [integer, 'null'], description: Sao cao nhất người gọi từng đạt; null = chưa làm}
+    ListeningClipView:
+      type: object
+      required: [clipId, title, topic, cefrLevel, audioUrl, audioUrlExpiresAt, questions]
+      properties:
+        clipId: {type: string, format: uuid}
+        title: {type: string}
+        topic: {type: string}
+        cefrLevel: {$ref: '#/components/schemas/CefrLevel'}
+        durationSec: {type: [integer, 'null']}
+        audioUrl: {type: string, format: uri}
+        audioUrlExpiresAt: {type: string, format: date-time}
+        bestStars: {type: [integer, 'null']}
+        questions:
+          type: array
+          items:
+            type: object
+            required: [questionId, type, text, options]
+            properties:
+              questionId: {type: string, format: uuid}
+              type: {$ref: '#/components/schemas/ListeningQuestionType'}
+              text: {type: string}
+              options: {type: array, minItems: 4, maxItems: 4, items: {type: string}, description: 'Lựa chọn A, B, C, D theo thứ tự'}
+    ListeningQuestionType:
+      type: string
+      enum: [choose_heard, fill_blank, dialogue_question]
+      description: Listening.Answer.Types
+    ListeningSubmitRequest:
+      type: object
+      required: [sessionId, clipId, answers]
+      properties:
+        sessionId: {type: string, format: uuid, description: Do client sinh để gửi lại an toàn}
+        clipId: {type: string, format: uuid}
+        startedAt: {type: string, format: date-time}
+        answers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [questionId, selectedAnswer]
+            properties:
+              questionId: {type: string, format: uuid}
+              selectedAnswer: {type: string, enum: [A, B, C, D]}
+    ListeningSessionResult:
+      type: object
+      required: [sessionId, clipId, correctCount, totalQuestions, stars, previousBest, starsAdded, completedAt, results, transcript]
+      properties:
+        sessionId: {type: string, format: uuid}
+        clipId: {type: string, format: uuid}
+        correctCount: {type: integer}
+        totalQuestions: {type: integer}
+        stars: {type: integer, minimum: 0, maximum: 5, description: BR-16}
+        previousBest: {type: integer, description: Sao tốt nhất trước phiên này (0 nếu chưa làm)}
+        starsAdded: {type: integer, description: 'BR-36: max(0, stars - previousBest)'}
+        completedAt: {type: string, format: date-time}
+        results:
+          type: array
+          items:
+            type: object
+            required: [questionId, selectedAnswer, correctAnswer, correct, explanation]
+            properties:
+              questionId: {type: string, format: uuid}
+              selectedAnswer: {type: string}
+              correctAnswer: {type: string}
+              correct: {type: boolean}
+              explanation: {type: string}
+        transcript:
+          type: array
+          items:
+            type: object
+            required: [speaker, en, vi]
+            properties:
+              speaker: {type: string}
+              en: {type: string}
+              vi: {type: string}
+    ListeningLineDraft:
+      type: object
+      properties:
+        row: {type: [integer, 'null'], description: Dòng CSV gốc; null khi Admin thêm trên preview}
+        speaker: {type: string}
+        en: {type: string}
+        vi: {type: string}
+    ListeningClipDraft:
+      type: object
+      description: Một bài nghe trong preview; `voices` là người nói → tên giọng dựng sẵn của TTS
+      properties:
+        clipCode: {type: string}
+        row: {type: [integer, 'null']}
+        title: {type: string}
+        topic: {type: string}
+        cefrLevel: {type: string}
+        voices: {type: object, additionalProperties: {type: string}}
+        lines:
+          type: array
+          items: {$ref: '#/components/schemas/ListeningLineDraft'}
+        questions:
+          type: array
+          items:
+            type: object
+            properties:
+              row: {type: [integer, 'null']}
+              type: {type: string}
+              text: {type: string}
+              options: {type: array, items: {type: string}}
+              answer: {type: string}
+              explanation: {type: string}
+    ImportIssue:
+      type: object
+      required: [code, message]
+      description: Lỗi theo dòng CSV + cột để admin-web tô đỏ (UC-19 E3)
+      properties:
+        clipIndex: {type: [integer, 'null'], description: null = lỗi cả file}
+        row: {type: [integer, 'null'], description: Số dòng CSV (đếm từ 1, dòng tiêu đề là 1)}
+        column: {type: [string, 'null']}
+        code: {type: string}
+        message: {type: string}
+    ImportJob:
+      type: object
+      required: [jobId, kind, status, attempts, createdAt, clips, warnings]
+      properties:
+        jobId: {type: string, format: uuid}
+        kind: {type: string, enum: [listening_csv]}
+        status: {type: string, enum: [queued, processing, preview_ready, saved, failed, cancelled]}
+        attempts: {type: integer, description: Số lần sinh audio TTS}
+        error: {type: [string, 'null']}
+        createdAt: {type: string, format: date-time}
+        finishedAt: {type: [string, 'null'], format: date-time}
+        clips:
+          type: array
+          items:
+            type: object
+            required: [clip]
+            properties:
+              clip: {$ref: '#/components/schemas/ListeningClipDraft'}
+              audio:
+                type: [object, 'null']
+                properties:
+                  fingerprint: {type: string}
+                  durationSec: {type: integer}
+                  ttsModel: {type: string}
+                  format: {type: string}
+                  current: {type: boolean, description: Audio khớp lời thoại + giọng hiện tại (lưu được)}
+              savedClipId: {type: [string, 'null'], format: uuid}
+        warnings:
+          type: array
+          items: {$ref: '#/components/schemas/ImportIssue'}
+    AdminListeningClip:
+      type: object
+      required: [clipId, title, topic, cefrLevel, orderIndex, status, voices, lines, questions, audioFingerprint]
+      properties:
+        clipId: {type: string, format: uuid}
+        title: {type: string}
+        topic: {type: string}
+        cefrLevel: {$ref: '#/components/schemas/CefrLevel'}
+        orderIndex: {type: integer}
+        status: {type: string, enum: [published, retired]}
+        durationSec: {type: [integer, 'null']}
+        ttsModel: {type: [string, 'null']}
+        voices: {type: object, additionalProperties: {type: string}}
+        lines:
+          type: array
+          items: {$ref: '#/components/schemas/ListeningLineDraft'}
+        questions:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId: {type: string, format: uuid}
+              type: {$ref: '#/components/schemas/ListeningQuestionType'}
+              text: {type: string}
+              options: {type: array, items: {type: string}}
+              answer: {type: string, enum: [A, B, C, D]}
+              explanation: {type: string}
+              status: {type: string, enum: [active, retired]}
+        audioUrl: {type: [string, 'null'], format: uri}
+        audioFingerprint: {type: string}
+        retiredAt: {type: [string, 'null'], format: date-time}

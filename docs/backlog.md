@@ -18,6 +18,16 @@ Việc đã biết phải làm nhưng chưa tới lượt. Khi bắt đầu mộ
   - thông báo `writing_graded`.
   Kèm job tạo bù cho các bài `graded` trước khi có adapter (đọc `writing_submission` có `graded_at`, `stars_earned`).
 
+## Listening
+
+- **Gamification nhận sự kiện hoàn thành phiên nghe:** cài adapter thật cho `ListeningCompletedEventPort` (hiện là
+  `NoOpListeningCompletedEventAdapter`): `star_event` source `listening` với `starsAdded` (chỉ khi > 0, BR-36; cột
+  `stars` của star_event phải 1–6), streak (BR-11), bộ đếm mở khoá Final Test theo phần tăng (BR-20, BR-36). Job tạo
+  bù tính lại `starsAdded` từ `listening_session` theo thứ tự `completed_at`.
+- **Bucket Storage:** tạo bucket riêng tư `imports` và `listening-audio` trên Supabase (Flyway không quản lý schema
+  storage); dọn WAV tạm trong `imports/jobs/*` và `imports/clips/*` sau khi lưu.
+- **Đổi model TTS (ADR 0005):** job sinh lại audio cho clip có `tts_model` cũ.
+
 ## RAG
 
 - **Admin.QuestionBank.Retire phải hết hạn cache (BR-25):** khi Admin retire một đề Writing, gọi
