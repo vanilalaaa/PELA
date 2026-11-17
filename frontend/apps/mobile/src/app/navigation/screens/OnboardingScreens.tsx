@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { BackHandler, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Screen } from '../../../core/ui/components';
 import { useTheme } from '../../../core/ui/theme';
 import type { SurveyAnswers } from '../../../features/onboarding/application/types';
 import { useUseCases } from '../../UseCasesContext';
 import { useSession } from '../../session/sessionStore';
-import type { RootNav } from '../PlaceholderScreen';
 import type { OnboardingStackParamList } from '../types';
+
+type OnboardingNav = NativeStackNavigationProp<OnboardingStackParamList>;
+
+/** Chặn nút Back Android khi màn đang hiển thị (bài xếp lớp chỉ làm một lần, BR-19). */
+function useBlockHardwareBack() {
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+      return () => sub.remove();
+    }, []),
+  );
+}
 
 /** Câu trả lời mẫu để thử luồng; form 5 bước thật (09.1–09.5) dựng ở P3. */
 const SAMPLE_ANSWERS: SurveyAnswers = {
@@ -38,7 +50,7 @@ function Frame({ title, figma, children }: { title: string; figma: string; child
 /** 09.1–09.5: gửi khảo sát → A1 thì xong onboarding (SkipRule), ngược lại sang Placement. */
 export function SurveyScreen() {
   const { t } = useTranslation();
-  const nav = useNavigation<RootNav>();
+  const nav = useNavigation<OnboardingNav>();
   const { onboarding } = useUseCases();
   const [busy, setBusy] = useState(false);
   const submit = async () => {
@@ -46,7 +58,8 @@ export function SurveyScreen() {
     try {
       const result = await onboarding.submitSurvey(SAMPLE_ANSWERS);
       if (result.next === 'done') useSession.getState().completeOnboarding();
-      else nav.navigate('Onboarding', { screen: 'PlacementIntro', params: { orientedLevel: result.mappedLevel } });
+      // replace: khảo sát đã gửi, không quay lại được.
+      else nav.replace('PlacementIntro', { orientedLevel: result.mappedLevel });
     } finally {
       setBusy(false);
     }
@@ -65,14 +78,14 @@ export function SurveyAnalyzingScreen() {
 /** 11 Intro: làm bài, hoặc "Bắt đầu từ đầu" xếp A1 (UC-03 A1, FLOW-4). */
 export function PlacementIntroScreen() {
   const { t } = useTranslation();
-  const nav = useNavigation<RootNav>();
+  const nav = useNavigation<OnboardingNav>();
   const { params } = useRoute<RouteProp<OnboardingStackParamList, 'PlacementIntro'>>();
   return (
     <Frame title="PlacementIntro" figma="11 · FLOW-4, FLOW-10">
       <Button
         label={t('nav.action.startTest')}
         fullWidth
-        onPress={() => nav.navigate('Onboarding', { screen: 'PlacementTest', params })}
+        onPress={() => nav.replace('PlacementTest', params)}
         testID="placement-start"
       />
       <Button
@@ -88,17 +101,16 @@ export function PlacementIntroScreen() {
 /** 12: nộp đáp án (id lượt do client sinh — tạm dùng id mẫu cho tới khi có bộ sinh UUID). */
 export function PlacementTestScreen() {
   const { t } = useTranslation();
-  const nav = useNavigation<RootNav>();
+  const nav = useNavigation<OnboardingNav>();
   const { placement } = useUseCases();
+  useBlockHardwareBack();
   const [busy, setBusy] = useState(false);
   const submit = async () => {
     setBusy(true);
     try {
       const r = await placement.submit('placement-demo-attempt', []);
-      nav.navigate('Onboarding', {
-        screen: 'PlacementResult',
-        params: { placedLevel: r.placedLevel, passed: r.passed, score: r.score },
-      });
+      // replace: không quay lại bài thi đã nộp.
+      nav.replace('PlacementResult', { placedLevel: r.placedLevel, passed: r.passed, score: r.score });
     } finally {
       setBusy(false);
     }
@@ -115,6 +127,7 @@ export function PlacementResultScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { params } = useRoute<RouteProp<OnboardingStackParamList, 'PlacementResult'>>();
+  useBlockHardwareBack();
   return (
     <Frame title="PlacementResult" figma={params.passed ? '13' : '14'}>
       <Text style={[theme.typeScale.bodyStrong, { color: theme.colors.textPrimary }]}>
