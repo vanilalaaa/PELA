@@ -9,6 +9,7 @@ import { ActionsInputsPage } from '../dev/uikit/ActionsInputsPage';
 import { DisplayPage } from '../dev/uikit/DisplayPage';
 import { DbCheckScreen } from '../dev/DbCheckScreen';
 import { useSession } from '../session/sessionStore';
+import { selectRootBranch } from '../session/rootBranch';
 import { useSessionBootstrap } from '../session/useSessionActions';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabs } from './MainTabs';
@@ -62,8 +63,10 @@ export function RootNavigator() {
   const { t } = useTranslation();
   const theme = useTheme();
   useSessionBootstrap();
-  const status = useSession((s) => s.status);
-  const onboardingDone = useSession((s) => s.onboardingDone);
+  const branch = selectRootBranch(
+    useSession((s) => s.status),
+    useSession((s) => s.onboardingDone),
+  );
   const title = (name: keyof RootStackParamList) => ({ title: t(`nav.title.${name}`) });
 
   return (
@@ -89,11 +92,11 @@ export function RootNavigator() {
       }}
     >
       <Stack.Navigator>
-        {status === 'loading' ? (
+        {branch === 'splash' ? (
           <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-        ) : status === 'signedOut' ? (
+        ) : branch === 'auth' ? (
           <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} />
-        ) : !onboardingDone ? (
+        ) : branch === 'onboarding' ? (
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} options={{ headerShown: false }} />
         ) : (
           <Stack.Group>

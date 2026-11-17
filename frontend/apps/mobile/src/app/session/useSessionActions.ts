@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import type { LoginInput } from '../../features/auth/application';
 import { isOnboardingDone } from '../../features/onboarding/application/onboardingUseCases';
-import { onSessionExpired } from '../container';
+import { infrastructure, onSessionExpired } from '../container';
+import { bootstrapSession } from './bootstrapSession';
 import { useUseCases } from '../UseCasesContext';
 import { useSession } from './sessionStore';
 
@@ -16,11 +17,14 @@ export function useSessionBootstrap() {
     let active = true;
     (async () => {
       try {
-        const me = await auth.restoreSession();
+        const result = await bootstrapSession({
+          restoreSession: () => auth.restoreSession(),
+          getOnboardingStatus: () => onboarding.getStatus(),
+          clearTokens: () => infrastructure.tokenStore.clear(),
+        });
         if (!active) return;
-        if (!me) return useSession.getState().signOut();
-        const status = await onboarding.getStatus();
-        if (active) useSession.getState().signIn(me, isOnboardingDone(status));
+        if (result.status === 'signedIn') useSession.getState().signIn(result.me, result.onboardingDone);
+        else useSession.getState().signOut();
       } catch {
         if (active) useSession.getState().signOut();
       }
