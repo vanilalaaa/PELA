@@ -12,12 +12,8 @@
     "title": "UI Kit (dev)",
     "subtitle": "Internal screen to compare components against Figma — not a user-facing screen.",
     "sectionButton": "Button",
-    "sectionCard": "Card",
     "sectionInput": "Input",
-    "sectionProgress": "ProgressBar",
-    "sectionStar": "StarRating",
     "sectionSheet": "BottomSheet",
-    "sectionQuestion": "QuestionOption",
     "openSheet": "Open BottomSheet",
     "inputLabel": "Your name",
     "inputPlaceholder": "Enter your name...",
@@ -28,11 +24,7 @@
     "buttonGhost": "Ghost",
     "buttonDisabled": "Disabled",
     "buttonLoading": "Loading",
-    "cardStatic": "Static card (not pressable)",
-    "cardPressable": "Pressable card (has pressed state)",
-    "cardDisabled": "Disabled card",
     "inputReadonly": "Read-only",
-    "questionOption": "Option — {{state}}",
     "sheetTitle": "BottomSheet",
     "sheetBody": "Built with React Native's Modal and Animated, no extra native library.",
     "openActions": "Wave 1 · Actions and inputs",
@@ -52,7 +44,20 @@
       "journeyman": "Journeyman",
       "expert": "Expert",
       "master": "Master"
-    }
+    },
+    "openDisplay": "Wave 2 · Display",
+    "displayTitle": "UI Kit · Wave 2",
+    "tagTopic": "Vocabulary",
+    "chipLabel": "New",
+    "cardTitle": "Lesson 1 · Greetings",
+    "cardBody": "12 new words · 5 min",
+    "avatarName": "Nguyen Thi Uyen",
+    "statDays": "days",
+    "tabVocab": "Vocabulary",
+    "tabGrammar": "Grammar",
+    "tabListening": "Listening",
+    "answerSample": "grateful",
+    "sectionDisplay": "Display"
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -85,6 +90,26 @@
     },
     "otp": {
       "label": "{{length}}-digit verification code"
+    },
+    "badge": {
+      "dot": "New notification",
+      "count": "{{count}} new"
+    },
+    "statPill": {
+      "streak": "{{value}}-day streak",
+      "star": "{{value}} stars"
+    },
+    "starRating": "{{value}} of {{max}} stars",
+    "answer": {
+      "correct": "correct",
+      "wrong": "wrong"
+    },
+    "bottomNav": {
+      "home": "Home",
+      "lesson": "Lessons",
+      "practice": "Practice",
+      "leaderboard": "Ranking",
+      "profile": "Profile"
     }
   }
 }

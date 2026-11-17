@@ -49,7 +49,7 @@ const palette = {
   mint: { 100: '#dcf5e3', 300: '#a8e6ba', 500: '#4cc97a', 600: '#3db86a', 700: '#1e8548' },
   sky: { 100: '#d7ecfc', 300: '#9fd0f8', 500: '#38a7f6', 700: '#0072df' },
   lilac: { 100: '#efe6ff', 500: '#9b7bff', 700: '#6445d1' },
-  streak: { 100: '#ffe9d9', 500: '#ff8a3d' },
+  streak: { 100: '#ffe9d9', 500: '#ff8a3d', 700: '#d9560f' }, // 700 = streak-ink (StatPill 481:5729)
   tier: {
     1: { fill: '#e9a06c', ink: '#86461f' },
     2: { fill: '#dce5f0', ink: '#5a6c86' },
@@ -188,6 +188,68 @@ export const componentColors = {
     2: { bar: palette.amber[500], text: palette.amber[700] },
     3: { bar: palette.mint[500], text: palette.mint[700] },
   },
+  // Nền tint phẳng của Card (503:9474) và IconCircle (475:5626): Blue dùng blue-50, tone khác tông 100.
+  tint: {
+    white: palette.white,
+    blue: palette.blue[50],
+    sky: palette.sky[100],
+    amber: palette.amber[100],
+    coral: palette.coral[100],
+    mint: palette.mint[100],
+    lilac: palette.lilac[100],
+    streak: palette.streak[100],
+    neutral: palette.ink[100],
+  },
+  // Tag 478:5509: chọn = nền tint + viền tông 500 + chữ tông 700; chưa chọn = trắng, viền ink-200.
+  tag: {
+    blue: { bg: palette.blue[50], border: palette.blue[500], fg: palette.blue[700] },
+    amber: { bg: palette.amber[100], border: palette.amber[500], fg: palette.amber[700] },
+    mint: { bg: palette.mint[100], border: palette.mint[500], fg: palette.mint[700] },
+    coral: { bg: palette.coral[100], border: palette.coral[500], fg: palette.coral[700] },
+    unselected: { bg: palette.white, border: palette.ink[200], fg: palette.ink[700] },
+  },
+  // Chip 643:18143: Soft = tông 100 / chữ 700; Solid = tông 500 / chữ trắng (Amber chữ ink-900).
+  chip: {
+    soft: {
+      neutral: { bg: palette.ink[100], fg: palette.ink[700] },
+      sky: { bg: palette.sky[100], fg: palette.sky[700] },
+      mint: { bg: palette.mint[100], fg: palette.mint[700] },
+      amber: { bg: palette.amber[100], fg: palette.amber[700] },
+      coral: { bg: palette.coral[100], fg: palette.coral[700] },
+    },
+    solid: {
+      neutral: { bg: palette.ink[900], fg: palette.white },
+      sky: { bg: palette.blue[500], fg: palette.white },
+      mint: { bg: palette.mint[500], fg: palette.white },
+      amber: { bg: palette.amber[500], fg: palette.ink[900] },
+      coral: { bg: palette.coral[500], fg: palette.white },
+    },
+  },
+  // Badge 503:9333; viền chấm trắng 2px.
+  badge: {
+    blue: { bg: palette.blue[500], fg: palette.white },
+    coral: { bg: palette.coral[500], fg: palette.white },
+    mint: { bg: palette.mint[500], fg: palette.white },
+    amber: { bg: palette.amber[500], fg: palette.ink[900] },
+    soft: { bg: palette.blue[100], fg: palette.blue[700] },
+    neutral: { bg: palette.ink[100], fg: palette.ink[700] },
+    ring: palette.white,
+  },
+  // Avatar 478:5590: ring trắng 3px + blue-500 (tổng 6px).
+  avatarRing: { inner: palette.white, outer: palette.blue[500] },
+  // ProgressBar 503:9449: track ink-100, vệt sáng trắng 45%.
+  progress: { track: palette.ink[100], highlight: 'rgba(255, 255, 255, 0.45)' },
+  // AnswerOption 481:5935.
+  answer: {
+    idle: { bg: palette.white, border: palette.ink[200], keyBg: palette.ink[100], keyFg: palette.ink[500], fg: palette.ink[900] },
+    selected: { bg: palette.blue[50], border: palette.blue[500], keyBg: palette.blue[500], keyFg: palette.white, fg: palette.blue[700] },
+    correct: { bg: palette.mint[100], border: palette.mint[500], keyBg: palette.mint[500], keyFg: palette.white, fg: palette.mint[700] },
+    wrong: { bg: palette.coral[100], border: palette.coral[500], keyBg: palette.coral[500], keyFg: palette.white, fg: palette.coral[700] },
+    disabled: { bg: palette.ink[50], border: palette.ink[200], keyBg: palette.ink[100], keyFg: palette.ink[400], fg: palette.ink[400] },
+  },
+  // Tabs 480:5609 và BottomNav 480:5870.
+  tabs: { track: palette.ink[100], active: palette.white, fgActive: palette.blue[700], fg: palette.ink[500] },
+  bottomNav: { bg: palette.white, border: palette.ink[200], pill: palette.blue[50], fgActive: palette.blue[700], fg: palette.ink[400], badge: palette.coral[500] },
 } as const;
 
 /** Cặp màu theo tone cho component có biến thể Tone (Card, Tag, Chip, IconCircle, Avatar, ProgressBar, Badge). */
@@ -204,7 +266,7 @@ export const tones = {
   coral: { bg: palette.coral[100], fg: palette.coral[700], accent: palette.coral[500] },
   mint: { bg: palette.mint[100], fg: palette.mint[700], accent: palette.mint[500] },
   lilac: { bg: palette.lilac[100], fg: palette.lilac[700], accent: palette.lilac[500] },
-  streak: { bg: palette.streak[100], fg: palette.streak[500], accent: palette.streak[500] },
+  streak: { bg: palette.streak[100], fg: palette.streak[700], accent: palette.streak[500] },
   neutral: { bg: palette.ink[100], fg: palette.ink[700], accent: palette.ink[500] },
 } as const satisfies Record<string, ToneColors>;
 
@@ -304,6 +366,14 @@ export const typeScale = {
   inputLabel: { fontFamily: font.nunitoExtraBold, fontSize: 14, lineHeight: 20, letterSpacing: 0 },
   inputValue: { fontFamily: font.nunitoSemiBold, fontSize: 16, lineHeight: 22, letterSpacing: 0 },
   micro: { fontFamily: font.nunitoBold, fontSize: 11, lineHeight: 14, letterSpacing: 0 },
+  // Style riêng của component (Figma không gắn text style):
+  tab: { fontFamily: font.balooBold, fontSize: 15, lineHeight: 20, letterSpacing: 0.15 }, // Tabs 480:5609
+  navLabel: { fontFamily: font.nunitoExtraBold, fontSize: 11, lineHeight: 14, letterSpacing: 0 }, // BottomNav
+  // Figma dùng Nunito Black 12 cho Badge; app chưa nhúng Black → ExtraBold (GAP-19).
+  badge: { fontFamily: font.nunitoExtraBold, fontSize: 12, lineHeight: 16, letterSpacing: 0 },
+  statValue: { fontFamily: font.balooExtraBold, fontSize: 16, lineHeight: 20, letterSpacing: 0 }, // StatPill, phím đáp án
+  progressLabel: { fontFamily: font.balooExtraBold, fontSize: 14, lineHeight: 18, letterSpacing: 0 },
+  answerLabel: { fontFamily: font.nunitoExtraBold, fontSize: 16, lineHeight: 22, letterSpacing: 0 }, // AnswerOption
   eyebrow: {
     fontFamily: font.nunitoExtraBold,
     fontSize: 11,
@@ -355,6 +425,8 @@ export const motion = {
     bounce: [0.34, 1.56, 0.64, 1], // phần thưởng, chấm radio, núm switch, mở huy hiệu
   },
   pressScale: { button: 0.96, iconButton: 0.92, card: 0.98 },
+  // Mờ khi nhấn cho mục Tabs/BottomNav (Figma không có Pressed, GAP-22).
+  pressOpacity: 0.6,
 } as const;
 
 export type Tones = typeof tones;

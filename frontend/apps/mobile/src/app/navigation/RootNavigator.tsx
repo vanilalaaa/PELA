@@ -7,6 +7,7 @@ import { useTheme } from '../../core/ui/theme';
 import { Button } from '../../core/ui/components';
 import { UiKitScreen } from '../dev/UiKitScreen';
 import { ActionsInputsPage } from '../dev/uikit/ActionsInputsPage';
+import { DisplayPage } from '../dev/uikit/DisplayPage';
 import { DbCheckScreen } from '../dev/DbCheckScreen';
 import type { RootStackParamList } from './types';
 
@@ -21,6 +22,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       Home: '',
       DevUiKit: 'dev/ui-kit',
       DevUiKitActions: 'dev/ui-kit/actions',
+      DevUiKitDisplay: 'dev/ui-kit/display',
       DevDbCheck: 'dev/db-check',
     },
   },
@@ -80,6 +82,9 @@ export function RootNavigator() {
         {__DEV__ ? <Stack.Screen name="DevUiKit" component={UiKitScreen} options={{ title: t('uiKit.title') }} /> : null}
         {__DEV__ ? (
           <Stack.Screen name="DevUiKitActions" component={ActionsInputsPage} options={{ title: t('uiKit.actionsTitle') }} />
+        ) : null}
+        {__DEV__ ? (
+          <Stack.Screen name="DevUiKitDisplay" component={DisplayPage} options={{ title: t('uiKit.displayTitle') }} />
         ) : null}
         {__DEV__ ? <Stack.Screen name="DevDbCheck" component={DbCheckScreen} options={{ title: t('dbCheck.title') }} /> : null}
       </Stack.Navigator>
