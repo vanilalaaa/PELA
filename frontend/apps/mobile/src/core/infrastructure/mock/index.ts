@@ -6,3 +6,4 @@ export {
   useDevMockSettings,
 } from './mockBehavior';
 export type { MockBehaviorOptions, MockMode } from './mockBehavior';
+export { clone, fixture } from './fixture';

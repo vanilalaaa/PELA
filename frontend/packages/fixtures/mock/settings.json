@@ -1,0 +1,7 @@
+{
+  "preference": { "masterEnabled": true, "dailyReminder": true, "remindTime": "20:00", "updatedAt": "2026-11-01T08:00:00Z" },
+  "notifications": [
+    { "notificationId": "f7000000-0000-4000-8000-000000000001", "type": "friend_request", "title": "Lời mời kết bạn", "body": "Phạm Thu Hà muốn kết bạn với bạn.", "readAt": null, "createdAt": "2026-11-15T09:00:00Z" },
+    { "notificationId": "f7000000-0000-4000-8000-000000000002", "type": "badge_earned", "title": "Huy hiệu mới", "body": "Bạn vừa đạt Chuỗi 7 ngày.", "readAt": "2026-10-08T09:00:00Z", "createdAt": "2026-10-08T08:00:00Z" }
+  ]
+}

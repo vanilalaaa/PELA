@@ -1,0 +1,19 @@
+{
+  "clips": [
+    {
+      "clipId": "c7000000-0000-4000-8000-000000000001", "topic": "Daily routines", "title": "Ordering coffee", "cefrLevel": "A2", "orderIndex": 1, "durationSec": 42, "bestStars": 3,
+      "audioUrl": "https://example.com/mock/ordering-coffee.mp3",
+      "questions": [
+        { "questionId": "c8000000-0000-4000-8000-000000000001", "text": "What does the man order?", "options": ["A latte", "A tea", "A juice", "A cake"] }
+      ]
+    },
+    {
+      "clipId": "c7000000-0000-4000-8000-000000000002", "topic": "Travel", "title": "At the station", "cefrLevel": "A2", "orderIndex": 2, "durationSec": 55, "bestStars": null,
+      "audioUrl": "https://example.com/mock/at-the-station.mp3",
+      "questions": [
+        { "questionId": "c8000000-0000-4000-8000-000000000002", "text": "When does the train leave?", "options": ["8:15", "8:50", "9:15", "9:50"] }
+      ]
+    }
+  ],
+  "result": { "sessionId": "c9000000-0000-4000-8000-000000000001", "clipId": "c7000000-0000-4000-8000-000000000001", "correctCount": 1, "totalQuestions": 1, "starsEarned": 5, "starsAdded": 2, "transcript": "A: Hi, can I get a latte, please? B: Sure, that's three dollars." }
+}

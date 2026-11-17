@@ -1,0 +1,10 @@
+{
+  "friends": [
+    { "userId": "6f1c2a3b-0000-4000-8000-000000000002", "fullName": "Trần Bảo Lan", "username": "baolan", "avatarUrl": null, "cefrLevel": "B1", "starTotal": 980 },
+    { "userId": "6f1c2a3b-0000-4000-8000-000000000003", "fullName": "Lê Quốc Huy", "username": "quochuy", "avatarUrl": null, "cefrLevel": "A2", "starTotal": 1420 }
+  ],
+  "requests": [
+    { "friendshipId": "d7000000-0000-4000-8000-000000000001", "createdAt": "2026-11-15T09:00:00Z", "from": { "userId": "6f1c2a3b-0000-4000-8000-000000000004", "fullName": "Phạm Thu Hà", "username": "thuha", "avatarUrl": null, "cefrLevel": "A1", "starTotal": 120 } }
+  ],
+  "blocked": []
+}

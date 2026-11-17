@@ -11,6 +11,38 @@ import { createSqliteDatabase } from '../core/infrastructure/database';
 import { createApiClient, readApiBaseUrl, type ApiClient } from '../core/infrastructure/http';
 import { createSecureTokenStore } from '../core/infrastructure/http/secureTokenStore';
 import type { UseCases } from './UseCasesContext';
+import { createAuthUseCases } from '../features/auth/application';
+import { createApiAuthRepository } from '../features/auth/infrastructure/ApiAuthRepository';
+import { createMockAuthRepository } from '../features/auth/infrastructure/MockAuthRepository';
+import { createWritingUseCases } from '../features/writing/application';
+import { createApiWritingRepository } from '../features/writing/infrastructure/ApiWritingRepository';
+import { createMockWritingRepository } from '../features/writing/infrastructure/MockWritingRepository';
+import { createOnboardingUseCases } from '../features/onboarding/application/onboardingUseCases';
+import { createMockOnboardingRepository } from '../features/onboarding/infrastructure/MockOnboardingRepository';
+import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
+import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
+import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
+import { createMockRoadmapRepository } from '../features/roadmap/infrastructure/MockRoadmapRepository';
+import { createLessonUseCases } from '../features/lesson/application/lessonUseCases';
+import { createMockLessonRepository } from '../features/lesson/infrastructure/MockLessonRepository';
+import { createFinalTestUseCases } from '../features/finalTest/application/finalTestUseCases';
+import { createMockFinalTestRepository } from '../features/finalTest/infrastructure/MockFinalTestRepository';
+import { createChallengeUseCases } from '../features/challenge/application/challengeUseCases';
+import { createMockChallengeRepository } from '../features/challenge/infrastructure/MockChallengeRepository';
+import { createListeningUseCases } from '../features/listening/application/listeningUseCases';
+import { createMockListeningRepository } from '../features/listening/infrastructure/MockListeningRepository';
+import { createProfileUseCases } from '../features/profile/application/profileUseCases';
+import { createMockProfileRepository } from '../features/profile/infrastructure/MockProfileRepository';
+import { createSocialUseCases } from '../features/social/application/socialUseCases';
+import { createMockSocialRepository } from '../features/social/infrastructure/MockSocialRepository';
+import { createGamificationUseCases } from '../features/gamification/application/gamificationUseCases';
+import { createMockGamificationRepository } from '../features/gamification/infrastructure/MockGamificationRepository';
+import { createSettingsUseCases } from '../features/settings/application/settingsUseCases';
+import { createMockSettingsRepository } from '../features/settings/infrastructure/MockSettingsRepository';
+import { createLevelUseCases } from '../features/level/application/levelUseCases';
+import { createMockLevelRepository } from '../features/level/infrastructure/MockLevelRepository';
+import { createSyncUseCases } from '../features/sync/application/syncUseCases';
+import { createMockSyncRepository } from '../features/sync/infrastructure/MockSyncRepository';
 import { FEATURES, resolveDataSource, type DataSource, type FeatureName } from './config/dataSources';
 
 let databasePromise: Promise<Database> | null = null;
@@ -68,5 +100,33 @@ export function resolvedDataSources(): Record<FeatureName, DataSource> {
 /** Hạ tầng dùng chung để tạo Api<Feature>Repository (bước c). */
 export const infrastructure = { apiClient, tokenStore } as const;
 
-/** Use case của mọi tính năng; bước (c) điền theo `dataSourceOf(feature)`. */
-export const useCases: UseCases = {};
+/**
+ * Chọn repository theo nguồn dữ liệu. Tính năng chưa có Api repository (chưa có endpoint, xem
+ * docs/api-requests.md) luôn dùng mock dù bảng ghi 'api'.
+ */
+function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['client']) => R): R {
+  if (dataSourceOf(feature) === 'api' && api && apiClient) return api(apiClient.client);
+  if (__DEV__ && dataSourceOf(feature) === 'api' && !api) {
+    console.warn(`[container] ${feature}: chưa có Api repository, dùng mock`);
+  }
+  return mock();
+}
+
+/** Use case của mọi tính năng, đã tiêm repository (mock hoặc API). */
+export const useCases: UseCases = {
+  auth: createAuthUseCases(pick('auth', createMockAuthRepository, createApiAuthRepository), tokenStore),
+  onboarding: createOnboardingUseCases(pick('onboarding', createMockOnboardingRepository)),
+  placement: createPlacementUseCases(pick('placement', createMockPlacementRepository)),
+  roadmap: createRoadmapUseCases(pick('roadmap', createMockRoadmapRepository)),
+  lesson: createLessonUseCases(pick('lesson', createMockLessonRepository)),
+  finalTest: createFinalTestUseCases(pick('finalTest', createMockFinalTestRepository)),
+  challenge: createChallengeUseCases(pick('challenge', createMockChallengeRepository)),
+  writing: createWritingUseCases(pick('writing', createMockWritingRepository, createApiWritingRepository)),
+  listening: createListeningUseCases(pick('listening', createMockListeningRepository)),
+  profile: createProfileUseCases(pick('profile', createMockProfileRepository)),
+  social: createSocialUseCases(pick('social', createMockSocialRepository)),
+  gamification: createGamificationUseCases(pick('gamification', createMockGamificationRepository)),
+  settings: createSettingsUseCases(pick('settings', createMockSettingsRepository)),
+  sync: createSyncUseCases(pick('sync', createMockSyncRepository)),
+  level: createLevelUseCases(pick('level', createMockLevelRepository)),
+};

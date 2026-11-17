@@ -1,0 +1,19 @@
+{
+  "cefrLevel": "A2",
+  "topics": [
+    {
+      "topicId": "d1000000-0000-4000-8000-000000000001", "cefrLevel": "A2", "name": "Daily routines", "orderIndex": 1, "status": "in_progress",
+      "lessons": [
+        { "lessonId": "e1000000-0000-4000-8000-000000000001", "topicId": "d1000000-0000-4000-8000-000000000001", "orderIndex": 1, "title": "Morning", "newWordCount": 8, "status": "completed", "starsEarned": 4 },
+        { "lessonId": "e1000000-0000-4000-8000-000000000002", "topicId": "d1000000-0000-4000-8000-000000000001", "orderIndex": 2, "title": "At work", "newWordCount": 8, "status": "in_progress", "starsEarned": 0 },
+        { "lessonId": "e1000000-0000-4000-8000-000000000003", "topicId": "d1000000-0000-4000-8000-000000000001", "orderIndex": 3, "title": "Evening", "newWordCount": 8, "status": "not_started", "starsEarned": 0 }
+      ]
+    },
+    {
+      "topicId": "d1000000-0000-4000-8000-000000000002", "cefrLevel": "A2", "name": "Travel", "orderIndex": 2, "status": "locked",
+      "lessons": [
+        { "lessonId": "e1000000-0000-4000-8000-000000000004", "topicId": "d1000000-0000-4000-8000-000000000002", "orderIndex": 1, "title": "At the airport", "newWordCount": 8, "status": "not_started", "starsEarned": 0 }
+      ]
+    }
+  ]
+}

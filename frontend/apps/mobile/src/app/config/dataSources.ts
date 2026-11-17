@@ -17,6 +17,7 @@ export const FEATURES = [
   'gamification',
   'settings',
   'sync',
+  'level',
 ] as const;
 
 export type FeatureName = (typeof FEATURES)[number];
@@ -37,6 +38,7 @@ export const dataSources: Record<FeatureName, DataSource> = {
   gamification: 'mock',
   settings: 'mock',
   sync: 'mock',
+  level: 'mock',
 };
 
 export interface DataSourceEnv {

@@ -237,6 +237,9 @@ importers:
       '@pela/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@pela/fixtures':
+        specifier: workspace:*
+        version: link:../../packages/fixtures
       '@react-native-community/netinfo':
         specifier: 12.0.1
         version: 12.0.1(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)

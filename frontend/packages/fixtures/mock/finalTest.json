@@ -1,0 +1,19 @@
+{
+  "status": { "topicId": "d1000000-0000-4000-8000-000000000001", "unlockCycle": 1, "attemptsUsed": 1, "attemptsAllowed": 3, "locked": false, "starsEarnedSinceLock": 0, "starsRequiredToUnlock": 30, "passed": false },
+  "paper": {
+    "attemptId": "a3000000-0000-4000-8000-000000000001",
+    "topicId": "d1000000-0000-4000-8000-000000000001",
+    "questions": [
+      { "questionId": "a4000000-0000-4000-8000-000000000001", "vocabId": "f1000000-0000-4000-8000-000000000001", "type": "mcq", "prompt": "colleague", "options": ["đồng nghiệp", "hạn chót", "cuộc họp", "văn phòng"] }
+    ]
+  },
+  "result": {
+    "attemptId": "a3000000-0000-4000-8000-000000000001",
+    "topicId": "d1000000-0000-4000-8000-000000000001",
+    "attemptNumber": 2,
+    "score": 85,
+    "passed": true,
+    "attemptedAt": "2026-11-16T15:00:00Z",
+    "status": { "topicId": "d1000000-0000-4000-8000-000000000001", "unlockCycle": 1, "attemptsUsed": 2, "attemptsAllowed": 3, "locked": false, "starsEarnedSinceLock": 0, "starsRequiredToUnlock": 30, "passed": true }
+  }
+}
