@@ -3,7 +3,11 @@ import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../core/ui/theme';
-import { BottomSheet, Button } from '../../core/ui/components';
+import { BottomSheet, Button, Chip } from '../../core/ui/components';
+import { useDevMockSettings, type MockMode } from '../../core/infrastructure/mock';
+import { resolvedDataSources } from '../container';
+
+const MOCK_MODES: MockMode[] = ['normal', 'error', 'empty'];
 
 /**
  * Màn "Storybook" nội bộ, chỉ có trong bản dev. Mục lục các trang con theo đợt (đợt 1: hành động
@@ -17,6 +21,9 @@ export function UiKitScreen() {
   const theme = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
   const navigation = useNavigation();
+  const mockMode = useDevMockSettings((st) => st.mode);
+  const setMockMode = useDevMockSettings((st) => st.setMode);
+  const sources = resolvedDataSources();
 
   return (
     <ScrollView
@@ -34,6 +41,26 @@ export function UiKitScreen() {
         <Button label={t('uiKit.openActions')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitActions')} />
         <Button label={t('uiKit.openDisplay')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitDisplay')} />
       </View>
+
+      <Section title={t('uiKit.mockTitle')}>
+        <Text style={{ color: theme.colors.textSecondary, ...theme.typeScale.caption }}>{t('uiKit.mockHint')}</Text>
+        <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+          {MOCK_MODES.map((m) => (
+            <Button
+              key={m}
+              size="sm"
+              label={t(`uiKit.mockMode.${m}`)}
+              variant={mockMode === m ? 'primary' : 'secondary'}
+              onPress={() => setMockMode(m)}
+            />
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.xs }}>
+          {Object.entries(sources).map(([feature, source]) => (
+            <Chip key={feature} label={`${feature}: ${source}`} tone={source === 'api' ? 'sky' : 'neutral'} />
+          ))}
+        </View>
+      </Section>
 
       <Section title={t('uiKit.sectionSheet')}>
         <Button label={t('uiKit.openSheet')} onPress={() => setSheetVisible(true)} />

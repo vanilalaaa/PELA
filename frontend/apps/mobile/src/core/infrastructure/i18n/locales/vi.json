@@ -57,7 +57,14 @@
     "tabGrammar": "Ngữ pháp",
     "tabListening": "Nghe",
     "answerSample": "grateful",
-    "sectionDisplay": "Hiển thị"
+    "sectionDisplay": "Hiển thị",
+    "mockTitle": "Dữ liệu giả (mock)",
+    "mockHint": "Áp cho mọi Mock repository. Chip: nguồn dữ liệu thực tế của từng tính năng.",
+    "mockMode": {
+      "normal": "Bình thường",
+      "error": "Ép lỗi",
+      "empty": "Rỗng"
+    }
   },
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",

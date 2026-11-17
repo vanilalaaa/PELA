@@ -57,7 +57,14 @@
     "tabGrammar": "Grammar",
     "tabListening": "Listening",
     "answerSample": "grateful",
-    "sectionDisplay": "Display"
+    "sectionDisplay": "Display",
+    "mockTitle": "Mock data",
+    "mockHint": "Applies to every mock repository. Chips: actual data source of each feature.",
+    "mockMode": {
+      "normal": "Normal",
+      "error": "Force error",
+      "empty": "Empty"
+    }
   },
   "dbCheck": {
     "title": "DB check (dev)",
