@@ -33,6 +33,13 @@ npx expo-doctor
 - Thư mục `ios/` và `android/` được sinh tự động (CNG) và bị gitignore; cấu hình native qua `app.json` và config plugin, không sửa tay.
 - Thư viện có native code cần dev build lại (`npx expo run:android|ios`).
 
+## Gọi API
+
+- Chỉ gọi backend qua `createPelaClient` (`@pela/api-contract`) bên trong `features/<f>/infrastructure/Api<Feature>Repository.ts`. Xem [README api-contract](../../packages/api-contract/README.md).
+- Không sửa tay `packages/api-contract/src/schema.d.ts`; đổi API thì sửa OpenAPI rồi `pnpm gen:api`.
+- Endpoint thiếu so với SRS: ghi vào [`docs/api-requests.md`](../../../docs/api-requests.md), không tự đoán; tính năng đó dùng mock.
+- Chọn mock hay API cho từng tính năng ở `src/app/config/dataSources.ts`; `EXPO_PUBLIC_DATA_SOURCE=mock` ép mọi tính năng dùng mock.
+
 ## Quy tắc UI
 
 - Figma là nguồn chuẩn cho hình thức (UI-1); `docs/srs/SRS_1.md` (SRS v4.3) là nguồn chuẩn cho nghiệp vụ.
