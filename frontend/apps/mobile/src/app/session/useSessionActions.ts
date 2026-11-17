@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import type { LoginInput } from '../../features/auth/application';
-import { isOnboardingDone } from '../../features/onboarding/application/onboardingUseCases';
+import { onboardingEntry } from '../../features/onboarding/application/onboardingUseCases';
 import { infrastructure, onSessionExpired } from '../container';
 import { bootstrapSession } from './bootstrapSession';
 import { useUseCases } from '../UseCasesContext';
@@ -23,7 +23,7 @@ export function useSessionBootstrap() {
           clearTokens: () => infrastructure.tokenStore.clear(),
         });
         if (!active) return;
-        if (result.status === 'signedIn') useSession.getState().signIn(result.me, result.onboardingDone);
+        if (result.status === 'signedIn') useSession.getState().signIn(result.me, result.onboardingEntry);
         else useSession.getState().signOut();
       } catch {
         if (active) useSession.getState().signOut();
@@ -45,7 +45,7 @@ export function useSessionActions() {
     async (input: LoginInput) => {
       const me = await auth.login(input);
       const status = await onboarding.getStatus();
-      useSession.getState().signIn(me, isOnboardingDone(status));
+      useSession.getState().signIn(me, onboardingEntry(status));
     },
     [auth, onboarding],
   );

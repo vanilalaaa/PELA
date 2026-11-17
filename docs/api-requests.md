@@ -8,7 +8,7 @@ Trạng thái: `cần đặc tả` · `đang làm` · `đã có` · `bỏ`.
 
 | Id | Chỗ | UC/BR | Cần gì | Vì sao | Trạng thái |
 |---|---|---|---|---|---|
-| API-1 | `GET /me` (`Me`) | UC-02, UC-03, Onboarding.Survey.SkipRule | Thêm trạng thái onboarding: `surveyDone`, `placementDone` (hoặc một trường `onboardingStep`) | Mobile cần chặn điều hướng: đăng nhập xong mà chưa khảo sát/placement thì vào OnboardingStack. Hiện lấy tạm từ mock onboarding | cần đặc tả |
+| API-1 | `GET /me` (`Me`) | UC-02 POST-1, UC-03, BR-19, Onboarding.Survey.SkipRule | Thêm `onboardingStatus: 'surveyPending' \| 'placementPending' \| 'done'` và `orientedLevel` (CEFR, có khi `placementPending`). Server chuyển trạng thái: gửi khảo sát → `placementPending` (ánh xạ A1 → `done`); nộp Placement hoặc chọn "Bắt đầu từ đầu" → `done` | Mở lại app giữa chừng phải về đúng màn: chưa khảo sát → Survey; khảo sát xong chưa thi → Placement Intro (không làm lại khảo sát, thi đúng một lần); xong → MainTabs. Hiện mock lưu trạng thái này trong secure-store | cần đặc tả |
 | API-2 | Auth | UC-01 2.0.E3, Auth.Register.Verify | Endpoint gửi lại email xác minh (vd. `POST /auth/verification/resend`, công khai, giới hạn tần suất) | SRS: email chưa xác minh thì chặn đăng nhập và cho gửi lại email xác minh | cần đặc tả |
 | API-3 | Auth | CO-6, GAP-8 | Đăng nhập Google (luồng OAuth qua Supabase hay qua backend, và endpoint đổi token) | SRS chỉ cho đăng nhập mạng xã hội bằng Google; OpenAPI chưa có | cần đặc tả |
 | API-4 | Writing | Writing.Draft | Lưu / lấy / xoá bài nháp chủ động (hiện chỉ có nháp khi nộp bị 429 hết lượt) | Learner viết dở cần lưu nháp để viết tiếp, kể cả offline | cần đặc tả |
@@ -20,7 +20,7 @@ Kiểu dữ liệu mobile đang dùng nằm ở `frontend/apps/mobile/src/featur
 
 | Id | Feature mobile | UC/BR | Thao tác cần | Trạng thái |
 |---|---|---|---|---|
-| API-6 | onboarding | UC-02, Onboarding.Survey/Profile | Gửi khảo sát 5 câu → trả trình độ ánh xạ; đọc trạng thái onboarding | cần đặc tả |
+| API-6 | onboarding | UC-02, UC-03 A1, Onboarding.Survey/Profile | Gửi khảo sát 5 câu → trả trình độ ánh xạ; đọc trạng thái onboarding (API-1); "Bắt đầu từ đầu" → xếp A1, kết thúc onboarding (Placement.Test.StartFromBeginning) | cần đặc tả |
 | API-7 | placement | UC-03, BR-19 | Lấy đề placement; nộp đáp án (id lượt do client sinh) → điểm, đạt/trượt, trình độ xếp | cần đặc tả |
 | API-8 | roadmap | UC-06 | Lộ trình trình độ hiện tại: topic + lesson + tiến độ, sao | cần đặc tả |
 | API-9 | lesson | UC-06, BR-36, BR-23 | Nội dung lesson (từ mới + câu hỏi); nộp đáp án thô theo lô → sao, phần sao tăng thêm | cần đặc tả |

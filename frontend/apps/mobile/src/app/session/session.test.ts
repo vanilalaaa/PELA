@@ -6,7 +6,7 @@ import { bootstrapSession } from './bootstrapSession';
 import { selectRootBranch } from './rootBranch';
 
 const ME = { userId: 'u1', email: 'a@b.c', fullName: 'A', role: 'learner', status: 'active', timezone: 'Asia/Ho_Chi_Minh' } as Me;
-const DONE: OnboardingStatus = { surveyDone: true, placementDone: true, cefrLevel: 'B1' };
+const DONE: OnboardingStatus = { onboardingStatus: 'done', orientedLevel: 'C1', cefrLevel: 'B1' };
 
 describe('selectRootBranch', () => {
   it.each([
@@ -30,12 +30,16 @@ describe('bootstrapSession', () => {
 
   it('có token, /me ok → signedIn kèm trạng thái onboarding', async () => {
     const d = deps();
-    expect(await bootstrapSession(d)).toEqual({ status: 'signedIn', me: ME, onboardingDone: true });
+    expect(await bootstrapSession(d)).toEqual({ status: 'signedIn', me: ME, onboardingEntry: null });
     expect(d.clearTokens).not.toHaveBeenCalled();
   });
-  it('chưa xong onboarding → signedIn, onboardingDone=false', async () => {
-    const d = deps({ getOnboardingStatus: async () => ({ surveyDone: true, placementDone: false, cefrLevel: null }) });
-    expect(await bootstrapSession(d)).toMatchObject({ status: 'signedIn', onboardingDone: false });
+  it('chưa khảo sát → signedIn, mở Survey', async () => {
+    const d = deps({ getOnboardingStatus: async () => ({ onboardingStatus: 'surveyPending', orientedLevel: null, cefrLevel: null }) });
+    expect(await bootstrapSession(d)).toMatchObject({ status: 'signedIn', onboardingEntry: { screen: 'Survey' } });
+  });
+  it('khảo sát xong, chưa làm Placement → signedIn, mở PlacementIntro kèm orientedLevel', async () => {
+    const d = deps({ getOnboardingStatus: async () => ({ onboardingStatus: 'placementPending', orientedLevel: 'C1', cefrLevel: null }) });
+    expect(await bootstrapSession(d)).toMatchObject({ onboardingEntry: { screen: 'PlacementIntro', orientedLevel: 'C1' } });
   });
   it('không có token → signedOut', async () => {
     const d = deps({ restoreSession: async () => null });

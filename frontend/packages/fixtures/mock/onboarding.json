@@ -1,9 +1,4 @@
 {
-  "status": {
-    "surveyDone": false,
-    "placementDone": false,
-    "cefrLevel": null
-  },
   "surveyResult": {
     "mappedLevel": "C1"
   }

@@ -10,6 +10,7 @@ import { initI18n } from '../core/infrastructure/i18n';
 import { createSqliteDatabase } from '../core/infrastructure/database';
 import { createApiClient, readApiBaseUrl, type ApiClient } from '../core/infrastructure/http';
 import { createSecureTokenStore } from '../core/infrastructure/http/secureTokenStore';
+import { createSecureKeyValueStore } from '../core/infrastructure/storage/secureKeyValueStore';
 import type { UseCases } from './UseCasesContext';
 import { createAuthUseCases } from '../features/auth/application';
 import { createApiAuthRepository } from '../features/auth/infrastructure/ApiAuthRepository';
@@ -75,6 +76,8 @@ export function onSessionExpired(listener: () => void): () => void {
 
 const apiBaseUrl = readApiBaseUrl();
 const tokenStore = createSecureTokenStore();
+/** Nơi mock lưu trạng thái cần còn sau khi mở lại app (vd. onboarding) — cùng secure-store với phiên. */
+const mockStore = createSecureKeyValueStore();
 
 /** null khi chưa cấu hình EXPO_PUBLIC_API_BASE_URL (mọi tính năng chạy mock). */
 const apiClient: ApiClient | null = apiBaseUrl
@@ -115,8 +118,8 @@ function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['
 /** Use case của mọi tính năng, đã tiêm repository (mock hoặc API). */
 export const useCases: UseCases = {
   auth: createAuthUseCases(pick('auth', createMockAuthRepository, createApiAuthRepository), tokenStore),
-  onboarding: createOnboardingUseCases(pick('onboarding', createMockOnboardingRepository)),
-  placement: createPlacementUseCases(pick('placement', createMockPlacementRepository)),
+  onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore))),
+  placement: createPlacementUseCases(pick('placement', () => createMockPlacementRepository(mockStore))),
   roadmap: createRoadmapUseCases(pick('roadmap', createMockRoadmapRepository)),
   lesson: createLessonUseCases(pick('lesson', createMockLessonRepository)),
   finalTest: createFinalTestUseCases(pick('finalTest', createMockFinalTestRepository)),

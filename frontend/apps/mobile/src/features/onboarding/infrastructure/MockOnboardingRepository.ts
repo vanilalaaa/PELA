@@ -1,19 +1,41 @@
 import onboardingFixture from '@pela/fixtures/mock/onboarding.json';
-import { clone, fixture, mockCall } from '../../../core/infrastructure/mock';
+import { clone, fixture, mockCall, readMockOnboarding, writeMockOnboarding } from '../../../core/infrastructure/mock';
+import type { KeyValueStore } from '../../../core/infrastructure/storage/keyValueStore';
 import type { OnboardingRepository } from '../application/OnboardingRepository';
 import type { OnboardingStatus, SurveyResult } from '../application/types';
 
 interface OnboardingFixture {
-  status: OnboardingStatus;
   surveyResult: SurveyResult;
 }
 
 const data = fixture<OnboardingFixture>(onboardingFixture);
 
-export function createMockOnboardingRepository(): OnboardingRepository {
-  const empty: OnboardingStatus = { surveyDone: false, placementDone: false, cefrLevel: null };
+/**
+ * Onboarding giả lập có lưu trạng thái (giống server): khảo sát xong → placementPending (A1 → done);
+ * "Bắt đầu từ đầu" → done A1. Placement mock ghi done khi nộp bài.
+ */
+export function createMockOnboardingRepository(store: KeyValueStore): OnboardingRepository {
   return {
-    getStatus: () => mockCall(() => clone(data.status), empty),
-    submitSurvey: () => mockCall(() => clone(data.surveyResult), clone(data.surveyResult)),
+    getStatus: async () => {
+      const state = await readMockOnboarding(store);
+      return mockCall(() => state as OnboardingStatus, state as OnboardingStatus);
+    },
+    submitSurvey: async () => {
+      const result = clone(data.surveyResult);
+      const level = result.mappedLevel;
+      const out = await mockCall(() => result, result);
+      await writeMockOnboarding(store, {
+        onboardingStatus: level === 'A1' ? 'done' : 'placementPending',
+        orientedLevel: level,
+        cefrLevel: level === 'A1' ? 'A1' : null,
+      });
+      return out;
+    },
+    startFromBeginning: async () => {
+      const state: OnboardingStatus = { onboardingStatus: 'done', orientedLevel: null, cefrLevel: 'A1' };
+      const out = await mockCall(() => state, state);
+      await writeMockOnboarding(store, state);
+      return out;
+    },
   };
 }

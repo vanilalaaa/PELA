@@ -4,6 +4,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDevMockSettings } from '../core/infrastructure/mock';
+import { createMemoryKeyValueStore } from '../core/infrastructure/storage/keyValueStore';
 import { createMockAuthRepository } from './auth/infrastructure/MockAuthRepository';
 import { createMockChallengeRepository } from './challenge/infrastructure/MockChallengeRepository';
 import { createMockFinalTestRepository } from './finalTest/infrastructure/MockFinalTestRepository';
@@ -42,14 +43,27 @@ describe('Mock repositories', () => {
     expect(await bad).toBe('INVALID_CREDENTIALS');
   });
 
-  it('onboarding: mặc định chưa khảo sát; khảo sát ánh xạ C1', async () => {
-    const repo = createMockOnboardingRepository();
-    expect(await run(repo.getStatus())).toMatchObject({ surveyDone: false, placementDone: false });
+  it('onboarding: lưu trạng thái qua các lần mở app (surveyPending → placementPending → done)', async () => {
+    const store = createMemoryKeyValueStore();
+    const repo = createMockOnboardingRepository(store);
+    expect(await run(repo.getStatus())).toEqual({ onboardingStatus: 'surveyPending', orientedLevel: null, cefrLevel: null });
     expect(await run(repo.submitSurvey({} as never))).toEqual({ mappedLevel: 'C1' });
+    // "Mở lại app": repository mới, cùng kho lưu.
+    const reopened = createMockOnboardingRepository(store);
+    expect(await run(reopened.getStatus())).toEqual({ onboardingStatus: 'placementPending', orientedLevel: 'C1', cefrLevel: null });
+    await run(createMockPlacementRepository(store).submit('id-1', []));
+    expect(await run(reopened.getStatus())).toEqual({ onboardingStatus: 'done', orientedLevel: 'C1', cefrLevel: 'B1' });
+  });
+
+  it('onboarding: "Bắt đầu từ đầu" → done ở A1', async () => {
+    const store = createMemoryKeyValueStore();
+    const repo = createMockOnboardingRepository(store);
+    await run(repo.startFromBeginning());
+    expect(await run(repo.getStatus())).toMatchObject({ onboardingStatus: 'done', cefrLevel: 'A1' });
   });
 
   it('placement: kịch bản BR-19 — định hướng C1, thi B2, 64% → xếp B1, không đạt', async () => {
-    const repo = createMockPlacementRepository();
+    const repo = createMockPlacementRepository(createMemoryKeyValueStore());
     const r = await run(repo.submit('id-1', []));
     expect(r).toMatchObject({ attemptId: 'id-1', orientedLevel: 'C1', testedLevel: 'B2', score: 64, passed: false, placedLevel: 'B1' });
   });

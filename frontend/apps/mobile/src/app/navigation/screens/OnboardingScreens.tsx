@@ -80,6 +80,17 @@ export function PlacementIntroScreen() {
   const { t } = useTranslation();
   const nav = useNavigation<OnboardingNav>();
   const { params } = useRoute<RouteProp<OnboardingStackParamList, 'PlacementIntro'>>();
+  const { onboarding } = useUseCases();
+  const [busy, setBusy] = useState(false);
+  const startFromBeginning = async () => {
+    setBusy(true);
+    try {
+      await onboarding.startFromBeginning();
+      useSession.getState().completeOnboarding();
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <Frame title="PlacementIntro" figma="11 · FLOW-4, FLOW-10">
       <Button
@@ -92,7 +103,8 @@ export function PlacementIntroScreen() {
         label={t('nav.action.startFromBeginning')}
         variant="ghost"
         fullWidth
-        onPress={() => useSession.getState().completeOnboarding()}
+        loading={busy}
+        onPress={() => void startFromBeginning()}
       />
     </Frame>
   );

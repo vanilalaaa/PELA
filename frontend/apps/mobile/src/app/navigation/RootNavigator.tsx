@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { NavigationContainer, type LinkingOptions } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef, type LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../core/ui/theme';
@@ -16,6 +16,7 @@ import { MainTabs } from './MainTabs';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { SettingsScreen } from './screens/SettingsScreen';
 import * as P from './screens/placeholders';
+import { createDevNavigationLog } from './devNavigationLog';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -63,6 +64,8 @@ export function RootNavigator() {
   const { t } = useTranslation();
   const theme = useTheme();
   useSessionBootstrap();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const [navLog] = React.useState(createDevNavigationLog);
   const branch = selectRootBranch(
     useSession((s) => s.status),
     useSession((s) => s.onboardingDone),
@@ -71,7 +74,10 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer
+      ref={navigationRef}
       linking={linking}
+      onReady={() => navLog.onReady(navigationRef.getRootState())}
+      onStateChange={(state) => navLog.onStateChange(state)}
       theme={{
         dark: false, // Figma chưa có dark mode — xem core/ui/theme/tokens.ts
         colors: {

@@ -8,6 +8,7 @@ import {
   SurveyAnalyzingScreen,
   SurveyScreen,
 } from './screens/OnboardingScreens';
+import { useSession } from '../session/sessionStore';
 import type { OnboardingStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<OnboardingStackParamList>();
@@ -19,13 +20,17 @@ const Stack = createNativeStackNavigator<OnboardingStackParamList>();
 export function OnboardingNavigator() {
   const { t } = useTranslation();
   const title = (name: keyof OnboardingStackParamList) => ({ title: t(`nav.title.${name}`) });
+  // Mở lại app giữa chừng: placementPending vào thẳng PlacementIntro (không làm lại khảo sát).
+  const entry = useSession((s) => s.onboardingEntry);
+  const placement = entry?.screen === 'PlacementIntro' ? entry : null;
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName={placement ? 'PlacementIntro' : 'Survey'}>
       <Stack.Screen name="Survey" component={SurveyScreen} options={title('Survey')} />
       <Stack.Screen name="SurveyAnalyzing" component={SurveyAnalyzingScreen} options={title('SurveyAnalyzing')} />
       <Stack.Screen
         name="PlacementIntro"
         component={PlacementIntroScreen}
+        initialParams={placement ? { orientedLevel: placement.orientedLevel } : undefined}
         options={{ ...title('PlacementIntro'), headerBackVisible: false, gestureEnabled: false }}
       />
       <Stack.Screen
