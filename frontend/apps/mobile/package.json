@@ -9,6 +9,7 @@
     "@pela/domain": "workspace:*",
     "@pela/fixtures": "workspace:*",
     "@react-native-community/netinfo": "12.0.1",
+    "@react-navigation/bottom-tabs": "^7.22.0",
     "@react-navigation/native": "^7.5.1",
     "@react-navigation/native-stack": "^7.21.0",
     "@tanstack/react-query": "^5.107.1",

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../core/ui/theme';
-import { BottomSheet, Button, Chip } from '../../core/ui/components';
+import { BottomSheet, Button, Chip, Screen } from '../../core/ui/components';
 import { useDevMockSettings, type MockMode } from '../../core/infrastructure/mock';
+import { useQuery } from '@tanstack/react-query';
 import { resolvedDataSources } from '../container';
+import { useUseCases } from '../UseCasesContext';
 
 const MOCK_MODES: MockMode[] = ['normal', 'error', 'empty'];
 
@@ -24,12 +26,24 @@ export function UiKitScreen() {
   const mockMode = useDevMockSettings((st) => st.mode);
   const setMockMode = useDevMockSettings((st) => st.setMode);
   const sources = resolvedDataSources();
+  const { roadmap } = useUseCases();
+  // Thử gọi một Mock repository để thấy 3 chế độ: số chủ đề / mảng rỗng / mã lỗi.
+  const probe = useQuery({
+    queryKey: ['dev', 'mockProbe', mockMode],
+    queryFn: () => roadmap.getRoadmap(),
+    enabled: false,
+    retry: false,
+  });
+  const probeText = probe.isFetching
+    ? t('uiKit.mockProbe.loading')
+    : probe.error
+      ? t('uiKit.mockProbe.error', { code: (probe.error as { code?: string }).code ?? probe.error.message })
+      : probe.data
+        ? t('uiKit.mockProbe.result', { count: probe.data.topics.length })
+        : '';
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.bgCanvas }}
-      contentContainerStyle={{ padding: theme.spacing.md, gap: theme.spacing.lg }}
-    >
+    <Screen edges={['bottom']} contentStyle={{ gap: theme.spacing.lg }}>
       <View>
         <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h2 }}>
           {t('uiKit.title')}
@@ -55,6 +69,12 @@ export function UiKitScreen() {
             />
           ))}
         </View>
+        <Button size="sm" variant="soft" label={t('uiKit.mockProbe.run')} onPress={() => void probe.refetch()} />
+        {probeText ? (
+          <Text testID="mock-probe-result" style={{ color: theme.colors.textPrimary, ...theme.typeScale.bodyStrong }}>
+            {probeText}
+          </Text>
+        ) : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.xs }}>
           {Object.entries(sources).map(([feature, source]) => (
             <Chip key={feature} label={`${feature}: ${source}`} tone={source === 'api' ? 'sky' : 'neutral'} />
@@ -72,7 +92,7 @@ export function UiKitScreen() {
           <Button label={t('common.close')} variant="ghost" onPress={() => setSheetVisible(false)} />
         </BottomSheet>
       </Section>
-    </ScrollView>
+    </Screen>
   );
 }
 

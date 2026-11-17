@@ -46,3 +46,5 @@ export { Tabs } from './Tabs';
 export type { TabItem, TabsProps } from './Tabs';
 export { BottomNav } from './BottomNav';
 export type { BottomNavProps, BottomNavTab } from './BottomNav';
+export { Screen } from './Screen';
+export type { ScreenEdge, ScreenProps } from './Screen';

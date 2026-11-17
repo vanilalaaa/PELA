@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView } from 'react-native';
+import { } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../core/ui/theme';
 import { UIIcon } from '../../../core/ui/icons';
@@ -18,6 +18,7 @@ import {
   type ButtonVariant,
   type IconButtonSize,
   type IconButtonVariant,
+  Screen,
 } from '../../../core/ui/components';
 import { Caption, Row, Section } from './Section';
 
@@ -45,10 +46,7 @@ export function ActionsInputsPage() {
   const demoLabel = t('uiKit.demoAction');
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.bgCanvas }}
-      contentContainerStyle={{ padding: theme.spacing.screenGutter, gap: theme.spacing.xl }}
-    >
+    <Screen edges={['bottom']} contentStyle={{ gap: theme.spacing.xl }}>
       <Section title="Button">
         {SIZES.map((size) => (
           <React.Fragment key={size}>
@@ -172,6 +170,6 @@ export function ActionsInputsPage() {
         <Select label={t('uiKit.selectLabel')} options={ranks} value={rank} onChange={setRank} />
         <Select label={t('uiKit.selectLabel')} options={ranks} value="journeyman" onChange={() => {}} disabled />
       </Section>
-    </ScrollView>
+    </Screen>
   );
 }

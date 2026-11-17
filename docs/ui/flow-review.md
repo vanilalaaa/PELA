@@ -112,7 +112,7 @@ Params có kiểu; id do server/client cấp. Màn kết quả nằm trong route
 | SurveyAnalyzing | – | OnboardingStack | 10 |
 | PlacementIntro | `{ orientedLevel }` | OnboardingStack | 11 |
 | PlacementTest | `{ orientedLevel }` | OnboardingStack | 12 |
-| PlacementResult | `{ placedLevel, passed, correct, total }` | OnboardingStack | 13, 14, 15 |
+| PlacementResult | `{ placedLevel, passed, score }` | OnboardingStack | 13, 14, 15 |
 | Home | – | MainTabs | 16 |
 | Roadmap | – | MainTabs ("Bài học") | 17 |
 | Practice | – | MainTabs ("Luyện tập") | 35 |

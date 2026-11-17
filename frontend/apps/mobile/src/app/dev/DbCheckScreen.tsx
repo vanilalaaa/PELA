@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Q, type Database } from '@nozbe/watermelondb';
 import { useTheme } from '../../core/ui/theme';
-import { Button } from '../../core/ui/components';
+import { Button, Screen } from '../../core/ui/components';
 import type { ReviewCard } from '../../core/infrastructure/database';
 import { getDatabase } from '../container';
 
@@ -134,10 +134,7 @@ export function DbCheckScreen() {
   const passed = rows !== null && rows.every((row) => row.ok);
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.bgCanvas }}
-      contentContainerStyle={{ padding: theme.spacing.md, gap: theme.spacing.md }}
-    >
+    <Screen edges={['bottom']} contentStyle={{ gap: theme.spacing.md }}>
       <Text style={{ color: theme.colors.textSecondary }}>{t('dbCheck.subtitle')}</Text>
 
       <Button label={t('dbCheck.write')} onPress={write} />
@@ -169,6 +166,6 @@ export function DbCheckScreen() {
           ))}
         </View>
       ) : null}
-    </ScrollView>
+    </Screen>
   );
 }
