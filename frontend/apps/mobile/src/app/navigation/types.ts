@@ -84,6 +84,7 @@ export type RootStackParamList = {
   DevUiKit: undefined;
   DevUiKitActions: undefined;
   DevUiKitDisplay: undefined;
+  DevUiKitAuth: undefined;
   DevDbCheck: undefined;
 };
 

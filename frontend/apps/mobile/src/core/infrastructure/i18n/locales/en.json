@@ -70,7 +70,10 @@
       "loading": "Calling…",
       "result": "Result: {{count}} topics",
       "error": "Error: {{code}}"
-    }
+    },
+    "openAuth": "Wave 3a · Auth",
+    "authTitle": "UI Kit · Auth",
+    "mascotName": "PELA Bunny"
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -217,5 +220,23 @@
     "email": "Email",
     "password": "Password",
     "placedLevel": "Your level: {{level}} · {{score}}%"
+  },
+  "auth": {
+    "back": "Back",
+    "logo": "PELA",
+    "orContinueWith": "or continue with",
+    "login": "Log in",
+    "rememberTooltip": "Stay signed in on this device",
+    "rememberInfo": "About staying signed in",
+    "verify": {
+      "bubble": "I sent you an email, check your inbox!",
+      "spamHint": "Can't find it? Check your Spam or Promotions folder."
+    },
+    "error": {
+      "invalidCredentials": "Incorrect email or password.",
+      "emailTaken": "This email is already registered.",
+      "locked": "Your account is temporarily locked after too many failed attempts.",
+      "lockedUntil": "Try again after {{time}}."
+    }
   }
 }

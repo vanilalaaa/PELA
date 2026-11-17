@@ -70,7 +70,10 @@
       "loading": "Đang gọi…",
       "result": "Kết quả: {{count}} chủ đề",
       "error": "Lỗi: {{code}}"
-    }
+    },
+    "openAuth": "Đợt 3a · Màn Auth",
+    "authTitle": "UI Kit · Auth",
+    "mascotName": "Thỏ PELA"
   },
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",
@@ -217,5 +220,23 @@
     "email": "Email",
     "password": "Mật khẩu",
     "placedLevel": "Cấp của bạn: {{level}} · {{score}}%"
+  },
+  "auth": {
+    "back": "Quay lại",
+    "logo": "PELA",
+    "orContinueWith": "hoặc tiếp tục với",
+    "login": "Đăng nhập",
+    "rememberTooltip": "Giữ đăng nhập trên thiết bị này",
+    "rememberInfo": "Thông tin về ghi nhớ đăng nhập",
+    "verify": {
+      "bubble": "Mình đã gửi email rồi, kiểm tra hộp thư nhé!",
+      "spamHint": "Không thấy email? Xem thư mục Spam hoặc Quảng cáo."
+    },
+    "error": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng.",
+      "emailTaken": "Email này đã được đăng ký.",
+      "locked": "Tài khoản tạm bị khoá do đăng nhập sai nhiều lần.",
+      "lockedUntil": "Thử lại sau {{time}}."
+    }
   }
 }

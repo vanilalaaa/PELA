@@ -54,6 +54,7 @@ export function UiKitScreen() {
       <View style={{ gap: theme.spacing.sm }}>
         <Button label={t('uiKit.openActions')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitActions')} />
         <Button label={t('uiKit.openDisplay')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitDisplay')} />
+        <Button label={t('uiKit.openAuth')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitAuth')} />
       </View>
 
       <Section title={t('uiKit.mockTitle')}>

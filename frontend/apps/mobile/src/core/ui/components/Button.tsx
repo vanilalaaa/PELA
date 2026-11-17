@@ -3,7 +3,7 @@ import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from '
 import { useTheme } from '../theme';
 import { usePressScale } from './usePressScale';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'star' | 'success' | 'danger' | 'dangerSolid';
+export type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'star' | 'success' | 'danger' | 'dangerSolid' | 'warn';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps {
