@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../core/ui/theme';
 import { Button } from '../../core/ui/components';
 import { UiKitScreen } from '../dev/UiKitScreen';
+import { ActionsInputsPage } from '../dev/uikit/ActionsInputsPage';
 import { DbCheckScreen } from '../dev/DbCheckScreen';
 import type { RootStackParamList } from './types';
 
@@ -19,6 +20,7 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Home: '',
       DevUiKit: 'dev/ui-kit',
+      DevUiKitActions: 'dev/ui-kit/actions',
       DevDbCheck: 'dev/db-check',
     },
   },
@@ -76,6 +78,9 @@ export function RootNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'PELA' }} />
         {/* Màn dev để so UI Kit với Figma; không đăng ký ở bản release. */}
         {__DEV__ ? <Stack.Screen name="DevUiKit" component={UiKitScreen} options={{ title: t('uiKit.title') }} /> : null}
+        {__DEV__ ? (
+          <Stack.Screen name="DevUiKitActions" component={ActionsInputsPage} options={{ title: t('uiKit.actionsTitle') }} />
+        ) : null}
         {__DEV__ ? <Stack.Screen name="DevDbCheck" component={DbCheckScreen} options={{ title: t('dbCheck.title') }} /> : null}
       </Stack.Navigator>
     </NavigationContainer>

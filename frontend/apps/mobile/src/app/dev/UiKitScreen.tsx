@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../core/ui/theme';
 import {
   BottomSheet,
   Button,
   Card,
-  Input,
   ProgressBar,
   QuestionOption,
   StarRating,
@@ -14,9 +14,9 @@ import {
 } from '../../core/ui/components';
 
 /**
- * Màn "Storybook" nội bộ, chỉ có trong bản dev: liệt kê từng component ở đủ state (default,
- * pressed, disabled) và cả 2 theme, để so trực tiếp với Figma.
- * Riêng state "pressed" không demo tĩnh được vì chỉ xuất hiện khi đang chạm (xem Button.tsx).
+ * Màn "Storybook" nội bộ, chỉ có trong bản dev. Mục lục các trang con theo đợt (đợt 1: hành động
+ * và nhập liệu); các component chưa làm lại theo Figma vẫn hiển thị ở đây.
+ * Trạng thái "pressed" chỉ thấy khi đang chạm.
  *
  * Chỉ được đăng ký vào navigator khi `__DEV__` (xem RootNavigator.tsx).
  */
@@ -24,7 +24,7 @@ export function UiKitScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const navigation = useNavigation();
   const [selectedOption, setSelectedOption] = useState<QuestionOptionState>('default');
 
   const questionStates: QuestionOptionState[] = ['default', 'selected', 'correct', 'incorrect', 'disabled'];
@@ -41,13 +41,9 @@ export function UiKitScreen() {
         <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>{t('uiKit.subtitle')}</Text>
       </View>
 
-      <Section title={t('uiKit.sectionButton')}>
-        <Button label={t('uiKit.buttonPrimary')} variant="primary" onPress={() => {}} />
-        <Button label={t('uiKit.buttonSecondary')} variant="secondary" onPress={() => {}} />
-        <Button label={t('uiKit.buttonGhost')} variant="ghost" onPress={() => {}} />
-        <Button label={t('uiKit.buttonDisabled')} variant="primary" disabled onPress={() => {}} />
-        <Button label={t('uiKit.buttonLoading')} variant="primary" loading onPress={() => {}} />
-      </Section>
+      <View style={{ gap: theme.spacing.sm }}>
+        <Button label={t('uiKit.openActions')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitActions')} />
+      </View>
 
       <Section title={t('uiKit.sectionCard')}>
         <Card>
@@ -59,17 +55,6 @@ export function UiKitScreen() {
         <Card onPress={() => {}} disabled>
           <Text style={{ color: theme.colors.textPrimary }}>{t('uiKit.cardDisabled')}</Text>
         </Card>
-      </Section>
-
-      <Section title={t('uiKit.sectionInput')}>
-        <Input
-          label={t('uiKit.inputLabel')}
-          placeholder={t('uiKit.inputPlaceholder')}
-          value={inputValue}
-          onChangeText={setInputValue}
-        />
-        <Input label={t('uiKit.inputLabel')} value="" errorMessage={t('uiKit.inputError')} />
-        <Input label={t('uiKit.inputLabel')} value={t('uiKit.inputReadonly')} disabled />
       </Section>
 
       <Section title={t('uiKit.sectionProgress')}>

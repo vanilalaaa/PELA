@@ -43,9 +43,10 @@ const palette = {
     800: '#2e3a55',
     900: '#1f2a44',
   },
-  amber: { 100: '#fff4c8', 300: '#ffe38a', 500: '#ffc53d', 700: '#a86a00' },
+  // amber/600, mint/600: thấy trong biến thể Pressed của PELA/Button (474:5706, 474:5826).
+  amber: { 100: '#fff4c8', 300: '#ffe38a', 500: '#ffc53d', 600: '#ffb820', 700: '#a86a00' },
   coral: { 100: '#ffe1e6', 300: '#ffb3c0', 500: '#ff7a90', 700: '#c93b57' },
-  mint: { 100: '#dcf5e3', 300: '#a8e6ba', 500: '#4cc97a', 700: '#1e8548' },
+  mint: { 100: '#dcf5e3', 300: '#a8e6ba', 500: '#4cc97a', 600: '#3db86a', 700: '#1e8548' },
   sky: { 100: '#d7ecfc', 300: '#9fd0f8', 500: '#38a7f6', 700: '#0072df' },
   lilac: { 100: '#efe6ff', 500: '#9b7bff', 700: '#6445d1' },
   streak: { 100: '#ffe9d9', 500: '#ff8a3d' },
@@ -99,10 +100,6 @@ export interface ColorTokens {
   infoAccent: string;
   streakBg: string;
   streakFg: string;
-  /** @deprecated Alias tạm của `streakFg`; xoá ở bước components (Figma không có "secondary"). */
-  secondary: string;
-  /** @deprecated Giá trị cũ, Figma không có `streak-ink`; xoá ở bước components. */
-  secondaryPressed: string;
 }
 
 export const colorTokens: ColorTokens = {
@@ -142,9 +139,56 @@ export const colorTokens: ColorTokens = {
   infoAccent: palette.blue[500], // info/accent — suy ra (tông 500)
   streakBg: palette.streak[100], // var(--streak-bg)
   streakFg: palette.streak[500], // var(--streak)
-  secondary: palette.streak[500],
-  secondaryPressed: '#d9560f',
 };
+
+/**
+ * Màu theo trạng thái của component, lấy từ biến thể trong Figma (PELA/Button 474:6006,
+ * Button / Danger solid 575:11744, IconButton 475:5355, Input 570:11731, OtpCell 578:11762,
+ * Checkbox/Radio/Switch 476:5500/5515/5532). Figma dùng thẳng primitive (blue-100, blue-200…)
+ * nên gom ở đây thay vì để component chạm vào palette.
+ */
+export const componentColors = {
+  button: {
+    primary: { bg: palette.blue[500], bgPressed: palette.blue[700], fg: palette.white },
+    secondary: { bg: palette.white, bgPressed: palette.blue[100], fg: palette.blue[700], border: palette.blue[200] },
+    soft: { bg: palette.blue[50], bgPressed: palette.blue[200], fg: palette.blue[700] },
+    ghost: { bg: 'transparent', bgPressed: palette.blue[100], fg: palette.blue[700] },
+    star: { bg: palette.amber[500], bgPressed: palette.amber[600], fg: palette.ink[900] },
+    success: { bg: palette.mint[500], bgPressed: palette.mint[600], fg: palette.white },
+    danger: { bg: palette.coral[100], bgPressed: palette.coral[300], fg: palette.coral[700] },
+    // Figma không vẽ Pressed cho Danger solid → giữ nền, chỉ thu nhỏ khi nhấn (GAP).
+    dangerSolid: { bg: palette.coral[700], bgPressed: palette.coral[700], fg: palette.white },
+    disabled: { bg: palette.ink[200], fg: palette.ink[400] },
+  },
+  iconButton: {
+    soft: { bg: palette.blue[50], bgPressed: palette.blue[200], fg: palette.blue[700] },
+    ghost: { bg: 'transparent', bgPressed: palette.ink[200], fg: palette.ink[700] },
+    primary: { bg: palette.blue[500], bgPressed: palette.blue[700], fg: palette.white },
+    white: { bg: palette.white, bgPressed: palette.blue[100], fg: palette.ink[700] },
+    disabled: { bg: palette.ink[100], fg: palette.ink[400] },
+  },
+  field: {
+    bg: palette.white,
+    bgDisabled: palette.ink[100],
+    icon: palette.ink[400],
+    iconFocused: palette.blue[600],
+    caret: palette.blue[600],
+    optionSelectedBg: palette.blue[50],
+  },
+  otp: { borderFilled: palette.blue[300] },
+  control: {
+    on: palette.blue[500],
+    offBorder: palette.ink[300],
+    switchOffTrack: palette.ink[300],
+    knob: palette.white,
+  },
+  strength: {
+    empty: palette.ink[100],
+    1: { bar: palette.coral[500], text: palette.coral[700] },
+    2: { bar: palette.amber[500], text: palette.amber[700] },
+    3: { bar: palette.mint[500], text: palette.mint[700] },
+  },
+} as const;
 
 /** Cặp màu theo tone cho component có biến thể Tone (Card, Tag, Chip, IconCircle, Avatar, ProgressBar, Badge). */
 export interface ToneColors {
@@ -256,6 +300,9 @@ export const typeScale = {
   caption: { fontFamily: font.nunitoSemiBold, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
   captionBold: { fontFamily: font.nunitoBold, fontSize: 13, lineHeight: 18, letterSpacing: 0 },
   labelSpeaker: { fontFamily: font.balooExtraBold, fontSize: 12, lineHeight: 16, letterSpacing: 0 },
+  // Input (570:11731) không gắn text style: nhãn Nunito 800 14/20, giá trị Nunito 600 16/22.
+  inputLabel: { fontFamily: font.nunitoExtraBold, fontSize: 14, lineHeight: 20, letterSpacing: 0 },
+  inputValue: { fontFamily: font.nunitoSemiBold, fontSize: 16, lineHeight: 22, letterSpacing: 0 },
   micro: { fontFamily: font.nunitoBold, fontSize: 11, lineHeight: 14, letterSpacing: 0 },
   eyebrow: {
     fontFamily: font.nunitoExtraBold,
@@ -285,13 +332,17 @@ export const elevation = {
   lg: shadow('#1F4882', 0x24, 14, 36, 8), // dialog, bottom sheet
   primary: shadow(palette.blue[500], 0x59, 6, 16, 5), // button primary (mất khi press/disabled)
   star: shadow(palette.amber[500], 0x59, 6, 16, 5), // button sao / phần thưởng
+  success: shadow(palette.mint[500], 0x59, 6, 16, 5), // PELA/shadow-success (Button Success, thấy ở 474:5806)
 } as const;
 
-/** PELA/ring-focus: viền 2px blue-500 + ring 4px #38A7F6 α47. RN không có spread → component vẽ viền ngoài. */
-export const focusRing = {
-  color: palette.blue[500],
-  opacity: Math.round((0x47 / 255) * 1000) / 1000,
-  width: 4,
+/**
+ * Vòng sáng quanh ô nhập. RN không có box-shadow spread → component vẽ một viền ngoài dày `width`.
+ * focus: PELA/ring-focus #38A7F6 α47 spread 4. error: Figma ghi "vòng coral 22%, chưa có token"
+ * (Input 570:11731) → coral-500 α 0.22, cùng độ dày.
+ */
+export const rings = {
+  focus: { color: 'rgba(56, 167, 246, 0.278)', width: 4 },
+  error: { color: 'rgba(255, 122, 144, 0.22)', width: 4 },
 } as const;
 
 // ---------------------------------------------------------------------------------------------
@@ -313,5 +364,6 @@ export type Radii = typeof radii;
 export type Typography = typeof typography;
 export type TypeScale = typeof typeScale;
 export type Elevation = typeof elevation;
-export type FocusRing = typeof focusRing;
+export type Rings = typeof rings;
+export type ComponentColors = typeof componentColors;
 export type Motion = typeof motion;

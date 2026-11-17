@@ -9,7 +9,8 @@ export {
   typography,
   typeScale,
   elevation,
-  focusRing,
+  rings,
+  componentColors,
   motion,
 } from './tokens';
 export type {
@@ -23,7 +24,8 @@ export type {
   Typography,
   TypeScale,
   Elevation,
-  FocusRing,
+  Rings,
+  ComponentColors,
   Motion,
 } from './tokens';
 export type { Theme } from './useTheme';

@@ -2,10 +2,11 @@ import { createContext, useContext } from 'react';
 import {
   colorTokens,
   elevation,
-  focusRing,
+  componentColors,
   motion,
   radii,
   rankTiers,
+  rings,
   spacing,
   tones,
   typeScale,
@@ -22,7 +23,8 @@ export interface Theme {
   typography: typeof typography;
   typeScale: typeof typeScale;
   elevation: typeof elevation;
-  focusRing: typeof focusRing;
+  rings: typeof rings;
+  componentColors: typeof componentColors;
   motion: typeof motion;
 }
 
@@ -39,7 +41,8 @@ export const theme: Theme = {
   typography,
   typeScale,
   elevation,
-  focusRing,
+  rings,
+  componentColors,
   motion,
 };
 

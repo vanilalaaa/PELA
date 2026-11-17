@@ -34,7 +34,25 @@
     "inputReadonly": "Read-only",
     "questionOption": "Option — {{state}}",
     "sheetTitle": "BottomSheet",
-    "sheetBody": "Built with React Native's Modal and Animated, no extra native library."
+    "sheetBody": "Built with React Native's Modal and Animated, no extra native library.",
+    "openActions": "Wave 1 · Actions and inputs",
+    "demoAction": "Continue",
+    "inputDisplayName": "Display name",
+    "inputHint": "Up to 20 characters",
+    "password": "Password",
+    "passwordWrong": "Incorrect password",
+    "checkbox": "Daily study reminder",
+    "radioA": "Study 10 min/day",
+    "radioB": "Study 20 min/day",
+    "switch": "Sound",
+    "selectLabel": "Target rank",
+    "actionsTitle": "UI Kit · Wave 1",
+    "rank": {
+      "apprentice": "Apprentice",
+      "journeyman": "Journeyman",
+      "expert": "Expert",
+      "master": "Master"
+    }
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -49,5 +67,24 @@
     "error": "Error: {{message}}",
     "passed": "PASSED: all fields match",
     "failed": "FAILED: some fields differ"
+  },
+  "ui": {
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password",
+      "requirement": "At least 8 characters with uppercase, lowercase and a number",
+      "level1": "Weak",
+      "level2": "Medium",
+      "level3": "Strong",
+      "rule": {
+        "minLength": "At least 8 characters",
+        "uppercase": "Has an uppercase letter",
+        "lowercase": "Has a lowercase letter",
+        "digit": "Has a number"
+      }
+    },
+    "otp": {
+      "label": "{{length}}-digit verification code"
+    }
   }
 }
