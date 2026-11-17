@@ -12,12 +12,8 @@
     "title": "UI Kit (dev)",
     "subtitle": "Internal screen to compare components against Figma — not a user-facing screen.",
     "sectionButton": "Button",
-    "sectionCard": "Card",
     "sectionInput": "Input",
-    "sectionProgress": "ProgressBar",
-    "sectionStar": "StarRating",
     "sectionSheet": "BottomSheet",
-    "sectionQuestion": "QuestionOption",
     "openSheet": "Open BottomSheet",
     "inputLabel": "Your name",
     "inputPlaceholder": "Enter your name...",
@@ -28,13 +24,40 @@
     "buttonGhost": "Ghost",
     "buttonDisabled": "Disabled",
     "buttonLoading": "Loading",
-    "cardStatic": "Static card (not pressable)",
-    "cardPressable": "Pressable card (has pressed state)",
-    "cardDisabled": "Disabled card",
     "inputReadonly": "Read-only",
-    "questionOption": "Option — {{state}}",
     "sheetTitle": "BottomSheet",
-    "sheetBody": "Built with React Native's Modal and Animated, no extra native library."
+    "sheetBody": "Built with React Native's Modal and Animated, no extra native library.",
+    "openActions": "Wave 1 · Actions and inputs",
+    "demoAction": "Continue",
+    "inputDisplayName": "Display name",
+    "inputHint": "Up to 20 characters",
+    "password": "Password",
+    "passwordWrong": "Incorrect password",
+    "checkbox": "Daily study reminder",
+    "radioA": "Study 10 min/day",
+    "radioB": "Study 20 min/day",
+    "switch": "Sound",
+    "selectLabel": "Target rank",
+    "actionsTitle": "UI Kit · Wave 1",
+    "rank": {
+      "apprentice": "Apprentice",
+      "journeyman": "Journeyman",
+      "expert": "Expert",
+      "master": "Master"
+    },
+    "openDisplay": "Wave 2 · Display",
+    "displayTitle": "UI Kit · Wave 2",
+    "tagTopic": "Vocabulary",
+    "chipLabel": "New",
+    "cardTitle": "Lesson 1 · Greetings",
+    "cardBody": "12 new words · 5 min",
+    "avatarName": "Nguyen Thi Uyen",
+    "statDays": "days",
+    "tabVocab": "Vocabulary",
+    "tabGrammar": "Grammar",
+    "tabListening": "Listening",
+    "answerSample": "grateful",
+    "sectionDisplay": "Display"
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -49,5 +72,44 @@
     "error": "Error: {{message}}",
     "passed": "PASSED: all fields match",
     "failed": "FAILED: some fields differ"
+  },
+  "ui": {
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password",
+      "requirement": "At least 8 characters with uppercase, lowercase and a number",
+      "level1": "Weak",
+      "level2": "Medium",
+      "level3": "Strong",
+      "rule": {
+        "minLength": "At least 8 characters",
+        "uppercase": "Has an uppercase letter",
+        "lowercase": "Has a lowercase letter",
+        "digit": "Has a number"
+      }
+    },
+    "otp": {
+      "label": "{{length}}-digit verification code"
+    },
+    "badge": {
+      "dot": "New notification",
+      "count": "{{count}} new"
+    },
+    "statPill": {
+      "streak": "{{value}}-day streak",
+      "star": "{{value}} stars"
+    },
+    "starRating": "{{value}} of {{max}} stars",
+    "answer": {
+      "correct": "correct",
+      "wrong": "wrong"
+    },
+    "bottomNav": {
+      "home": "Home",
+      "lesson": "Lessons",
+      "practice": "Practice",
+      "leaderboard": "Ranking",
+      "profile": "Profile"
+    }
   }
 }

@@ -1,0 +1,50 @@
+sequenceDiagram
+    actor L as Learner
+    participant App as Mobile App
+    participant API as Backend API
+    participant DB as Supabase (PostgreSQL)
+    L->>App: Open a Lesson in the current Topic (first time or replay, BR-36)
+    App->>API: GET /lessons/{lesson_id}
+    API->>DB: Fetch new vocab + review vocab (previous lesson)
+    DB-->>API: Lesson vocabulary + question templates
+    API-->>App: Lesson session (interleaved queue, stored for offline use)
+    loop each item in queue
+        App->>L: Present item (flashcard / MCQ / listen-select / drag-drop / fill-blank)
+        L->>App: Submit answer
+        alt Correct
+            App->>App: Mark item done
+        else Incorrect (attempt 1-2)
+            App->>L: Show correct answer
+            App->>App: Re-queue item to back of queue (BR-21)
+        else Incorrect (3rd consecutive attempt)
+            App->>L: Show correct answer, mark passed
+            App->>App: Record error_count +1 locally (BR-21)
+        end
+    end
+    App->>API: POST /lessons/{lesson_id}/complete {answers[]}
+    API->>API: Recompute correctness, error_count and Star rating (BR-16, BR-23)
+    API->>DB: Save LESSON_PROGRESS, add only the improvement over the best rating to star_total (BR-36)
+    opt Topic Final Test is locked
+        API->>DB: stars_earned_since_lock += full session rating (BR-20)
+    end
+    API-->>App: Lesson complete
+    opt All lessons in Topic complete and Final Test available
+        L->>App: Start Final Test
+        App->>API: POST /topics/{topic_id}/final-test/start
+        API->>API: Generate 20 random questions by rules (all formats)
+        API-->>App: attempt_id + Final Test session
+        L->>App: Submit answers
+        App->>API: POST /topics/{topic_id}/final-test/{attempt_id}/submit
+        API->>DB: Insert FINAL_TEST_ATTEMPT (unlock_cycle, attempt_number)
+        alt Score >= 80%
+            API->>DB: Unlock next Topic, migrate Topic vocab into REVIEW_CARD (SM-2 pool)
+            API->>DB: For vocab with error_count >= 2: force EF < 2.5, label weak (BR-6, BR-20)
+            API-->>App: Passed — next Topic unlocked
+        else Score < 80% and attempt_number < 3
+            API-->>App: Failed — retry immediately with new random set
+        else Score < 80% on the last attempt of the cycle
+            API->>DB: Lock Final Test and next Topic, stars_earned_since_lock = 0 (BR-20)
+            API-->>App: Locked — earn 30 Stars to unlock one new attempt
+            App-->>L: Show "x/30 Stars" progress, Lessons of this Topic stay open for replay
+        end
+    end

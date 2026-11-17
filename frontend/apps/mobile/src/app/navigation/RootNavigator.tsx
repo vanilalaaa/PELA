@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../core/ui/theme';
 import { Button } from '../../core/ui/components';
 import { UiKitScreen } from '../dev/UiKitScreen';
+import { ActionsInputsPage } from '../dev/uikit/ActionsInputsPage';
+import { DisplayPage } from '../dev/uikit/DisplayPage';
 import { DbCheckScreen } from '../dev/DbCheckScreen';
 import type { RootStackParamList } from './types';
 
@@ -19,6 +21,8 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Home: '',
       DevUiKit: 'dev/ui-kit',
+      DevUiKitActions: 'dev/ui-kit/actions',
+      DevUiKitDisplay: 'dev/ui-kit/display',
       DevDbCheck: 'dev/db-check',
     },
   },
@@ -33,8 +37,8 @@ function HomeScreen() {
   const theme = useTheme();
   const navigation = useNavigation();
   return (
-    <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: theme.typography.size.lg }}>PELA</Text>
+    <View style={[styles.center, { backgroundColor: theme.colors.bgCanvas }]}>
+      <Text style={{ color: theme.colors.textPrimary, ...theme.typeScale.h3 }}>PELA</Text>
       <Text style={{ color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>{t('common.loading')}</Text>
       {__DEV__ ? (
         <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.sm }}>
@@ -56,19 +60,19 @@ export function RootNavigator() {
       theme={{
         dark: false, // Figma chưa có dark mode — xem core/ui/theme/tokens.ts
         colors: {
-          primary: theme.colors.primary,
-          background: theme.colors.background,
-          card: theme.colors.surface,
+          primary: theme.colors.bgPrimary,
+          background: theme.colors.bgCanvas,
+          card: theme.colors.bgSurface,
           text: theme.colors.textPrimary,
-          border: theme.colors.border,
-          notification: theme.colors.danger,
+          border: theme.colors.borderDefault,
+          notification: theme.colors.warnFg,
         },
         fonts: {
           // Mỗi family đã là một độ đậm riêng (xem tokens.ts), nên fontWeight để '400'.
-          regular: { fontFamily: theme.typography.fontFamily.regular, fontWeight: '400' },
-          medium: { fontFamily: theme.typography.fontFamily.medium, fontWeight: '400' },
-          bold: { fontFamily: theme.typography.fontFamily.bold, fontWeight: '400' },
-          heavy: { fontFamily: theme.typography.fontFamily.heavy, fontWeight: '400' },
+          regular: { fontFamily: theme.typography.fontFamily.nunitoSemiBold, fontWeight: '400' },
+          medium: { fontFamily: theme.typography.fontFamily.nunitoBold, fontWeight: '400' },
+          bold: { fontFamily: theme.typography.fontFamily.balooBold, fontWeight: '400' },
+          heavy: { fontFamily: theme.typography.fontFamily.balooExtraBold, fontWeight: '400' },
         },
       }}
     >
@@ -76,6 +80,12 @@ export function RootNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'PELA' }} />
         {/* Màn dev để so UI Kit với Figma; không đăng ký ở bản release. */}
         {__DEV__ ? <Stack.Screen name="DevUiKit" component={UiKitScreen} options={{ title: t('uiKit.title') }} /> : null}
+        {__DEV__ ? (
+          <Stack.Screen name="DevUiKitActions" component={ActionsInputsPage} options={{ title: t('uiKit.actionsTitle') }} />
+        ) : null}
+        {__DEV__ ? (
+          <Stack.Screen name="DevUiKitDisplay" component={DisplayPage} options={{ title: t('uiKit.displayTitle') }} />
+        ) : null}
         {__DEV__ ? <Stack.Screen name="DevDbCheck" component={DbCheckScreen} options={{ title: t('dbCheck.title') }} /> : null}
       </Stack.Navigator>
     </NavigationContainer>

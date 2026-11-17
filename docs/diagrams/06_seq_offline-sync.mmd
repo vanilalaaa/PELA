@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor L as Learner
+    participant App as Mobile App (UI)
+    participant LDB as Local DB (WatermelonDB + outbox)
+    participant SM as Sync Engine
+    participant API as Backend API
+    participant DB as Supabase (PostgreSQL)
+    Note over App,LDB: Device is offline
+    L->>App: Complete Daily Challenge / Lesson / Listening exercise
+    App->>LDB: Update local data + insert outbox record (client-generated id) in one transaction
+    LDB-->>App: Saved locally, provisional Stars shown as "syncing"
+    Note over LDB,DB: Network connection restored (or app foreground / every 5 minutes)
+    SM->>SM: Detect connectivity change
+    SM->>LDB: Read pending outbox records
+    LDB-->>SM: Batch of 20-50 records
+    SM->>API: POST /sync/push {device_id, records[]}
+    API->>API: Recompute Stars/streak/SM-2/Final-Test outcomes from raw answers (BR-23, anti-fraud)
+    API->>DB: Persist records (unique client ids make retries idempotent)
+    DB-->>API: Stored
+    API-->>SM: 200 OK {results[id, status], canonical Stars/streak}
+    alt status = accepted or duplicate
+        SM->>LDB: Delete record from outbox (BR-13), overwrite provisional values
+    else status = rejected
+        SM->>LDB: Keep record, store error code for display
+    end
+    SM->>API: GET /sync/pull?last_pulled_at=...
+    API->>DB: Read changes since last pull
+    API-->>SM: changes{created, updated, deleted} + new timestamp
+    SM->>LDB: Apply changes (content, SM-2 state)
+    LDB-->>App: Observables emit, screens refresh
+    App-->>L: Show "All progress synced" indicator
