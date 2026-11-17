@@ -102,7 +102,8 @@
         "uppercase": "Has an uppercase letter",
         "lowercase": "Has a lowercase letter",
         "digit": "Has a number"
-      }
+      },
+      "strongerHint": "Make it longer or add a special character to strengthen it"
     },
     "otp": {
       "label": "{{length}}-digit verification code"
@@ -226,17 +227,75 @@
     "logo": "PELA",
     "orContinueWith": "or continue with",
     "login": "Log in",
+    "register": "Sign up",
     "rememberTooltip": "Stay signed in on this device",
     "rememberInfo": "About staying signed in",
+    "remember": "Remember me",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password",
+    "fullName": "Full name",
+    "confirmPassword": "Confirm password",
+    "googleUnavailable": "Sign in with Google, not available yet",
+    "offline": "You're offline. Connect to the internet to continue.",
+    "welcome": {
+      "tagline": "Personalized English Learning App"
+    },
+    "loginScreen": {
+      "title": "Welcome back",
+      "passwordPlaceholder": "Enter your password",
+      "forgot": "Forgot password?",
+      "noAccount": "Don't have an account?"
+    },
+    "registerScreen": {
+      "title": "Create account",
+      "namePlaceholder": "Linh Tran",
+      "passwordPlaceholder": "Create a password",
+      "confirmPlaceholder": "Re-enter your password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?"
+    },
     "verify": {
-      "bubble": "I sent you an email, check your inbox!",
-      "spamHint": "Can't find it? Check your Spam or Promotions folder."
+      "bubble": "A verification email has been sent. Check your inbox.",
+      "spamHint": "Can't find it? Check your Spam or Promotions folder.",
+      "title": "Check your email",
+      "sentTo": "A verification email has been sent to ",
+      "instructions": ". Tap the link in the email to activate your account, then log in.",
+      "verifiedLogin": "Log in after verifying",
+      "resend": "Resend email",
+      "changeEmail": "Change email address",
+      "resendShort": "Resend"
     },
     "error": {
       "invalidCredentials": "Incorrect email or password.",
       "emailTaken": "This email is already registered.",
-      "locked": "Your account is temporarily locked after too many failed attempts.",
-      "lockedUntil": "Try again after {{time}}."
+      "locked": "Sign-in is temporarily locked after too many failed attempts.",
+      "lockedUntil": "Try again {{time}}.",
+      "lockedLater": "Try again in a few minutes.",
+      "unverified": "Your email isn't verified yet. Open the link in the verification email.",
+      "resendUnavailable": "Resending the verification email will be available in a later update.",
+      "suspended": "Your account is suspended.",
+      "suspendedReason": "Reason: {{reason}}.",
+      "suspendedUntil": "Until {{date}}.",
+      "suspendedForever": "Your account has been permanently suspended.",
+      "pendingDeletion": "Your account is scheduled for deletion and cannot sign in.",
+      "deletionDate": "Your data will be permanently deleted on {{date}}.",
+      "invalidInput": "Some details are invalid. Check the highlighted fields.",
+      "network": "Can't reach the server. Check your connection and try again.",
+      "tooManyRequests": "Too many attempts. Wait a moment and try again.",
+      "providerUnavailable": "Sign-in is temporarily unavailable. Try again in a few minutes.",
+      "unknown": "Something went wrong. Try again later."
+    },
+    "validation": {
+      "required": "This field is empty. Enter a value.",
+      "invalidEmail": "This email isn't valid. Check and try again.",
+      "emailTooLong": "Email must be at most 150 characters",
+      "nameTooLong": "Name must be at most 100 characters",
+      "passwordTooLong": "Password must be at most 72 characters",
+      "weakPassword": "This password isn't strong enough. Meet all the conditions below.",
+      "passwordMismatch": "The passwords don't match. Enter it again.",
+      "invalidValue": "This value isn't valid. Check and try again.",
+      "emailTakenHint": "Use another email or log in."
     }
   }
 }

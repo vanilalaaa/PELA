@@ -13,26 +13,6 @@ const DEV = __DEV__
   : [];
 
 // ---- AuthStack
-export const WelcomeScreen = placeholderScreen({
-  title: 'Welcome',
-  figma: '01 · GAP-8',
-  edges: ['top', 'bottom'],
-  actions: [
-    { label: 'toRegister', variant: 'primary', run: (n) => n.navigate('Auth', { screen: 'Register' }) },
-    { label: 'toLogin', variant: 'secondary', run: (n) => n.navigate('Auth', { screen: 'Login' }) },
-    ...DEV,
-  ],
-});
-export const RegisterScreen = placeholderScreen({
-  title: 'Register',
-  figma: '02, 03',
-  actions: [{ label: 'next', run: (n) => n.navigate('Auth', { screen: 'VerifyEmail', params: { email: 'learner@example.com' } }) }],
-});
-export const VerifyEmailScreen = placeholderScreen({
-  title: 'VerifyEmail',
-  figma: '04 · API-2',
-  actions: [{ label: 'toLogin', run: (n) => n.navigate('Auth', { screen: 'Login' }) }],
-});
 export const ForgotPasswordScreen = placeholderScreen({
   title: 'ForgotPassword',
   figma: '44b · GAP-5',

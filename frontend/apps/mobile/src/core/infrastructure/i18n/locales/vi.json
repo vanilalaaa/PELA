@@ -78,7 +78,7 @@
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",
     "open": "Kiểm tra DB",
-    "subtitle": "Ghi một review_card mẫu vào WatermelonDB, đọc lại và so từng field. Tắt hẳn app rồi mở lại và bấm \"Đọc lại\" để kiểm tra dữ liệu còn lưu.",
+    "subtitle": "Ghi một review_card mẫu vào WatermelonDB, đọc lại và so từng field. Tắt hẳn app, mở lại và bấm \"Đọc lại\" để kiểm tra dữ liệu còn lưu.",
     "write": "Ghi review_card mẫu",
     "read": "Đọc lại và so sánh",
     "delete": "Xoá bản ghi mẫu",
@@ -102,7 +102,8 @@
         "uppercase": "Có chữ hoa",
         "lowercase": "Có chữ thường",
         "digit": "Có chữ số"
-      }
+      },
+      "strongerHint": "Dài hơn hoặc thêm ký tự đặc biệt để mạnh hơn"
     },
     "otp": {
       "label": "Mã xác thực {{length}} số"
@@ -226,17 +227,75 @@
     "logo": "PELA",
     "orContinueWith": "hoặc tiếp tục với",
     "login": "Đăng nhập",
+    "register": "Đăng ký",
     "rememberTooltip": "Giữ đăng nhập trên thiết bị này",
     "rememberInfo": "Thông tin về ghi nhớ đăng nhập",
+    "remember": "Ghi nhớ đăng nhập",
+    "email": "Email",
+    "emailPlaceholder": "ban@email.com",
+    "password": "Mật khẩu",
+    "fullName": "Họ và tên",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "googleUnavailable": "Đăng nhập bằng Google, chưa hỗ trợ",
+    "offline": "Thiết bị đang ngoại tuyến. Hãy kết nối mạng để tiếp tục.",
+    "welcome": {
+      "tagline": "Personalized English Learning App"
+    },
+    "loginScreen": {
+      "title": "Chào mừng trở lại",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "forgot": "Quên mật khẩu?",
+      "noAccount": "Chưa có tài khoản?"
+    },
+    "registerScreen": {
+      "title": "Tạo tài khoản",
+      "namePlaceholder": "Trần Thuỳ Linh",
+      "passwordPlaceholder": "Tạo mật khẩu",
+      "confirmPlaceholder": "Nhập lại mật khẩu",
+      "submit": "Tạo tài khoản",
+      "haveAccount": "Đã có tài khoản?"
+    },
     "verify": {
-      "bubble": "Mình đã gửi email rồi, kiểm tra hộp thư nhé!",
-      "spamHint": "Không thấy email? Xem thư mục Spam hoặc Quảng cáo."
+      "bubble": "Email xác thực đã được gửi. Hãy kiểm tra hộp thư của bạn.",
+      "spamHint": "Không thấy email? Xem thư mục Spam hoặc Quảng cáo.",
+      "title": "Kiểm tra email của bạn",
+      "sentTo": "Email xác thực đã được gửi tới ",
+      "instructions": ". Hãy nhấn vào liên kết trong email để kích hoạt tài khoản, sau đó đăng nhập.",
+      "verifiedLogin": "Đăng nhập sau khi xác thực",
+      "resend": "Gửi lại email",
+      "changeEmail": "Đổi địa chỉ email",
+      "resendShort": "Gửi lại"
     },
     "error": {
       "invalidCredentials": "Email hoặc mật khẩu không đúng.",
       "emailTaken": "Email này đã được đăng ký.",
-      "locked": "Tài khoản tạm bị khoá do đăng nhập sai nhiều lần.",
-      "lockedUntil": "Thử lại sau {{time}}."
+      "locked": "Tạm khoá đăng nhập do nhập sai nhiều lần.",
+      "lockedUntil": "Thử lại {{time}}.",
+      "lockedLater": "Hãy thử lại sau ít phút.",
+      "unverified": "Email chưa được xác thực. Hãy mở liên kết trong email xác thực.",
+      "resendUnavailable": "Chức năng gửi lại email xác thực sẽ có trong bản cập nhật sau.",
+      "suspended": "Tài khoản đang bị đình chỉ.",
+      "suspendedReason": "Lý do: {{reason}}.",
+      "suspendedUntil": "Đến ngày {{date}}.",
+      "suspendedForever": "Tài khoản đã bị đình chỉ vĩnh viễn.",
+      "pendingDeletion": "Tài khoản đang chờ xoá nên không thể đăng nhập.",
+      "deletionDate": "Dữ liệu sẽ bị xoá vĩnh viễn vào ngày {{date}}.",
+      "invalidInput": "Thông tin chưa hợp lệ. Hãy kiểm tra lại các ô được đánh dấu.",
+      "network": "Không kết nối được máy chủ. Hãy kiểm tra kết nối mạng và thử lại.",
+      "tooManyRequests": "Bạn đã thử quá nhiều lần. Hãy đợi một lát và thử lại.",
+      "providerUnavailable": "Dịch vụ đăng nhập đang tạm gián đoạn. Hãy thử lại sau ít phút.",
+      "unknown": "Đã có lỗi xảy ra. Hãy thử lại sau."
+    },
+    "validation": {
+      "required": "Không được để trống. Hãy nhập thông tin này.",
+      "invalidEmail": "Email chưa đúng định dạng. Hãy kiểm tra lại.",
+      "emailTooLong": "Email tối đa 150 ký tự",
+      "nameTooLong": "Họ tên tối đa 100 ký tự",
+      "passwordTooLong": "Mật khẩu tối đa 72 ký tự",
+      "weakPassword": "Mật khẩu chưa đủ mạnh. Hãy đáp ứng đủ các điều kiện bên dưới.",
+      "passwordMismatch": "Mật khẩu xác nhận chưa khớp. Hãy nhập lại.",
+      "invalidValue": "Giá trị chưa hợp lệ. Hãy kiểm tra lại.",
+      "emailTakenHint": "Hãy dùng email khác hoặc đăng nhập."
     }
   }
 }

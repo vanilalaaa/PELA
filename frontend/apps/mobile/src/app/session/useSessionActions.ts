@@ -42,8 +42,8 @@ export function useSessionActions() {
   const { auth, onboarding } = useUseCases();
 
   const login = useCallback(
-    async (input: LoginInput) => {
-      const me = await auth.login(input);
+    async (input: LoginInput, remember = true) => {
+      const me = await auth.login(input, { remember });
       const status = await onboarding.getStatus();
       useSession.getState().signIn(me, onboardingEntry(status));
     },

@@ -23,6 +23,7 @@ export interface AuthRepository {
 /** Nơi lưu token phiên (hiện thực: secure-store ở core/infrastructure/http). */
 export interface SessionTokenPort {
   get(): Promise<AuthTokens | null>;
-  set(tokens: AuthTokens): Promise<void>;
+  /** `persist=false`: chỉ giữ trong bộ nhớ (không tích "Ghi nhớ đăng nhập", Auth.Login.Remember). */
+  set(tokens: AuthTokens, options?: { persist?: boolean }): Promise<void>;
   clear(): Promise<void>;
 }

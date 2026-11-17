@@ -23,8 +23,15 @@ import { createMockWritingRepository } from './writing/infrastructure/MockWritin
 
 /** Chạy hết timer giả để lời gọi mock xong. */
 async function run<T>(promise: Promise<T>): Promise<T> {
+  // Gắn handler trước khi chạy timer để lỗi mock không thành unhandled rejection.
+  const settled = promise.then(
+    (value) => ({ ok: true as const, value }),
+    (error: unknown) => ({ ok: false as const, error }),
+  );
   await vi.runAllTimersAsync();
-  return promise;
+  const result = await settled;
+  if (!result.ok) throw result.error;
+  return result.value;
 }
 
 beforeEach(() => {

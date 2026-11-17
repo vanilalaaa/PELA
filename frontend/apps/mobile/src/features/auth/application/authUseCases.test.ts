@@ -40,6 +40,15 @@ describe('auth use cases', () => {
     expect(await auth.login({ email: 'a@b.c', password: 'Abcdef12' })).toEqual(ME);
     expect(await tokens.get()).toEqual(TOKENS);
   });
+  it('login truyền chế độ ghi nhớ xuống nơi lưu token', async () => {
+    const set = vi.fn(async () => undefined);
+    const tokens: SessionTokenPort = { get: async () => null, set, clear: async () => undefined };
+    const auth = createAuthUseCases(repo(), tokens);
+    await auth.login({ email: 'a@b.c', password: 'Abcdef12' }, { remember: false });
+    expect(set).toHaveBeenLastCalledWith(TOKENS, { persist: false });
+    await auth.login({ email: 'a@b.c', password: 'Abcdef12' });
+    expect(set).toHaveBeenLastCalledWith(TOKENS, { persist: true });
+  });
   it('login sai → không lưu token', async () => {
     const tokens = createMemoryTokenStore();
     const auth = createAuthUseCases(repo({ login: () => Promise.reject(new Error('INVALID_CREDENTIALS')) }), tokens);

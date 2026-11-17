@@ -10,8 +10,8 @@ import type { CefrLevel } from '../../domain/types';
 export type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  Register: undefined;
-  VerifyEmail: { email: string };
+  Register: { fullName?: string } | undefined;
+  VerifyEmail: { email: string; fullName?: string };
   ForgotPassword: { email?: string } | undefined;
   ForgotPasswordOtp: { email: string };
   ResetPassword: { resetToken: string };

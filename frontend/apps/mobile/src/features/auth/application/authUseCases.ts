@@ -3,8 +3,11 @@ import type { LoginInput, Me, RegisterInput, ResetPasswordInput } from './types'
 
 export interface AuthUseCases {
   register(input: RegisterInput): ReturnType<AuthRepository['register']>;
-  /** Đăng nhập rồi lưu token; trả thông tin tài khoản. */
-  login(input: LoginInput): Promise<Me>;
+  /**
+   * Đăng nhập rồi lưu token; trả thông tin tài khoản. `remember` (mặc định true): có lưu phiên bền
+   * trên thiết bị không (Auth.Login.Remember).
+   */
+  login(input: LoginInput, options?: { remember?: boolean }): Promise<Me>;
   /** Gọi /auth/logout rồi LUÔN xoá token, kể cả khi server lỗi hoặc mất mạng. */
   logout(allDevices?: boolean): Promise<void>;
   /** Khởi động app: có token thì lấy /me; không có thì null. Lỗi ném ra để caller về màn đăng nhập. */
@@ -18,9 +21,9 @@ export interface AuthUseCases {
 export function createAuthUseCases(repo: AuthRepository, tokens: SessionTokenPort): AuthUseCases {
   return {
     register: (input) => repo.register(input),
-    async login(input) {
+    async login(input, options) {
       const session = await repo.login(input);
-      await tokens.set(session);
+      await tokens.set(session, { persist: options?.remember ?? true });
       return repo.getMe();
     },
     async logout(allDevices = false) {

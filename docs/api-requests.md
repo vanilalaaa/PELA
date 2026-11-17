@@ -13,6 +13,7 @@ Trạng thái: `cần đặc tả` · `đang làm` · `đã có` · `bỏ`.
 | API-3 | Auth | CO-6, GAP-8 | Đăng nhập Google (luồng OAuth qua Supabase hay qua backend, và endpoint đổi token) | SRS chỉ cho đăng nhập mạng xã hội bằng Google; OpenAPI chưa có | cần đặc tả |
 | API-4 | Writing | Writing.Draft | Lưu / lấy / xoá bài nháp chủ động (hiện chỉ có nháp khi nộp bị 429 hết lượt) | Learner viết dở cần lưu nháp để viết tiếp, kể cả offline | cần đặc tả |
 | API-5 | Writing | BR-30 | Bỏ qua một từ gợi ý (vd. `POST /practice/writing/vocab-suggestions/{id}/dismiss` → `status = dismissed`) | Schema đã có trạng thái `dismissed` nhưng chưa có endpoint đặt trạng thái này | cần đặc tả |
+| API-19 | Lỗi `VALIDATION_FAILED` (`components.responses.ValidationFailed`) | UI-2 | Xác nhận `details[].field` dùng đúng tên thuộc tính của request body (vd. `fullName`, `email`, `password`, `confirmPassword`) | Mobile đặt lỗi dưới đúng ô theo `field`; OpenAPI chưa nói rõ quy ước tên | cần đặc tả |
 
 ## Tính năng chưa có endpoint (mobile đang chạy mock)
 

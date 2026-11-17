@@ -1,0 +1,123 @@
+/**
+ * Luật form và ánh xạ lỗi cho màn Auth (UC-01, Auth.Register.Validate, BR-1). Hàm thuần, có test.
+ * Thông điệp là key i18n dưới `auth.validation` / `auth.error`; màn tự dịch.
+ * Mã lỗi theo docs/api/openapi.yaml (không tự đặt mã mới).
+ */
+import { z } from 'zod';
+import { evaluatePassword } from '@pela/domain';
+
+// Giới hạn theo OpenAPI RegisterRequest (fullName ≤ 100, email ≤ 150, password ≤ 72).
+export const FULL_NAME_MAX = 100;
+export const EMAIL_MAX = 150;
+export const PASSWORD_MAX = 72;
+
+const email = z
+  .string()
+  .trim()
+  .min(1, 'required')
+  .max(EMAIL_MAX, 'emailTooLong')
+  .pipe(z.email('invalidEmail'));
+
+export const loginSchema = z.object({
+  email,
+  password: z.string().min(1, 'required'),
+});
+export type LoginForm = z.infer<typeof loginSchema>;
+
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(1, 'required').max(FULL_NAME_MAX, 'nameTooLong'),
+    email,
+    password: z
+      .string()
+      .min(1, 'required')
+      .max(PASSWORD_MAX, 'passwordTooLong')
+      .refine((p) => evaluatePassword(p).valid, 'weakPassword'),
+    confirmPassword: z.string().min(1, 'required'),
+  })
+  .refine((d) => d.password === d.confirmPassword, { path: ['confirmPassword'], message: 'passwordMismatch' });
+export type RegisterForm = z.infer<typeof registerSchema>;
+
+/** Lỗi API dạng tối thiểu (presentation không import infrastructure). */
+interface ApiErrorLike {
+  status?: number;
+  code?: string;
+  details?: unknown;
+}
+
+function asApiError(error: unknown): ApiErrorLike {
+  return typeof error === 'object' && error !== null ? (error as ApiErrorLike) : {};
+}
+
+function detail(error: ApiErrorLike, key: string): string | null {
+  const d = error.details;
+  if (typeof d !== 'object' || d === null || Array.isArray(d)) return null;
+  const v = (d as Record<string, unknown>)[key];
+  return typeof v === 'string' ? v : null;
+}
+
+export type FieldErrors = Partial<Record<string, string>>;
+
+/** VALIDATION_FAILED: details là danh sách {field, message} → lỗi chung "invalidValue" dưới từng ô. */
+function validationFieldErrors(error: ApiErrorLike): FieldErrors {
+  if (!Array.isArray(error.details)) return {};
+  const out: FieldErrors = {};
+  for (const item of error.details) {
+    const field = (item as { field?: unknown } | null)?.field;
+    if (typeof field === 'string') out[field] = 'invalidValue';
+  }
+  return out;
+}
+
+/** Lỗi chung cho mọi form auth (mạng, quá tải, dịch vụ xác thực, không rõ). */
+export type CommonAlert = { key: 'network' } | { key: 'tooManyRequests' } | { key: 'providerUnavailable' } | { key: 'unknown' };
+
+function commonAlert(error: ApiErrorLike): CommonAlert {
+  if (error.status === 0) return { key: 'network' };
+  if (error.status === 429 || error.code === 'TOO_MANY_REQUESTS') return { key: 'tooManyRequests' };
+  if (error.status === 503 || error.code === 'AUTH_PROVIDER_UNAVAILABLE') return { key: 'providerUnavailable' };
+  return { key: 'unknown' };
+}
+
+export type LoginAlert =
+  | { key: 'invalidCredentials' }
+  | { key: 'locked'; lockedUntil: string | null }
+  | { key: 'unverified' }
+  | { key: 'suspended'; reason: string | null; suspendedUntil: string | null }
+  | { key: 'pendingDeletion'; deletionScheduledAt: string | null }
+  | { key: 'invalidInput' }
+  | CommonAlert;
+
+/** UC-01 2.0.E1–E4, Auth.Login.Suspended/PendingDeletion (POST /auth/login). */
+export function mapLoginError(raw: unknown): { alert: LoginAlert; fieldErrors: FieldErrors } {
+  const e = asApiError(raw);
+  switch (e.code) {
+    case 'INVALID_CREDENTIALS':
+      return { alert: { key: 'invalidCredentials' }, fieldErrors: { email: 'highlight', password: 'highlight' } };
+    case 'ACCOUNT_LOCKED':
+      return { alert: { key: 'locked', lockedUntil: detail(e, 'lockedUntil') }, fieldErrors: {} };
+    case 'EMAIL_NOT_VERIFIED':
+      return { alert: { key: 'unverified' }, fieldErrors: {} };
+    case 'ACCOUNT_SUSPENDED':
+      return {
+        alert: { key: 'suspended', reason: detail(e, 'reason'), suspendedUntil: detail(e, 'suspendedUntil') },
+        fieldErrors: {},
+      };
+    case 'ACCOUNT_PENDING_DELETION':
+      return { alert: { key: 'pendingDeletion', deletionScheduledAt: detail(e, 'deletionScheduledAt') }, fieldErrors: {} };
+    case 'VALIDATION_FAILED':
+      return { alert: { key: 'invalidInput' }, fieldErrors: validationFieldErrors(e) };
+    default:
+      return { alert: commonAlert(e), fieldErrors: {} };
+  }
+}
+
+export type RegisterAlert = { key: 'emailTaken' } | { key: 'invalidInput' } | CommonAlert;
+
+/** UC-01 1.0.E1 (BR-1), POST /auth/register. */
+export function mapRegisterError(raw: unknown): { alert: RegisterAlert; fieldErrors: FieldErrors } {
+  const e = asApiError(raw);
+  if (e.code === 'EMAIL_ALREADY_REGISTERED') return { alert: { key: 'emailTaken' }, fieldErrors: { email: 'emailTakenHint' } };
+  if (e.code === 'VALIDATION_FAILED') return { alert: { key: 'invalidInput' }, fieldErrors: validationFieldErrors(e) };
+  return { alert: commonAlert(e), fieldErrors: {} };
+}

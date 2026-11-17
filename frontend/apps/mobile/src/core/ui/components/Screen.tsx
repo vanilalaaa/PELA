@@ -1,9 +1,34 @@
-import React from 'react';
-import { ScrollView, View, type StyleProp, type ViewStyle } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, ScrollView, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
+import { KeyboardRevealContext } from './keyboardReveal';
 
 export type ScreenEdge = 'top' | 'bottom';
+
+/**
+ * Khoảng đệm dưới ô đang nhập khi tránh bàn phím. TextInput chỉ là phần chữ (cao ~22) bên trong khung
+ * ô 52 nên cần thêm phần đệm khung + dòng gợi ý/lỗi bên dưới.
+ */
+const KEYBOARD_GAP = 56;
+
+/** Lưu vị trí cuộn trong closure (không gây render lại khi cuộn). */
+function createOffsetTracker() {
+  let y = 0;
+  return { get: () => y, set: (next: number) => void (y = next) };
+}
+
+/** Mép trên bàn phím (null = đang đóng) và ScrollView hiện tại, giữ trong closure. */
+function createKeyboardTracker() {
+  let keyboardTop: number | null = null;
+  let scrollView: React.ComponentRef<typeof ScrollView> | null = null;
+  return {
+    top: () => keyboardTop,
+    setTop: (next: number | null) => void (keyboardTop = next),
+    view: () => scrollView,
+    setView: (next: React.ComponentRef<typeof ScrollView> | null) => void (scrollView = next),
+  };
+}
 
 export interface ScreenProps {
   children: React.ReactNode;
@@ -27,31 +52,79 @@ export interface ScreenProps {
 export function Screen({ children, scroll = true, edges = ['top', 'bottom'], padded = true, contentStyle, testID }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const topInset = edges.includes('top') ? insets.top : 0;
+  const [scrollView, setScrollView] = useState<React.ComponentRef<typeof ScrollView> | null>(null);
+  // Vị trí cuộn hiện tại, giữ trong object ổn định (không gây render lại).
+  const [scrollY] = useState(createOffsetTracker);
+
+  const [keyboard] = useState(createKeyboardTracker);
+
+  // Cuộn ô đang nhập lên trên bàn phím (cách KEYBOARD_GAP) nếu bị che. Gọi khi bàn phím mở và khi
+  // focus chuyển sang ô khác lúc bàn phím đang mở (Input gọi qua KeyboardRevealContext).
+  const [reveal] = useState(() => () => {
+    requestAnimationFrame(() => {
+      const top = keyboard.top();
+      const view = keyboard.view();
+      const input = TextInput.State.currentlyFocusedInput();
+      if (top === null || !view || !input) return;
+      input.measureInWindow((_x: number, y: number, _w: number, h: number) => {
+        const overlap = y + h + KEYBOARD_GAP - top;
+        if (overlap > 0) view.scrollTo({ y: scrollY.get() + overlap, animated: true });
+      });
+    });
+  });
+
+  useEffect(() => {
+    if (!scroll) return undefined;
+    keyboard.setView(scrollView);
+    const show = Keyboard.addListener('keyboardDidShow', (e) => {
+      keyboard.setTop(e.endCoordinates.screenY);
+      reveal();
+    });
+    const hide = Keyboard.addListener('keyboardDidHide', () => keyboard.setTop(null));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, [scroll, scrollView, keyboard, reveal]);
   const inner: StyleProp<ViewStyle> = [
     {
-      paddingTop: (edges.includes('top') ? insets.top : 0) + theme.spacing.md,
+      paddingTop: theme.spacing.md,
       paddingBottom: (edges.includes('bottom') ? insets.bottom : 0) + theme.spacing.lg,
       paddingHorizontal: padded ? theme.spacing.screenGutter : 0,
       gap: theme.spacing.lg,
     },
     contentStyle,
   ];
+  // Safe area trên nằm NGOÀI vùng cuộn để nội dung không trượt xuống dưới thanh trạng thái khi cuộn.
+  const frame = { flex: 1, paddingTop: topInset, backgroundColor: theme.colors.bgCanvas };
 
   if (!scroll) {
     return (
-      <View testID={testID} style={[{ flex: 1, backgroundColor: theme.colors.bgCanvas }, inner]}>
-        {children}
+      <View testID={testID} style={frame}>
+        <View style={[{ flex: 1 }, inner]}>{children}</View>
       </View>
     );
   }
   return (
-    <ScrollView
-      testID={testID}
-      style={{ flex: 1, backgroundColor: theme.colors.bgCanvas }}
-      contentContainerStyle={[{ flexGrow: 1 }, inner]}
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
+    <View testID={testID} style={frame}>
+      {/* Bàn phím không che ô nhập: thu vùng cuộn lại khi bàn phím mở (app edge-to-edge nên Android cũng cần).
+          Chạm vùng trống hoặc kéo để đóng bàn phím. */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <KeyboardRevealContext.Provider value={reveal}>
+        <ScrollView
+          ref={setScrollView}
+          onScroll={(e) => scrollY.set(e.nativeEvent.contentOffset.y)}
+          scrollEventThrottle={16}
+          style={{ flex: 1 }}
+          contentContainerStyle={[{ flexGrow: 1 }, inner]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {children}
+        </ScrollView>
+        </KeyboardRevealContext.Provider>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

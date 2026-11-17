@@ -39,5 +39,5 @@ export function ChatBubble({ message, speaker, testID }: ChatBubbleProps) {
 }
 
 const styles = StyleSheet.create({
-  bubble: { maxWidth: 280, paddingHorizontal: 16, paddingVertical: 12, gap: 2, alignSelf: 'flex-start' },
+  bubble: { maxWidth: 280, paddingHorizontal: 16, paddingVertical: 12, gap: 2 },
 });

@@ -10,6 +10,7 @@ import { initI18n } from '../core/infrastructure/i18n';
 import { createSqliteDatabase } from '../core/infrastructure/database';
 import { createApiClient, readApiBaseUrl, type ApiClient } from '../core/infrastructure/http';
 import { createSecureTokenStore } from '../core/infrastructure/http/secureTokenStore';
+import { createRememberableTokenStore } from '../core/infrastructure/http/rememberableTokenStore';
 import { createSecureKeyValueStore } from '../core/infrastructure/storage/secureKeyValueStore';
 import type { UseCases } from './UseCasesContext';
 import { createAuthUseCases } from '../features/auth/application';
@@ -75,7 +76,8 @@ export function onSessionExpired(listener: () => void): () => void {
 }
 
 const apiBaseUrl = readApiBaseUrl();
-const tokenStore = createSecureTokenStore();
+/** Token phiên: secure-store khi "Ghi nhớ đăng nhập", ngược lại chỉ trong bộ nhớ (Auth.Login.Remember). */
+const tokenStore = createRememberableTokenStore(createSecureTokenStore());
 /** Nơi mock lưu trạng thái cần còn sau khi mở lại app (vd. onboarding) — cùng secure-store với phiên. */
 const mockStore = createSecureKeyValueStore();
 
