@@ -9,6 +9,8 @@ export type RootStackParamList = {
   Home: undefined;
   // Màn dev — chỉ nên bật trong __DEV__, xem RootNavigator.tsx.
   DevUiKit: undefined;
+  DevUiKitActions: undefined;
+  DevUiKitDisplay: undefined;
   DevDbCheck: undefined;
 };
 

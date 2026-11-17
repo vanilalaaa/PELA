@@ -5,3 +5,4 @@ Khoá JSON dùng `snake_case`. Khi đổi luật nghiệp vụ, sửa fixture tr
 
 - `sm2-cases.json` — SM-2 (BR-26)
 - `word-count-cases.json` — đếm từ Writing (UC-10): `countWords` (TS) và `TextAnalysis.countWords` (Java)
+- `password-cases.json` — luật mật khẩu (Auth.Register.Validate) và mức độ mạnh: `evaluatePassword` (TS)

@@ -135,7 +135,7 @@ export function DbCheckScreen() {
 
   return (
     <ScrollView
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ backgroundColor: theme.colors.bgCanvas }}
       contentContainerStyle={{ padding: theme.spacing.md, gap: theme.spacing.md }}
     >
       <Text style={{ color: theme.colors.textSecondary }}>{t('dbCheck.subtitle')}</Text>
@@ -146,24 +146,24 @@ export function DbCheckScreen() {
 
       {status.kind === 'written' ? <Text style={{ color: theme.colors.textPrimary }}>{t('dbCheck.written')}</Text> : null}
       {status.kind === 'deleted' ? <Text style={{ color: theme.colors.textPrimary }}>{t('dbCheck.deleted')}</Text> : null}
-      {status.kind === 'missing' ? <Text style={{ color: theme.colors.danger }}>{t('dbCheck.missing')}</Text> : null}
+      {status.kind === 'missing' ? <Text style={{ color: theme.colors.warnFg }}>{t('dbCheck.missing')}</Text> : null}
       {status.kind === 'error' ? (
-        <Text style={{ color: theme.colors.danger }}>{t('dbCheck.error', { message: status.message })}</Text>
+        <Text style={{ color: theme.colors.warnFg }}>{t('dbCheck.error', { message: status.message })}</Text>
       ) : null}
 
       {rows ? (
         <View style={{ gap: theme.spacing.xs }}>
           <Text
             style={{
-              color: passed ? theme.colors.success : theme.colors.danger,
-              fontSize: theme.typography.size.lg,
+              color: passed ? theme.colors.successFg : theme.colors.warnFg,
+              ...theme.typeScale.h3,
               fontWeight: '700',
             }}
           >
             {passed ? t('dbCheck.passed') : t('dbCheck.failed')}
           </Text>
           {rows.map((row) => (
-            <Text key={row.field} style={{ color: row.ok ? theme.colors.textPrimary : theme.colors.danger }}>
+            <Text key={row.field} style={{ color: row.ok ? theme.colors.textPrimary : theme.colors.warnFg }}>
               {`${row.ok ? '✓' : '✗'} ${row.field} = ${row.actual}`}
             </Text>
           ))}

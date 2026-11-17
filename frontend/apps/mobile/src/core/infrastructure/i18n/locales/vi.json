@@ -12,12 +12,8 @@
     "title": "UI Kit (dev)",
     "subtitle": "Màn demo nội bộ để so sánh component với Figma — không phải màn cho người dùng.",
     "sectionButton": "Button",
-    "sectionCard": "Card",
     "sectionInput": "Input",
-    "sectionProgress": "ProgressBar",
-    "sectionStar": "StarRating",
     "sectionSheet": "BottomSheet",
-    "sectionQuestion": "QuestionOption",
     "openSheet": "Mở BottomSheet",
     "inputLabel": "Tên của bạn",
     "inputPlaceholder": "Nhập tên...",
@@ -28,13 +24,40 @@
     "buttonGhost": "Ghost",
     "buttonDisabled": "Vô hiệu",
     "buttonLoading": "Đang tải",
-    "cardStatic": "Card tĩnh (không bấm được)",
-    "cardPressable": "Card bấm được (có trạng thái pressed)",
-    "cardDisabled": "Card vô hiệu",
     "inputReadonly": "Không sửa được",
-    "questionOption": "Lựa chọn — {{state}}",
     "sheetTitle": "BottomSheet",
-    "sheetBody": "Dựng bằng Modal và Animated có sẵn của React Native, không thêm thư viện native."
+    "sheetBody": "Dựng bằng Modal và Animated có sẵn của React Native, không thêm thư viện native.",
+    "openActions": "Đợt 1 · Hành động và nhập liệu",
+    "demoAction": "Tiếp tục",
+    "inputDisplayName": "Tên hiển thị",
+    "inputHint": "Tối đa 20 ký tự",
+    "password": "Mật khẩu",
+    "passwordWrong": "Mật khẩu chưa đúng",
+    "checkbox": "Nhắc học mỗi ngày",
+    "radioA": "Học 10 phút/ngày",
+    "radioB": "Học 20 phút/ngày",
+    "switch": "Âm thanh",
+    "selectLabel": "Cấp muốn lên",
+    "actionsTitle": "UI Kit · Đợt 1",
+    "rank": {
+      "apprentice": "Học việc",
+      "journeyman": "Thợ lành nghề",
+      "expert": "Chuyên gia",
+      "master": "Bậc thầy"
+    },
+    "openDisplay": "Đợt 2 · Hiển thị",
+    "displayTitle": "UI Kit · Đợt 2",
+    "tagTopic": "Từ vựng",
+    "chipLabel": "Mới",
+    "cardTitle": "Bài 1 · Chào hỏi",
+    "cardBody": "12 từ mới · 5 phút",
+    "avatarName": "Nguyễn Thị Uyên",
+    "statDays": "ngày",
+    "tabVocab": "Từ vựng",
+    "tabGrammar": "Ngữ pháp",
+    "tabListening": "Nghe",
+    "answerSample": "grateful",
+    "sectionDisplay": "Hiển thị"
   },
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",
@@ -49,5 +72,44 @@
     "error": "Lỗi: {{message}}",
     "passed": "QUA: mọi field đều đúng",
     "failed": "LỖI: có field sai"
+  },
+  "ui": {
+    "password": {
+      "show": "Hiện mật khẩu",
+      "hide": "Ẩn mật khẩu",
+      "requirement": "Tối thiểu 8 ký tự, có chữ hoa, chữ thường và số",
+      "level1": "Yếu",
+      "level2": "Trung bình",
+      "level3": "Mạnh",
+      "rule": {
+        "minLength": "Tối thiểu 8 ký tự",
+        "uppercase": "Có chữ hoa",
+        "lowercase": "Có chữ thường",
+        "digit": "Có chữ số"
+      }
+    },
+    "otp": {
+      "label": "Mã xác thực {{length}} số"
+    },
+    "badge": {
+      "dot": "Có thông báo mới",
+      "count": "{{count}} mục mới"
+    },
+    "statPill": {
+      "streak": "Chuỗi {{value}} ngày",
+      "star": "{{value}} sao"
+    },
+    "starRating": "{{value}}/{{max}} sao",
+    "answer": {
+      "correct": "đúng",
+      "wrong": "sai"
+    },
+    "bottomNav": {
+      "home": "Trang chủ",
+      "lesson": "Bài học",
+      "practice": "Luyện tập",
+      "leaderboard": "Xếp hạng",
+      "profile": "Hồ sơ"
+    }
   }
 }
