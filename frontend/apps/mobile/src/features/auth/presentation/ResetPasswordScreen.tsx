@@ -70,7 +70,20 @@ export function ResetPasswordScreen() {
   };
 
   return (
-    <Screen contentStyle={{ gap: 14 }}>
+    <Screen
+      contentStyle={{ gap: 14 }}
+      footer={
+          <Button
+            label={t('auth.reset.submit')}
+            size="lg"
+            fullWidth
+            disabled={vm.expired}
+            loading={vm.submitting}
+            onPress={() => void vm.submit()}
+            testID="reset-submit"
+          />
+      }
+    >
       <ScreenHeader backLabel={t('auth.back')} title={t('auth.reset.title')} onBack={() => setConfirmOpen(true)} testID="reset-back" />
       <Chip
         label={t('auth.reset.verified', { email: maskEmail(params.email) })}
@@ -134,16 +147,6 @@ export function ResetPasswordScreen() {
             errorMessage={msg(fieldState.error?.message, vm.serverFieldErrors.confirmPassword)}
           />
         )}
-      />
-      <View style={{ flex: 1 }} />
-      <Button
-        label={t('auth.reset.submit')}
-        size="lg"
-        fullWidth
-        disabled={vm.expired}
-        loading={vm.submitting}
-        onPress={() => void vm.submit()}
-        testID="reset-submit"
       />
       <ConfirmDialog
         visible={confirmOpen}

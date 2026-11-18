@@ -10,4 +10,3 @@ Việc chưa làm được vì thiếu API hoặc chờ quyết định. Mỗi d
 | Nhánh "Đổi mật khẩu qua mã" mở từ Cài đặt (`ForgotPassword` với `source: 'settings'`): email đã che, không có ô nhập, xong về Cài đặt | 44b–44d | U12 (Cài đặt) | GAP-5 |
 | Hiện thời hạn mã ở 44c và thời gian chờ gửi lại | 44c | API-20 | GAP-34, GAP-35 |
 | Tách thông báo "mã đã hết hạn" khỏi "mã chưa đúng" | 44c | API-21 | GAP-7 |
-| Khảo sát ra A1: hiện 15 Placed A1 trước khi vào Main (hiện vào thẳng Main) | 10 → 15 | U3 đợt 4 (Placement) | Onboarding.Survey.SkipRule |

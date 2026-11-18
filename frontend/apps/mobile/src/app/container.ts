@@ -21,13 +21,14 @@ import { createApiWritingRepository } from '../features/writing/infrastructure/A
 import { createMockWritingRepository } from '../features/writing/infrastructure/MockWritingRepository';
 import { createOnboardingUseCases } from '../features/onboarding/application/onboardingUseCases';
 import { createMockOnboardingRepository } from '../features/onboarding/infrastructure/MockOnboardingRepository';
+import { createWatermelonPlacementProgressStore } from '../features/placement/infrastructure/WatermelonPlacementProgressStore';
 import { createWatermelonSurveyDraftStore } from '../features/onboarding/infrastructure/WatermelonSurveyDraftStore';
 import { INITIAL_ONBOARDING, writeMockOnboarding } from '../core/infrastructure/mock';
 import { parseSessionSnapshot, type SessionSnapshotStore } from './session/sessionSnapshot';
 import { createCryptoIdGenerator } from '../core/infrastructure/id/cryptoIdGenerator';
 import type { IdGeneratorPort } from '../core/application/idGenerator';
 import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
-import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
+import { createMockPlacementRepository, resetMockPlacement } from '../features/placement/infrastructure/MockPlacementRepository';
 import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
 import { createMockRoadmapRepository } from '../features/roadmap/infrastructure/MockRoadmapRepository';
 import { createLessonUseCases } from '../features/lesson/application/lessonUseCases';
@@ -152,14 +153,20 @@ const surveyDrafts = createWatermelonSurveyDraftStore(getDatabase);
 export async function resetMockOnboardingForDev(): Promise<void> {
   if (!__DEV__) return;
   await writeMockOnboarding(mockStore, INITIAL_ONBOARDING);
+  await resetMockPlacement(mockStore);
   await surveyDrafts.clear();
+  await createWatermelonPlacementProgressStore(getDatabase).clear();
 }
 
 /** Use case của mọi tính năng, đã tiêm repository (mock hoặc API). */
 export const useCases: UseCases = {
   auth: createAuthUseCases(pick('auth', createMockAuthRepository, createApiAuthRepository), tokenStore),
   onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore)), surveyDrafts),
-  placement: createPlacementUseCases(pick('placement', () => createMockPlacementRepository(mockStore))),
+  placement: createPlacementUseCases(
+    pick('placement', () => createMockPlacementRepository(mockStore)),
+    createWatermelonPlacementProgressStore(getDatabase),
+    () => Date.now(),
+  ),
   roadmap: createRoadmapUseCases(pick('roadmap', createMockRoadmapRepository)),
   lesson: createLessonUseCases(pick('lesson', createMockLessonRepository)),
   finalTest: createFinalTestUseCases(pick('finalTest', createMockFinalTestRepository)),

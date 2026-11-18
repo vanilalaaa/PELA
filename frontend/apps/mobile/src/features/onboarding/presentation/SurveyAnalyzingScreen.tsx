@@ -27,8 +27,10 @@ export function SurveyAnalyzingScreen() {
   const { params } = useRoute<RouteProp<OnboardingStackParamList, 'SurveyAnalyzing'>>();
   const onDone = useCallback(
     (next: OnboardingNextStep, mappedLevel: CefrLevel) => {
-      if (next === 'done') useSession.getState().completeOnboarding();
-      else {
+      if (next === 'done') {
+        // Khảo sát ra A1 (SkipRule): 15 Placed A1 rồi mới vào học.
+        nav.replace('PlacementResult', { kind: 'a1', placedLevel: 'A1' });
+      } else {
         // Ghi bước hiện tại vào phiên (ảnh chụp trên máy) để mở lại app vào thẳng PlacementIntro.
         useSession.getState().setOnboardingEntry({ screen: 'PlacementIntro', orientedLevel: mappedLevel });
         // replace: khảo sát đã gửi, không quay lại được.

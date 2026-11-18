@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -32,7 +32,21 @@ export function ForgotPasswordOtpScreen() {
   const masked = maskEmail(params.email);
 
   return (
-    <Screen contentStyle={{ gap: 14 }}>
+    <Screen
+      contentStyle={{ gap: 14 }}
+      footerWithKeyboard
+      footer={
+          <Button
+            label={t('auth.otp.submit')}
+            size="lg"
+            fullWidth
+            disabled={!vm.canSubmit}
+            loading={vm.verifying}
+            onPress={() => void vm.verify()}
+            testID="otp-submit"
+          />
+      }
+    >
       <ScreenHeader backLabel={t('auth.back')} title={t('auth.otp.title')} onBack={() => nav.goBack()} testID="otp-back" />
       <Text style={[theme.typeScale.body, { color: theme.colors.textSecondary }]}>
         {t('auth.otp.sentTo')}
@@ -64,21 +78,10 @@ export function ForgotPasswordOtpScreen() {
           {vm.resending ? t('auth.otp.resending') : t('auth.otp.resend')}
         </Text>
       </Pressable>
-      <View style={styles.spacer} />
-      <Button
-        label={t('auth.otp.submit')}
-        size="lg"
-        fullWidth
-        disabled={!vm.canSubmit}
-        loading={vm.verifying}
-        onPress={() => void vm.verify()}
-        testID="otp-submit"
-      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   resend: { alignSelf: 'flex-start' },
-  spacer: { flex: 1 },
 });

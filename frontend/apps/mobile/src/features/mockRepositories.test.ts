@@ -13,7 +13,8 @@ import { createMockLessonRepository } from './lesson/infrastructure/MockLessonRe
 import { createMockLevelRepository } from './level/infrastructure/MockLevelRepository';
 import { createMockListeningRepository } from './listening/infrastructure/MockListeningRepository';
 import { createMockOnboardingRepository } from './onboarding/infrastructure/MockOnboardingRepository';
-import { createMockPlacementRepository } from './placement/infrastructure/MockPlacementRepository';
+import placementFixture from '@pela/fixtures/mock/placement.json';
+import { createMockPlacementRepository, mockPlacedLevel } from './placement/infrastructure/MockPlacementRepository';
 import { createMockProfileRepository } from './profile/infrastructure/MockProfileRepository';
 import { createMockRoadmapRepository } from './roadmap/infrastructure/MockRoadmapRepository';
 import { createMockSettingsRepository } from './settings/infrastructure/MockSettingsRepository';
@@ -74,7 +75,11 @@ describe('Mock repositories', () => {
     // "Mở lại app": repository mới, cùng kho lưu.
     const reopened = createMockOnboardingRepository(store);
     expect(await run(reopened.getStatus())).toEqual({ onboardingStatus: 'placementPending', orientedLevel: 'C1', cefrLevel: null });
-    await run(createMockPlacementRepository(store).submit('id-1', []));
+    const placement = createMockPlacementRepository(store);
+    const attempt = await run(placement.start());
+    // 6/10 câu đúng = 60% ở bậc định hướng C1 → B1 (BR-19).
+    const answers = attempt.questions.slice(0, 6).map((q, i) => ({ questionId: q.questionId, answer: placementFixture.questions[i]!.options[placementFixture.questions[i]!.correctOptionIndex]! }));
+    await run(placement.submit(attempt.attemptId, answers));
     expect(await run(reopened.getStatus())).toEqual({ onboardingStatus: 'done', orientedLevel: 'C1', cefrLevel: 'B1' });
   });
 
@@ -85,10 +90,24 @@ describe('Mock repositories', () => {
     expect(await run(repo.getStatus())).toMatchObject({ onboardingStatus: 'done', cefrLevel: 'A1' });
   });
 
-  it('placement: kịch bản BR-19 — định hướng C1, thi B2, 64% → xếp B1, không đạt', async () => {
-    const repo = createMockPlacementRepository(createMemoryKeyValueStore());
-    const r = await run(repo.submit('id-1', []));
-    expect(r).toMatchObject({ attemptId: 'id-1', orientedLevel: 'C1', testedLevel: 'B2', score: 64, passed: false, placedLevel: 'B1' });
+  it('placement: một lượt (BR-19) — start lần hai và nộp lại → 409; đề không lộ đáp án', async () => {
+    const store = createMemoryKeyValueStore();
+    await run(createMockOnboardingRepository(store).submitSurvey({ selfAssessedLevel: 'B2' } as never));
+    const repo = createMockPlacementRepository(store);
+    const attempt = await run(repo.start());
+    expect(attempt).toMatchObject({ orientedLevel: 'B2', testedLevel: 'B1' });
+    expect(JSON.stringify(attempt)).not.toContain('correctOptionIndex');
+    await expect(run(repo.start())).rejects.toMatchObject({ status: 409, code: 'PLACEMENT_ALREADY_TAKEN' });
+    const r = await run(repo.submit(attempt.attemptId, []));
+    expect(r).toMatchObject({ score: 0, correctCount: 0, totalQuestions: 10, passed: false, placedLevel: 'A1' });
+    await expect(run(repo.submit(attempt.attemptId, []))).rejects.toMatchObject({ code: 'PLACEMENT_ALREADY_TAKEN' });
+  });
+
+  it.each([
+    ['A2', 50, 'A1'], ['B1', 79, 'A1'], ['B2', 39, 'A1'], ['B2', 40, 'A2'], ['C1', 26, 'A1'], ['C1', 27, 'A2'],
+    ['C1', 53, 'A2'], ['C1', 54, 'B1'], ['C2', 19, 'A1'], ['C2', 20, 'A2'], ['C2', 40, 'B1'], ['C2', 60, 'B2'], ['C2', 80, 'C2'],
+  ] as const)('mock xếp bậc theo bảng BR-19: định hướng %s, %i%% → %s', (oriented, score, placed) => {
+    expect(mockPlacedLevel(oriented, score)).toBe(placed);
   });
 
   it('roadmap: có chủ đề; chế độ rỗng trả danh sách trống', async () => {

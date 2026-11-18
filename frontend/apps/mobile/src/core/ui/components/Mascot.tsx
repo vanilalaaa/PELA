@@ -1,9 +1,18 @@
 import React from 'react';
 import { View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { thoPelaAnalyze, thoPelaComfort, thoPelaVerify, thoPelaWave } from '../brand/brandSvgs';
+import {
+  thoPelaAnalyze,
+  thoPelaCelebrate,
+  thoPelaCheer,
+  thoPelaComfort,
+  thoPelaReassure,
+  thoPelaVerify,
+  thoPelaWave,
+  thoPelaWelcome,
+} from '../brand/brandSvgs';
 
-export type MascotPose = 'verify' | 'comfort' | 'wave' | 'analyze';
+export type MascotPose = 'verify' | 'comfort' | 'wave' | 'analyze' | 'reassure' | 'celebrate' | 'cheer' | 'welcome';
 
 export interface MascotProps {
   /** Dáng Thỏ PELA; thêm dáng khác khi màn cần (Figma Thỏ PELA 456:1344: Wave, Reassure, Analyze…). */
@@ -13,7 +22,16 @@ export interface MascotProps {
   testID?: string;
 }
 
-const POSES = { verify: thoPelaVerify, comfort: thoPelaComfort, wave: thoPelaWave, analyze: thoPelaAnalyze } as const;
+const POSES = {
+  verify: thoPelaVerify,
+  comfort: thoPelaComfort,
+  wave: thoPelaWave,
+  analyze: thoPelaAnalyze,
+  reassure: thoPelaReassure,
+  celebrate: thoPelaCelebrate,
+  cheer: thoPelaCheer,
+  welcome: thoPelaWelcome,
+} as const;
 
 /** Linh vật Thỏ PELA (minh hoạ, ẩn với trình đọc màn hình). Mỗi màn chỉ một mascot (Figma). */
 export function Mascot({ pose = 'verify', width, testID }: MascotProps) {

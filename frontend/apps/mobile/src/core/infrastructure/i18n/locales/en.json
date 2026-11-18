@@ -427,5 +427,69 @@
       "offline": "You're offline. You're seeing data saved on this device; it will update when you're back online.",
       "serverUnavailable": "Can't reach the server. You're seeing data saved on this device."
     }
+  },
+  "placement": {
+    "intro": {
+      "bubble": "Take your time. The result only picks the right starting level.",
+      "title": "Placement test",
+      "subtitle": "This test places you at the right level so lessons are neither too easy nor too hard.",
+      "questionsRange": "10–15 multiple-choice questions",
+      "questionsCount": "{{count}} multiple-choice questions",
+      "duration": "{{count}} minutes",
+      "durationUnknown": "Time-limited",
+      "passMark": "Score 80% or more to start at your target level",
+      "oneShot": "You can take it only once",
+      "oneShotDetail": "No retakes, and you can't go back to a previous question.",
+      "offline": "You're offline. Connect to the internet to start the test.",
+      "start": "Start the test",
+      "resume": "Continue the test",
+      "fromBeginning": "Start from the beginning",
+      "confirmA1Title": "Start at the Novice level?",
+      "confirmA1Message": "You'll start at the Novice level and won't be able to take the placement test.",
+      "confirmA1": "Start"
+    },
+    "test": {
+      "exit": "Leave and keep progress",
+      "questionLabel": "QUESTION {{current}}/{{total}} · {{kind}}",
+      "kind": {
+        "fill_blank": "CHOOSE THE RIGHT WORD",
+        "meaning": "CHOOSE THE MEANING"
+      },
+      "instruction": {
+        "fill_blank": "Choose the word that completes the sentence:",
+        "meaning": "Choose the word closest in meaning to:"
+      },
+      "blank": "blank",
+      "next": "Next",
+      "submit": "Submit",
+      "confirmTitle": "Submit the test?",
+      "confirmMessage": "You can take the placement test only once.",
+      "confirmCancel": "Review",
+      "timeLeftA11y": "Time left {{time}}",
+      "oneMinuteLeft": "1 minute left.",
+      "timeUpSubmitted": "Time is up. Your answers have been submitted.",
+      "timeUpOffline": "Time is up. An internet connection is needed to submit. Your answers will be submitted when you're back online."
+    },
+    "result": {
+      "passedTitle": "You've completed the placement test",
+      "passedBody": "You scored 80% or more and start at the {{tier}} level. Lower levels count as completed and your learning path is unlocked.",
+      "scoreChip": "{{correct}}/{{total}} correct · {{score}}%",
+      "lowerTitle": "Your learning path is ready",
+      "lowerBody": "PELA suggests starting at the {{tier}} level to build a solid foundation. Study a little every day to reach the next level.",
+      "yourLevel": "YOUR LEVEL",
+      "a1Title": "Welcome to PELA",
+      "a1Body": "Your path starts with the essentials.",
+      "startLevel": "STARTING LEVEL",
+      "nextStep": "Next step",
+      "start": "Start learning"
+    },
+    "error": {
+      "network": "Can't reach the server. Check your connection and try again.",
+      "unknown": "Something went wrong. Try again later.",
+      "submitNetwork": "Couldn't submit because the server can't be reached. Your answers are kept. Try again.",
+      "submit": "Couldn't submit. Your answers are kept. Try again."
+    },
+    "alreadyTaken": "You've already taken the placement test.",
+    "continueToApp": "Start learning"
   }
 }

@@ -42,6 +42,15 @@ export interface ScreenProps {
   /** Lề ngang theo spacing/screen-gutter (mặc định true). */
   padded?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  /**
+   * Vùng nút ghim đáy (nút chính): nằm ngoài vùng cuộn, trên safe area dưới; nội dung phía trên cuộn.
+   * Có footer thì safe area dưới do footer chừa.
+   */
+  footer?: React.ReactNode;
+  /** Giữ footer khi bàn phím mở (màn chỉ có ô ngắn như OTP, không sợ che). Mặc định ẩn. */
+  footerWithKeyboard?: boolean;
+  /** Nền trong suốt để thấy nền vẽ phía sau (vd. gradient ở 13). Mặc định bgCanvas. */
+  transparent?: boolean;
   testID?: string;
 }
 
@@ -49,7 +58,7 @@ export interface ScreenProps {
  * Khung màn chung: nền bgCanvas, chừa safe area trên/dưới (tai thỏ, thanh điều hướng Android),
  * tuỳ chọn cuộn. Mọi màn dùng khung này thay vì tự xử lý inset.
  */
-export function Screen({ children, scroll = true, edges = ['top', 'bottom'], padded = true, contentStyle, testID }: ScreenProps) {
+export function Screen({ children, scroll = true, edges = ['top', 'bottom'], padded = true, contentStyle, transparent = false, footer, footerWithKeyboard = false, testID }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const topInset = edges.includes('top') ? insets.top : 0;
@@ -58,6 +67,8 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], pad
   const [scrollY] = useState(createOffsetTracker);
 
   const [keyboard] = useState(createKeyboardTracker);
+  // Bàn phím mở thì ẩn footer để không che ô đang nhập (nút hiện lại khi đóng bàn phím).
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   // Cuộn ô đang nhập lên trên bàn phím (cách KEYBOARD_GAP) nếu bị che. Gọi khi bàn phím mở và khi
   // focus chuyển sang ô khác lúc bàn phím đang mở (Input gọi qua KeyboardRevealContext).
@@ -79,9 +90,13 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], pad
     keyboard.setView(scrollView);
     const show = Keyboard.addListener('keyboardDidShow', (e) => {
       keyboard.setTop(e.endCoordinates.screenY);
+      setKeyboardOpen(true);
       reveal();
     });
-    const hide = Keyboard.addListener('keyboardDidHide', () => keyboard.setTop(null));
+    const hide = Keyboard.addListener('keyboardDidHide', () => {
+      keyboard.setTop(null);
+      setKeyboardOpen(false);
+    });
     return () => {
       show.remove();
       hide.remove();
@@ -90,19 +105,32 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], pad
   const inner: StyleProp<ViewStyle> = [
     {
       paddingTop: theme.spacing.md,
-      paddingBottom: (edges.includes('bottom') ? insets.bottom : 0) + theme.spacing.lg,
+      paddingBottom: (edges.includes('bottom') && !(footer && (footerWithKeyboard || !keyboardOpen)) ? insets.bottom : 0) + theme.spacing.lg,
       paddingHorizontal: padded ? theme.spacing.screenGutter : 0,
       gap: theme.spacing.lg,
     },
     contentStyle,
   ];
   // Safe area trên nằm NGOÀI vùng cuộn để nội dung không trượt xuống dưới thanh trạng thái khi cuộn.
-  const frame = { flex: 1, paddingTop: topInset, backgroundColor: theme.colors.bgCanvas };
+  const frame = { flex: 1, paddingTop: topInset, backgroundColor: transparent ? 'transparent' : theme.colors.bgCanvas };
+  const footerView = footer && (footerWithKeyboard || !keyboardOpen) ? (
+    <View
+      style={{
+        paddingHorizontal: padded ? theme.spacing.screenGutter : 0,
+        paddingTop: theme.spacing.sm,
+        paddingBottom: (edges.includes('bottom') ? insets.bottom : 0) + theme.spacing.md,
+        gap: theme.spacing.sm,
+      }}
+    >
+      {footer}
+    </View>
+  ) : null;
 
   if (!scroll) {
     return (
       <View testID={testID} style={frame}>
         <View style={[{ flex: 1 }, inner]}>{children}</View>
+        {footerView}
       </View>
     );
   }
@@ -124,6 +152,7 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], pad
           {children}
         </ScrollView>
         </KeyboardRevealContext.Provider>
+        {footerView}
       </KeyboardAvoidingView>
     </View>
   );

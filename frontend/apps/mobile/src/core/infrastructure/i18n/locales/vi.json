@@ -76,7 +76,7 @@
     "mascotName": "Thỏ PELA",
     "sectionDialog": "ConfirmDialog",
     "openDialog": "Mở hộp xác nhận",
-    "openDialogDestructive": "Mở hộp xác nhận phá huỷ",
+    "openDialogDestructive": "Mở hộp xác nhận phá hủy",
     "dialogTitle": "Xác nhận thao tác?",
     "dialogBody": "Hộp 2 nút ngang. Nút Back Android và chạm nền mờ đều đóng hộp.",
     "resetOnboarding": "Đặt lại onboarding (mock)"
@@ -87,9 +87,9 @@
     "subtitle": "Ghi một review_card mẫu vào WatermelonDB, đọc lại và so từng field. Tắt hẳn app, mở lại và bấm \"Đọc lại\" để kiểm tra dữ liệu còn lưu.",
     "write": "Ghi review_card mẫu",
     "read": "Đọc lại và so sánh",
-    "delete": "Xoá bản ghi mẫu",
+    "delete": "Xóa bản ghi mẫu",
     "written": "Đã ghi bản ghi mẫu.",
-    "deleted": "Đã xoá bản ghi mẫu.",
+    "deleted": "Đã xóa bản ghi mẫu.",
     "missing": "Không tìm thấy bản ghi mẫu.",
     "error": "Lỗi: {{message}}",
     "passed": "QUA: mọi field đều đúng",
@@ -180,7 +180,7 @@
       "EditProfile": "Sửa hồ sơ",
       "ChangePassword": "Đổi mật khẩu",
       "ChangeEmail": "Đổi email",
-      "DeleteAccount": "Xoá tài khoản",
+      "DeleteAccount": "Xóa tài khoản",
       "ChangeLevel": "Đổi cấp bậc",
       "LevelUpTest": "Bài thi lên cấp",
       "RateApp": "Đánh giá ứng dụng",
@@ -255,7 +255,7 @@
     },
     "registerScreen": {
       "title": "Tạo tài khoản",
-      "namePlaceholder": "Trần Thuỳ Linh",
+      "namePlaceholder": "Trần Thùy Linh",
       "passwordPlaceholder": "Tạo mật khẩu",
       "confirmPlaceholder": "Nhập lại mật khẩu",
       "submit": "Tạo tài khoản",
@@ -275,7 +275,7 @@
     "error": {
       "invalidCredentials": "Email hoặc mật khẩu không đúng.",
       "emailTaken": "Email này đã được đăng ký.",
-      "locked": "Tạm khoá đăng nhập do nhập sai nhiều lần.",
+      "locked": "Tạm khóa đăng nhập do nhập sai nhiều lần.",
       "lockedUntil": "Thử lại {{time}}.",
       "lockedLater": "Hãy thử lại sau ít phút.",
       "unverified": "Email chưa được xác thực. Hãy mở liên kết trong email xác thực.",
@@ -284,8 +284,8 @@
       "suspendedReason": "Lý do: {{reason}}.",
       "suspendedUntil": "Đến ngày {{date}}.",
       "suspendedForever": "Tài khoản đã bị đình chỉ vĩnh viễn.",
-      "pendingDeletion": "Tài khoản đang chờ xoá nên không thể đăng nhập.",
-      "deletionDate": "Dữ liệu sẽ bị xoá vĩnh viễn vào ngày {{date}}.",
+      "pendingDeletion": "Tài khoản đang chờ xóa nên không thể đăng nhập.",
+      "deletionDate": "Dữ liệu sẽ bị xóa vĩnh viễn vào ngày {{date}}.",
       "invalidInput": "Thông tin chưa hợp lệ. Hãy kiểm tra lại các ô được đánh dấu.",
       "network": "Không kết nối được máy chủ. Hãy kiểm tra kết nối mạng và thử lại.",
       "tooManyRequests": "Bạn đã thử quá nhiều lần. Hãy đợi một lát và thử lại.",
@@ -332,7 +332,7 @@
       "submit": "Đặt lại mật khẩu",
       "resendCode": "Gửi lại mã",
       "done": "Mật khẩu đã được đổi. Hãy đăng nhập bằng mật khẩu mới.",
-      "cancelTitle": "Huỷ đặt lại mật khẩu?",
+      "cancelTitle": "Hủy đặt lại mật khẩu?",
       "cancelMessage": "Mật khẩu chưa được đổi. Bạn sẽ quay về màn đăng nhập.",
       "cancelConfirm": "Thoát",
       "cancelKeep": "Ở lại"
@@ -390,7 +390,7 @@
         "movie": "Phim ảnh",
         "tech": "Công nghệ",
         "animal": "Động vật",
-        "health": "Sức khoẻ"
+        "health": "Sức khỏe"
       },
       "q4": {
         "title": "Mỗi ngày bạn học được bao lâu?",
@@ -427,5 +427,69 @@
       "offline": "Thiết bị đang ngoại tuyến. Dữ liệu đang hiển thị là bản đã lưu trên máy và sẽ được cập nhật khi có mạng.",
       "serverUnavailable": "Chưa kết nối được máy chủ. Dữ liệu đang hiển thị là bản đã lưu trên máy."
     }
+  },
+  "placement": {
+    "intro": {
+      "bubble": "Hãy làm bài thoải mái. Kết quả chỉ dùng để chọn bậc bắt đầu phù hợp.",
+      "title": "Bài kiểm tra xếp lớp",
+      "subtitle": "Bài kiểm tra giúp xếp bạn vào bậc phù hợp, để bài học không quá dễ hay quá khó.",
+      "questionsRange": "10–15 câu trắc nghiệm",
+      "questionsCount": "{{count}} câu trắc nghiệm",
+      "duration": "Làm trong {{count}} phút",
+      "durationUnknown": "Có giới hạn thời gian",
+      "passMark": "Đạt từ 80% để được xếp vào bậc định hướng",
+      "oneShot": "Chỉ làm được một lần",
+      "oneShotDetail": "Không làm lại được và không quay lại câu trước.",
+      "offline": "Thiết bị đang ngoại tuyến. Hãy kết nối mạng để bắt đầu bài kiểm tra.",
+      "start": "Bắt đầu làm bài",
+      "resume": "Làm tiếp bài kiểm tra",
+      "fromBeginning": "Bắt đầu từ đầu",
+      "confirmA1Title": "Bắt đầu từ bậc Tập sự?",
+      "confirmA1Message": "Bạn sẽ bắt đầu ở bậc Tập sự và không làm bài kiểm tra xếp lớp được nữa.",
+      "confirmA1": "Bắt đầu"
+    },
+    "test": {
+      "exit": "Thoát, giữ tiến độ",
+      "questionLabel": "CÂU {{current}}/{{total}} · {{kind}}",
+      "kind": {
+        "fill_blank": "CHỌN TỪ ĐÚNG",
+        "meaning": "CHỌN NGHĨA ĐÚNG"
+      },
+      "instruction": {
+        "fill_blank": "Chọn từ đúng để hoàn thành câu:",
+        "meaning": "Chọn từ có nghĩa gần nhất với từ sau:"
+      },
+      "blank": "chỗ trống",
+      "next": "Tiếp theo",
+      "submit": "Nộp bài",
+      "confirmTitle": "Nộp bài?",
+      "confirmMessage": "Bài kiểm tra chỉ làm được một lần.",
+      "confirmCancel": "Xem lại",
+      "timeLeftA11y": "Thời gian còn lại {{time}}",
+      "oneMinuteLeft": "Còn 1 phút.",
+      "timeUpSubmitted": "Đã hết giờ. Bài làm đã được nộp.",
+      "timeUpOffline": "Đã hết giờ. Cần kết nối mạng để nộp bài. Bài làm sẽ được nộp khi có mạng."
+    },
+    "result": {
+      "passedTitle": "Bạn đã hoàn thành bài kiểm tra xếp lớp",
+      "passedBody": "Bạn đạt từ 80% trở lên và bắt đầu ở bậc {{tier}}. Các bậc thấp hơn đã được tính là hoàn thành và lộ trình học đã mở.",
+      "scoreChip": "{{correct}}/{{total}} câu đúng · {{score}}%",
+      "lowerTitle": "Lộ trình của bạn đã sẵn sàng",
+      "lowerBody": "PELA đề xuất bạn bắt đầu từ bậc {{tier}} để nắm chắc nền tảng. Học đều mỗi ngày để lên bậc tiếp theo.",
+      "yourLevel": "BẬC CỦA BẠN",
+      "a1Title": "Chào mừng bạn đến với PELA",
+      "a1Body": "Lộ trình bắt đầu từ những kiến thức cơ bản nhất.",
+      "startLevel": "BẬC KHỞI ĐẦU",
+      "nextStep": "Bước tiếp theo",
+      "start": "Bắt đầu học"
+    },
+    "error": {
+      "network": "Không kết nối được máy chủ. Hãy kiểm tra kết nối mạng và thử lại.",
+      "unknown": "Đã có lỗi xảy ra. Hãy thử lại sau.",
+      "submitNetwork": "Chưa nộp được bài vì không kết nối được máy chủ. Bài làm vẫn được giữ. Hãy thử lại.",
+      "submit": "Chưa nộp được bài. Bài làm vẫn được giữ. Hãy thử lại."
+    },
+    "alreadyTaken": "Bạn đã làm bài kiểm tra xếp lớp.",
+    "continueToApp": "Vào học"
   }
 }

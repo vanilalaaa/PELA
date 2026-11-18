@@ -27,8 +27,16 @@ export type OnboardingStackParamList = {
   /** 10: câu trả lời 5 câu, gửi khi mở màn. */
   SurveyAnalyzing: { answers: SurveyAnswers };
   PlacementIntro: { orientedLevel: CefrLevel };
-  PlacementTest: { orientedLevel: CefrLevel };
-  PlacementResult: { placedLevel: CefrLevel; passed: boolean; score: number };
+  /** 12: lượt đang làm đọc từ tiến độ lưu trên máy. */
+  PlacementTest: undefined;
+  /** 13 đạt · 14 xếp bậc đề xuất · 15 bắt đầu ở A1 (khảo sát ra A1 hoặc "Bắt đầu từ đầu"). */
+  PlacementResult: {
+    kind: 'passed' | 'lower' | 'a1';
+    placedLevel: CefrLevel;
+    score?: number;
+    correctCount?: number;
+    totalQuestions?: number;
+  };
 };
 
 /** MainTabs — 5 tab theo figma-map: 16 Home, 17 Roadmap, 35 Practice Hub, 27 Leaderboard, 28 Profile. */
