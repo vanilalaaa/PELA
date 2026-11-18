@@ -24,6 +24,8 @@ import { createMockOnboardingRepository } from '../features/onboarding/infrastru
 import { createWatermelonSurveyDraftStore } from '../features/onboarding/infrastructure/WatermelonSurveyDraftStore';
 import { INITIAL_ONBOARDING, writeMockOnboarding } from '../core/infrastructure/mock';
 import { parseSessionSnapshot, type SessionSnapshotStore } from './session/sessionSnapshot';
+import { createCryptoIdGenerator } from '../core/infrastructure/id/cryptoIdGenerator';
+import type { IdGeneratorPort } from '../core/application/idGenerator';
 import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
 import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
 import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
@@ -119,6 +121,9 @@ function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['
   }
   return mock();
 }
+
+/** Bộ sinh id phía client (outbox, answer_id, report_id) — expo-crypto randomUUID. */
+export const idGenerator: IdGeneratorPort = createCryptoIdGenerator();
 
 /** Ảnh chụp phiên (tài khoản + bước onboarding) trên WatermelonDB localStorage, dùng khi mở app lúc lỗi mạng. */
 const SESSION_SNAPSHOT_KEY = 'session.snapshot';
