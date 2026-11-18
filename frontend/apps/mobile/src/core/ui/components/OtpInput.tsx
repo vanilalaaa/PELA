@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useImperativeHandle, useRef, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { OTP_LENGTH, otpCells, sanitizeOtp } from '../logic/otp';
@@ -21,6 +21,12 @@ export interface OtpInputProps {
   length?: number;
   autoFocus?: boolean;
   testID?: string;
+  /** Cho màn đưa focus về ô đầu (vd. sau "Gửi lại mã"). */
+  ref?: React.Ref<OtpInputHandle>;
+}
+
+export interface OtpInputHandle {
+  focus: () => void;
 }
 
 /**
@@ -37,11 +43,13 @@ export function OtpInput({
   length = OTP_LENGTH,
   autoFocus = false,
   testID,
+  ref,
 }: OtpInputProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const inputRef = useRef<React.ComponentRef<typeof TextInput>>(null);
   const [focused, setFocused] = useState(false);
+  useImperativeHandle(ref, () => ({ focus: () => inputRef.current?.focus() }), []);
   // Figma: ô 48×58, gap 12 (cả hàng 360). Màn hẹp hơn thì ô co lại theo bề ngang, giữ tỉ lệ 48:58.
   const [rowWidth, setRowWidth] = useState(0);
   const cellW = rowWidth > 0 ? Math.min(CELL_W, (rowWidth - CELL_GAP * (length - 1)) / length) : CELL_W;
@@ -50,7 +58,10 @@ export function OtpInput({
   const activeIndex = Math.min(value.length, length - 1);
 
   const handleChange = (text: string) => {
-    const code = sanitizeOtp(text, length);
+    // Mã sai: số cũ vẫn hiện nhưng gõ/dán tiếp sẽ thay toàn bộ (như đang chọn sẵn để gõ đè). Xoá lùi thì giữ.
+    const digits = sanitizeOtp(text, Number.MAX_SAFE_INTEGER);
+    const typedOver = status === 'wrong' && digits.length > value.length;
+    const code = typedOver ? digits.slice(value.length, value.length + length) : sanitizeOtp(text, length);
     onChange(code);
     if (code.length === length) onComplete?.(code);
   };
@@ -109,7 +120,7 @@ export function OtpInput({
         autoFocus={autoFocus}
         keyboardType="number-pad"
         textContentType="oneTimeCode"
-        autoComplete="sms-otp"
+        autoComplete={Platform.OS === 'ios' ? 'one-time-code' : 'sms-otp'}
         caretHidden
         accessibilityLabel={t('ui.otp.label', { length })}
         style={styles.hiddenInput}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { evaluatePassword, type PasswordRules } from '@pela/domain';
 import { useTheme } from '../theme';
 import { PelaIcon } from '../icons';
+import { passwordCaptionKeys } from '../logic/passwordCaption';
 
 export interface PasswordStrengthProps {
   password: string;
@@ -21,12 +22,14 @@ const RULE_ORDER: (keyof PasswordRules)[] = ['minLength', 'uppercase', 'lowercas
 export function PasswordStrength({ password, showRules = true }: PasswordStrengthProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { rules, level } = evaluatePassword(password);
+  const result = evaluatePassword(password);
+  const { rules, level } = result;
   const strength = theme.componentColors.strength;
   const barColor = level === 0 ? strength.empty : strength[level].bar;
   const textColor = level === 0 ? theme.colors.textTertiary : strength[level].text;
-  const requirement = t('ui.password.requirement');
-  const caption = level === 0 ? requirement : `${t(`ui.password.level${level}`)} · ${requirement}`;
+  const caption = passwordCaptionKeys(result)
+    .map((key) => t(`ui.password.${key}`))
+    .join(' · ');
 
   return (
     <View

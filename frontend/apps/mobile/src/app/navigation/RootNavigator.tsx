@@ -7,10 +7,12 @@ import { useTheme } from '../../core/ui/theme';
 import { UiKitScreen } from '../dev/UiKitScreen';
 import { ActionsInputsPage } from '../dev/uikit/ActionsInputsPage';
 import { DisplayPage } from '../dev/uikit/DisplayPage';
+import { AuthKitPage } from '../dev/uikit/AuthKitPage';
 import { DbCheckScreen } from '../dev/DbCheckScreen';
 import { useSession } from '../session/sessionStore';
 import { selectRootBranch } from '../session/rootBranch';
 import { useSessionBootstrap } from '../session/useSessionActions';
+import { StaleSessionBanner } from '../session/StaleSessionBanner';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabs } from './MainTabs';
 import { OnboardingNavigator } from './OnboardingNavigator';
@@ -42,6 +44,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       DevUiKit: 'dev/ui-kit',
       DevUiKitActions: 'dev/ui-kit/actions',
       DevUiKitDisplay: 'dev/ui-kit/display',
+      DevUiKitAuth: 'dev/ui-kit/auth',
       DevDbCheck: 'dev/db-check',
     },
   },
@@ -73,6 +76,7 @@ export function RootNavigator() {
   const title = (name: keyof RootStackParamList) => ({ title: t(`nav.title.${name}`) });
 
   return (
+    <StaleSessionBanner>
     <NavigationContainer
       ref={navigationRef}
       linking={linking}
@@ -147,10 +151,12 @@ export function RootNavigator() {
             <Stack.Screen name="DevUiKit" component={UiKitScreen} options={{ title: t('uiKit.title') }} />
             <Stack.Screen name="DevUiKitActions" component={ActionsInputsPage} options={{ title: t('uiKit.actionsTitle') }} />
             <Stack.Screen name="DevUiKitDisplay" component={DisplayPage} options={{ title: t('uiKit.displayTitle') }} />
+            <Stack.Screen name="DevUiKitAuth" component={AuthKitPage} options={{ title: t('uiKit.authTitle') }} />
             <Stack.Screen name="DevDbCheck" component={DbCheckScreen} options={{ title: t('dbCheck.title') }} />
           </Stack.Group>
         ) : null}
       </Stack.Navigator>
     </NavigationContainer>
+    </StaleSessionBanner>
   );
 }

@@ -10,6 +10,7 @@ import { initI18n } from '../core/infrastructure/i18n';
 import { createSqliteDatabase } from '../core/infrastructure/database';
 import { createApiClient, readApiBaseUrl, type ApiClient } from '../core/infrastructure/http';
 import { createSecureTokenStore } from '../core/infrastructure/http/secureTokenStore';
+import { createRememberableTokenStore } from '../core/infrastructure/http/rememberableTokenStore';
 import { createSecureKeyValueStore } from '../core/infrastructure/storage/secureKeyValueStore';
 import type { UseCases } from './UseCasesContext';
 import { createAuthUseCases } from '../features/auth/application';
@@ -20,8 +21,14 @@ import { createApiWritingRepository } from '../features/writing/infrastructure/A
 import { createMockWritingRepository } from '../features/writing/infrastructure/MockWritingRepository';
 import { createOnboardingUseCases } from '../features/onboarding/application/onboardingUseCases';
 import { createMockOnboardingRepository } from '../features/onboarding/infrastructure/MockOnboardingRepository';
+import { createWatermelonPlacementProgressStore } from '../features/placement/infrastructure/WatermelonPlacementProgressStore';
+import { createWatermelonSurveyDraftStore } from '../features/onboarding/infrastructure/WatermelonSurveyDraftStore';
+import { INITIAL_ONBOARDING, writeMockOnboarding } from '../core/infrastructure/mock';
+import { parseSessionSnapshot, type SessionSnapshotStore } from './session/sessionSnapshot';
+import { createCryptoIdGenerator } from '../core/infrastructure/id/cryptoIdGenerator';
+import type { IdGeneratorPort } from '../core/application/idGenerator';
 import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
-import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
+import { createMockPlacementRepository, resetMockPlacement } from '../features/placement/infrastructure/MockPlacementRepository';
 import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
 import { createMockRoadmapRepository } from '../features/roadmap/infrastructure/MockRoadmapRepository';
 import { createLessonUseCases } from '../features/lesson/application/lessonUseCases';
@@ -75,7 +82,8 @@ export function onSessionExpired(listener: () => void): () => void {
 }
 
 const apiBaseUrl = readApiBaseUrl();
-const tokenStore = createSecureTokenStore();
+/** Token phiên: secure-store khi "Ghi nhớ đăng nhập", ngược lại chỉ trong bộ nhớ (Auth.Login.Remember). */
+const tokenStore = createRememberableTokenStore(createSecureTokenStore());
 /** Nơi mock lưu trạng thái cần còn sau khi mở lại app (vd. onboarding) — cùng secure-store với phiên. */
 const mockStore = createSecureKeyValueStore();
 
@@ -115,11 +123,50 @@ function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['
   return mock();
 }
 
+/** Bộ sinh id phía client (outbox, answer_id, report_id) — expo-crypto randomUUID. */
+export const idGenerator: IdGeneratorPort = createCryptoIdGenerator();
+
+/** Ảnh chụp phiên (tài khoản + bước onboarding) trên WatermelonDB localStorage, dùng khi mở app lúc lỗi mạng. */
+const SESSION_SNAPSHOT_KEY = 'session.snapshot';
+export const sessionSnapshots: SessionSnapshotStore = {
+  async load() {
+    const db = await getDatabase();
+    return parseSessionSnapshot(await db.localStorage.get<unknown>(SESSION_SNAPSHOT_KEY));
+  },
+  async save(snapshot) {
+    const db = await getDatabase();
+    await db.localStorage.set(SESSION_SNAPSHOT_KEY, snapshot);
+  },
+  async clear() {
+    const db = await getDatabase();
+    await db.localStorage.remove(SESSION_SNAPSHOT_KEY);
+  },
+};
+
+/** Bản nháp khảo sát (ROB-1) trên WatermelonDB localStorage. */
+const surveyDrafts = createWatermelonSurveyDraftStore(getDatabase);
+
+/**
+ * Chỉ dùng ở DevUiKit (__DEV__): đưa onboarding mock về surveyPending và xoá nháp khảo sát, giữ phiên.
+ * Caller tự chuyển session sang nhánh Onboarding.
+ */
+export async function resetMockOnboardingForDev(): Promise<void> {
+  if (!__DEV__) return;
+  await writeMockOnboarding(mockStore, INITIAL_ONBOARDING);
+  await resetMockPlacement(mockStore);
+  await surveyDrafts.clear();
+  await createWatermelonPlacementProgressStore(getDatabase).clear();
+}
+
 /** Use case của mọi tính năng, đã tiêm repository (mock hoặc API). */
 export const useCases: UseCases = {
   auth: createAuthUseCases(pick('auth', createMockAuthRepository, createApiAuthRepository), tokenStore),
-  onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore))),
-  placement: createPlacementUseCases(pick('placement', () => createMockPlacementRepository(mockStore))),
+  onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore)), surveyDrafts),
+  placement: createPlacementUseCases(
+    pick('placement', () => createMockPlacementRepository(mockStore)),
+    createWatermelonPlacementProgressStore(getDatabase),
+    () => Date.now(),
+  ),
   roadmap: createRoadmapUseCases(pick('roadmap', createMockRoadmapRepository)),
   lesson: createLessonUseCases(pick('lesson', createMockLessonRepository)),
   finalTest: createFinalTestUseCases(pick('finalTest', createMockFinalTestRepository)),

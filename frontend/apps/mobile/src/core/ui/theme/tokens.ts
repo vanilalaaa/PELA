@@ -158,6 +158,8 @@ export const componentColors = {
     danger: { bg: palette.coral[100], bgPressed: palette.coral[300], fg: palette.coral[700] },
     // Figma không vẽ Pressed cho Danger solid → giữ nền, chỉ thu nhỏ khi nhấn (GAP).
     dangerSolid: { bg: palette.coral[700], bgPressed: palette.coral[700], fg: palette.white },
+    // Nút trong banner lỗi (03 Register Error: "Đăng nhập" nền warn-accent coral-500). Figma không vẽ Pressed → coral-700.
+    warn: { bg: palette.coral[500], bgPressed: palette.coral[700], fg: palette.white },
     disabled: { bg: palette.ink[200], fg: palette.ink[400] },
   },
   iconButton: {
@@ -247,6 +249,12 @@ export const componentColors = {
     wrong: { bg: palette.coral[100], border: palette.coral[500], keyBg: palette.coral[500], keyFg: palette.white, fg: palette.coral[700] },
     disabled: { bg: palette.ink[50], border: palette.ink[200], keyBg: palette.ink[100], keyFg: palette.ink[400], fg: palette.ink[400] },
   },
+  // SocialButton 643:13988.
+  socialButton: { bg: palette.white, border: palette.blue[200], fg: palette.ink[900] },
+  // ChatBubble 457:1684, tone Sky.
+  chatBubble: { bg: palette.sky[100], speaker: palette.blue[700], fg: palette.blue[800] },
+  // Tooltip 479:5715.
+  tooltip: { bg: palette.ink[900], fg: palette.white },
   // Tabs 480:5609 và BottomNav 480:5870.
   tabs: { track: palette.ink[100], active: palette.white, fgActive: palette.blue[700], fg: palette.ink[500] },
   bottomNav: { bg: palette.white, border: palette.ink[200], pill: palette.blue[50], fgActive: palette.blue[700], fg: palette.ink[400], badge: palette.coral[500] },
@@ -311,6 +319,7 @@ export const radii = {
   input: 16,
   answer: 20,
   bubble: 20,
+  bubbleTail: 6, // radius/bubble-tail: góc chỉ về người nói (ChatBubble 457:1684)
   card: 24,
   dialog: 28,
   sheet: 28,

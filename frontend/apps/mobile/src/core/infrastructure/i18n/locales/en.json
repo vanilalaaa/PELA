@@ -70,7 +70,16 @@
       "loading": "Calling…",
       "result": "Result: {{count}} topics",
       "error": "Error: {{code}}"
-    }
+    },
+    "openAuth": "Wave 3a · Auth",
+    "authTitle": "UI Kit · Auth",
+    "mascotName": "PELA Bunny",
+    "sectionDialog": "ConfirmDialog",
+    "openDialog": "Open confirm dialog",
+    "openDialogDestructive": "Open destructive dialog",
+    "dialogTitle": "Confirm this action?",
+    "dialogBody": "Two side-by-side buttons. Android Back and tapping the backdrop both close it.",
+    "resetOnboarding": "Reset onboarding (mock)"
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -99,7 +108,8 @@
         "uppercase": "Has an uppercase letter",
         "lowercase": "Has a lowercase letter",
         "digit": "Has a number"
-      }
+      },
+      "strongerHint": "Make it longer or add a special character to strengthen it"
     },
     "otp": {
       "label": "{{length}}-digit verification code"
@@ -217,5 +227,269 @@
     "email": "Email",
     "password": "Password",
     "placedLevel": "Your level: {{level}} · {{score}}%"
+  },
+  "auth": {
+    "back": "Back",
+    "logo": "PELA",
+    "orContinueWith": "or continue with",
+    "login": "Log in",
+    "register": "Sign up",
+    "rememberTooltip": "Stay signed in on this device",
+    "rememberInfo": "About staying signed in",
+    "remember": "Remember me",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password",
+    "fullName": "Full name",
+    "confirmPassword": "Confirm password",
+    "googleUnavailable": "Sign in with Google, not available yet",
+    "offline": "You're offline. Connect to the internet to continue.",
+    "welcome": {
+      "tagline": "Personalized English Learning App"
+    },
+    "loginScreen": {
+      "title": "Welcome back",
+      "passwordPlaceholder": "Enter your password",
+      "forgot": "Forgot password?",
+      "noAccount": "Don't have an account?"
+    },
+    "registerScreen": {
+      "title": "Create account",
+      "namePlaceholder": "Linh Tran",
+      "passwordPlaceholder": "Create a password",
+      "confirmPlaceholder": "Re-enter your password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?"
+    },
+    "verify": {
+      "bubble": "A verification email has been sent. Check your inbox.",
+      "spamHint": "Can't find it? Check your Spam or Promotions folder.",
+      "title": "Check your email",
+      "sentTo": "A verification email has been sent to ",
+      "instructions": ". Tap the link in the email to activate your account, then log in.",
+      "verifiedLogin": "Log in after verifying",
+      "resend": "Resend email",
+      "changeEmail": "Change email address",
+      "resendShort": "Resend"
+    },
+    "error": {
+      "invalidCredentials": "Incorrect email or password.",
+      "emailTaken": "This email is already registered.",
+      "locked": "Sign-in is temporarily locked after too many failed attempts.",
+      "lockedUntil": "Try again {{time}}.",
+      "lockedLater": "Try again in a few minutes.",
+      "unverified": "Your email isn't verified yet. Open the link in the verification email.",
+      "resendUnavailable": "Resending the verification email will be available in a later update.",
+      "suspended": "Your account is suspended.",
+      "suspendedReason": "Reason: {{reason}}.",
+      "suspendedUntil": "Until {{date}}.",
+      "suspendedForever": "Your account has been permanently suspended.",
+      "pendingDeletion": "Your account is scheduled for deletion and cannot sign in.",
+      "deletionDate": "Your data will be permanently deleted on {{date}}.",
+      "invalidInput": "Some details are invalid. Check the highlighted fields.",
+      "network": "Can't reach the server. Check your connection and try again.",
+      "tooManyRequests": "Too many attempts. Wait a moment and try again.",
+      "providerUnavailable": "Sign-in is temporarily unavailable. Try again in a few minutes.",
+      "unknown": "Something went wrong. Try again later.",
+      "tooManyRequestsWait": "Too many attempts. Try again in {{seconds}} seconds.",
+      "invalidOtp": "The code is incorrect or has expired. Check your email or resend the code.",
+      "resetExpired": "Your password reset session has expired. Resend the code to continue."
+    },
+    "validation": {
+      "required": "This field is empty. Enter a value.",
+      "invalidEmail": "This email isn't valid. Check and try again.",
+      "emailTooLong": "Email must be at most 150 characters",
+      "nameTooLong": "Name must be at most 100 characters",
+      "passwordTooLong": "Password must be at most 72 characters",
+      "weakPassword": "This password isn't strong enough. Meet all the conditions below.",
+      "passwordMismatch": "The passwords don't match. Enter it again.",
+      "invalidValue": "This value isn't valid. Check and try again.",
+      "emailTakenHint": "Use another email or log in.",
+      "samePassword": "Your new password must differ from your current password."
+    },
+    "forgot": {
+      "bubble": "Don't worry, you can recover your account with a verification code.",
+      "title": "Recover password",
+      "subtitle": "Enter the email you registered with. A 6-digit verification code will be sent to it.",
+      "submit": "Send code"
+    },
+    "otp": {
+      "title": "Enter verification code",
+      "sentTo": "A 6-digit code has been sent to ",
+      "sentToEnd": ".",
+      "resend": "Resend code",
+      "resending": "Resending code…",
+      "resent": "A new code has been sent. Check your email.",
+      "submit": "Continue"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "verified": "Verified {{email}}",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Create a new password",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Re-enter the new password",
+      "submit": "Reset password",
+      "resendCode": "Resend code",
+      "done": "Your password has been changed. Log in with your new password.",
+      "cancelTitle": "Cancel password reset?",
+      "cancelMessage": "Your password hasn't been changed. You'll return to the login screen.",
+      "cancelConfirm": "Leave",
+      "cancelKeep": "Stay"
+    }
+  },
+  "cefr": {
+    "tier": {
+      "A1": "Novice",
+      "A2": "Apprentice",
+      "B1": "Trainee",
+      "B2": "Journeyman",
+      "C1": "Expert",
+      "C2": "Master"
+    }
+  },
+  "onboarding": {
+    "survey": {
+      "greeting": "Welcome to PELA. Answer 5 short questions to get a learning path that fits you.",
+      "progress": "{{current}}/{{total}}",
+      "progressA11y": "Question {{current}} of {{total}}",
+      "questionLabel": "QUESTION {{current}}/{{total}}",
+      "previous": "Previous question",
+      "next": "Next",
+      "finish": "Finish",
+      "q1": {
+        "title": "You are…?",
+        "high_school": "High-school student",
+        "university": "University student",
+        "working": "Working",
+        "other": "Other",
+        "otherLabel": "Your role",
+        "otherPlaceholder": "Enter your role",
+        "otherBlank": "Enter your role."
+      },
+      "q2": {
+        "title": "Why are you learning English?",
+        "hint": "Choose up to 3",
+        "full": "3 items selected. Deselect one to choose another.",
+        "school": "Do well at school",
+        "certificate": "Take a certificate exam (IELTS, TOEIC…)",
+        "daily_communication": "Everyday conversation",
+        "travel": "Travel",
+        "work": "Work",
+        "entertainment": "Movies and music"
+      },
+      "q3": {
+        "title": "Which topics do you like?",
+        "hint": "Choose at least 1 topic",
+        "family": "Family",
+        "school": "School",
+        "travel": "Travel",
+        "food": "Food",
+        "sport": "Sports",
+        "music": "Music",
+        "movie": "Movies",
+        "tech": "Technology",
+        "animal": "Animals",
+        "health": "Health"
+      },
+      "q4": {
+        "title": "How long can you study each day?",
+        "minutes": "{{count}} minutes",
+        "desc5": "Light",
+        "desc10": "Steady",
+        "desc20": "Committed",
+        "desc30": "Intensive"
+      },
+      "q5": {
+        "title": "How would you rate your English level?",
+        "hint": "Choose the closest level. Your survey results and the placement test (if any) will set your starting level.",
+        "A1": "Just starting; I know a few greetings, numbers and colours.",
+        "A2": "I understand short familiar sentences and can introduce myself and my family.",
+        "B1": "I can talk simply about school and hobbies and read short passages.",
+        "B2": "I follow the main ideas of conversations and can write about my experiences.",
+        "C1": "I read news and watch films with English subtitles; I express opinions clearly.",
+        "C2": "I use English almost naturally at school and at work."
+      }
+    },
+    "analyzing": {
+      "bubble": "Checking your results…",
+      "title": "Checking your survey",
+      "subtitle": "PELA is choosing the right path for you.",
+      "errorTitle": "Couldn't send the survey",
+      "error": "Something went wrong while sending the survey. Your answers are kept. Try again.",
+      "networkError": "Can't reach the server. Your answers are kept. Check your connection and try again.",
+      "offline": "You're offline. Connect to the internet to send the survey.",
+      "review": "Review answers"
+    }
+  },
+  "session": {
+    "stale": {
+      "offline": "You're offline. You're seeing data saved on this device; it will update when you're back online.",
+      "serverUnavailable": "Can't reach the server. You're seeing data saved on this device."
+    }
+  },
+  "placement": {
+    "intro": {
+      "bubble": "Take your time. The result only picks the right starting level.",
+      "title": "Placement test",
+      "subtitle": "This test places you at the right level so lessons are neither too easy nor too hard.",
+      "questionsRange": "10–15 multiple-choice questions",
+      "questionsCount": "{{count}} multiple-choice questions",
+      "duration": "{{count}} minutes",
+      "durationUnknown": "Time-limited",
+      "passMark": "Score 80% or more to start at your target level",
+      "oneShot": "You can take it only once",
+      "oneShotDetail": "No retakes, and you can't go back to a previous question.",
+      "offline": "You're offline. Connect to the internet to start the test.",
+      "start": "Start the test",
+      "resume": "Continue the test",
+      "fromBeginning": "Start from the beginning",
+      "confirmA1Title": "Start at the Novice level?",
+      "confirmA1Message": "You'll start at the Novice level and won't be able to take the placement test.",
+      "confirmA1": "Start"
+    },
+    "test": {
+      "exit": "Leave and keep progress",
+      "questionLabel": "QUESTION {{current}}/{{total}} · {{kind}}",
+      "kind": {
+        "fill_blank": "CHOOSE THE RIGHT WORD",
+        "meaning": "CHOOSE THE MEANING"
+      },
+      "instruction": {
+        "fill_blank": "Choose the word that completes the sentence:",
+        "meaning": "Choose the word closest in meaning to:"
+      },
+      "blank": "blank",
+      "next": "Next",
+      "submit": "Submit",
+      "confirmTitle": "Submit the test?",
+      "confirmMessage": "You can take the placement test only once.",
+      "confirmCancel": "Review",
+      "timeLeftA11y": "Time left {{time}}",
+      "oneMinuteLeft": "1 minute left.",
+      "timeUpSubmitted": "Time is up. Your answers have been submitted.",
+      "timeUpOffline": "Time is up. An internet connection is needed to submit. Your answers will be submitted when you're back online."
+    },
+    "result": {
+      "passedTitle": "You've completed the placement test",
+      "passedBody": "You scored 80% or more and start at the {{tier}} level. Lower levels count as completed and your learning path is unlocked.",
+      "scoreChip": "{{correct}}/{{total}} correct · {{score}}%",
+      "lowerTitle": "Your learning path is ready",
+      "lowerBody": "PELA suggests starting at the {{tier}} level to build a solid foundation. Study a little every day to reach the next level.",
+      "yourLevel": "YOUR LEVEL",
+      "a1Title": "Welcome to PELA",
+      "a1Body": "Your path starts with the essentials.",
+      "startLevel": "STARTING LEVEL",
+      "nextStep": "Next step",
+      "start": "Start learning"
+    },
+    "error": {
+      "network": "Can't reach the server. Check your connection and try again.",
+      "unknown": "Something went wrong. Try again later.",
+      "submitNetwork": "Couldn't submit because the server can't be reached. Your answers are kept. Try again.",
+      "submit": "Couldn't submit. Your answers are kept. Try again."
+    },
+    "alreadyTaken": "You've already taken the placement test.",
+    "continueToApp": "Start learning"
   }
 }

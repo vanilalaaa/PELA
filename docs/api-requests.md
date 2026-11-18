@@ -13,6 +13,10 @@ Trạng thái: `cần đặc tả` · `đang làm` · `đã có` · `bỏ`.
 | API-3 | Auth | CO-6, GAP-8 | Đăng nhập Google (luồng OAuth qua Supabase hay qua backend, và endpoint đổi token) | SRS chỉ cho đăng nhập mạng xã hội bằng Google; OpenAPI chưa có | cần đặc tả |
 | API-4 | Writing | Writing.Draft | Lưu / lấy / xoá bài nháp chủ động (hiện chỉ có nháp khi nộp bị 429 hết lượt) | Learner viết dở cần lưu nháp để viết tiếp, kể cả offline | cần đặc tả |
 | API-5 | Writing | BR-30 | Bỏ qua một từ gợi ý (vd. `POST /practice/writing/vocab-suggestions/{id}/dismiss` → `status = dismissed`) | Schema đã có trạng thái `dismissed` nhưng chưa có endpoint đặt trạng thái này | cần đặc tả |
+| API-19 | Lỗi `VALIDATION_FAILED` (`components.responses.ValidationFailed`) | UI-2 | Xác nhận `details[].field` dùng đúng tên thuộc tính của request body (vd. `fullName`, `email`, `password`, `confirmPassword`) | Mobile đặt lỗi dưới đúng ô theo `field`; OpenAPI chưa nói rõ quy ước tên | cần đặc tả |
+| API-20 | `POST /auth/password/forgot` (202) | Auth.Recover.Request, Auth.Recover.Expire, MNT-3 | Trả `codeExpiresIn` (giây, thời hạn mã) và `resendAfter` (giây chờ trước khi gửi lại được) | 44c không hard-code "5 phút" và không đoán thời gian chờ; hiện app bỏ câu thời hạn, chỉ báo chờ khi gặp 429 (đọc `Retry-After`) | cần đặc tả |
+| API-21 | `POST /auth/password/verify-otp` (422) | Auth.Recover.Expire, GAP-7 | Tách mã `OTP_EXPIRED` khỏi `INVALID_OTP`; đồng thời ghi rõ 429 có header `Retry-After` | Để báo "mã đã hết hạn, hãy gửi lại" khác "mã chưa đúng"; hiện app dùng một thông báo chung cho cả hai | cần đặc tả |
+| API-22 | Khảo sát (API-6), `learner_profile` | UC-02, Onboarding.Profile.Store, RAG.Embed.Input | (1) Nhận key mục tiêu `entertainment` ("Xem phim, nghe nhạc", Figma 09.2; quyết định 18/11) ngoài 5 key trong V1. (2) Xác nhận bộ key chủ đề câu 3 (`family, school, travel, food, sport, music, movie, tech, animal, health`) trùng với chủ đề nội dung (Question Bank, Listening), vì `interests` đi vào RAG.Embed.Input. Mobile đang cố định các key này phía client cho tới khi API-6 trả câu hỏi/lựa chọn từ `survey_question` | Lệch key thì RAG lấy ngữ cảnh sai, server có thể từ chối giá trị lạ | cần đặc tả |
 
 ## Tính năng chưa có endpoint (mobile đang chạy mock)
 
@@ -21,7 +25,7 @@ Kiểu dữ liệu mobile đang dùng nằm ở `frontend/apps/mobile/src/featur
 | Id | Feature mobile | UC/BR | Thao tác cần | Trạng thái |
 |---|---|---|---|---|
 | API-6 | onboarding | UC-02, UC-03 A1, Onboarding.Survey/Profile | Gửi khảo sát 5 câu → trả trình độ ánh xạ; đọc trạng thái onboarding (API-1); "Bắt đầu từ đầu" → xếp A1, kết thúc onboarding (Placement.Test.StartFromBeginning) | cần đặc tả |
-| API-7 | placement | UC-03, BR-19 | Lấy đề placement; nộp đáp án (id lượt do client sinh) → điểm, đạt/trượt, trình độ xếp | cần đặc tả |
+| API-7 | placement | UC-03, BR-19, BR-23, FLOW-10, Hình A-1 | `POST /placement-test/start` → `attemptId` (server cấp), `orientedLevel`, `testedLevel`, `questions[]` (`questionId`, `kind`: fill_blank/meaning, `text` có `___`, `options[]`, không kèm đáp án), `deadline`, `serverTime` (để app bù lệch giờ máy). `POST /placement-test/{attemptId}/submit {answers:[{questionId, answer}]}` → `score`, `correctCount`, `totalQuestions`, `passed`, `placedLevel`, `attemptedAt`; gửi lại cùng attempt là idempotent. Lượt thứ hai (start hoặc submit lại sau khi đã chấm) → 409 `PLACEMENT_ALREADY_TAKEN` | Mobile đã dựng theo khuôn này bằng mock | cần đặc tả |
 | API-8 | roadmap | UC-06 | Lộ trình trình độ hiện tại: topic + lesson + tiến độ, sao | cần đặc tả |
 | API-9 | lesson | UC-06, BR-36, BR-23 | Nội dung lesson (từ mới + câu hỏi); nộp đáp án thô theo lô → sao, phần sao tăng thêm | cần đặc tả |
 | API-10 | finalTest | UC-07, BR-20 | Trạng thái lượt/khoá; bắt đầu lượt; nộp đáp án → điểm, trạng thái mới | cần đặc tả |

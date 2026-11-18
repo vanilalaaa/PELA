@@ -1,4 +1,4 @@
-export { ApiRequestError, CLIENT_ERROR_CODES, toApiRequestError, toNetworkError } from './ApiRequestError';
+export { ApiRequestError, CLIENT_ERROR_CODES, parseRetryAfter, toApiRequestError, toNetworkError } from './ApiRequestError';
 export { API_PREFIX, readApiBaseUrl, resolveApiBaseUrl } from './config';
 export { createApiClient, createRefreshRequest, call, unwrap } from './createApiClient';
 export type { ApiClient, ApiClientDeps } from './createApiClient';

@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
 import { useTheme } from '../theme';
 import { FieldShell, type FieldState } from './FieldShell';
+import { KeyboardRevealContext } from './keyboardReveal';
 
 export interface InputProps extends Omit<TextInputProps, 'style' | 'editable'> {
+  /** Ref tới TextInput (focus ô kế tiếp, react-hook-form setFocus). */
+  ref?: React.Ref<React.ComponentRef<typeof TextInput>>;
   label?: string;
   /** Có lỗi thì ô chuyển Error và hiện dòng lỗi thay cho hint (UI-2). */
   errorMessage?: string;
+  /** Tô đỏ ô mà không có dòng lỗi riêng (vd. 06 Login Error: lỗi chung đã nằm ở banner). */
+  invalid?: boolean;
   hint?: string;
   disabled?: boolean;
   /** Icon đầu dòng 22: nhận màu (ink-400, focused blue-600, disabled ink-400) và kích thước. */
@@ -26,6 +31,7 @@ const ICON_SIZE = 22;
 export function Input({
   label,
   errorMessage,
+  invalid = false,
   hint,
   disabled = false,
   renderLeftIcon,
@@ -38,7 +44,8 @@ export function Input({
 }: InputProps) {
   const theme = useTheme();
   const [focused, setFocused] = useState(false);
-  const state: FieldState = disabled ? 'disabled' : errorMessage ? 'error' : focused ? 'focused' : 'default';
+  const revealInput = useContext(KeyboardRevealContext);
+  const state: FieldState = disabled ? 'disabled' : errorMessage || invalid ? 'error' : focused ? 'focused' : 'default';
   const iconColor = state === 'focused' ? theme.componentColors.field.iconFocused : theme.componentColors.field.icon;
 
   return (
@@ -51,6 +58,7 @@ export function Input({
         accessibilityState={{ disabled }}
         onFocus={(e) => {
           setFocused(true);
+          revealInput?.();
           onFocus?.(e);
         }}
         onBlur={(e) => {
