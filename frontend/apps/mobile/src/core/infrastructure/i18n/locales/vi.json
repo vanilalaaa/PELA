@@ -78,7 +78,8 @@
     "openDialog": "Mở hộp xác nhận",
     "openDialogDestructive": "Mở hộp xác nhận phá huỷ",
     "dialogTitle": "Xác nhận thao tác?",
-    "dialogBody": "Hộp 2 nút ngang. Nút Back Android và chạm nền mờ đều đóng hộp."
+    "dialogBody": "Hộp 2 nút ngang. Nút Back Android và chạm nền mờ đều đóng hộp.",
+    "resetOnboarding": "Đặt lại onboarding (mock)"
   },
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",
@@ -335,6 +336,90 @@
       "cancelMessage": "Mật khẩu chưa được đổi. Bạn sẽ quay về màn đăng nhập.",
       "cancelConfirm": "Thoát",
       "cancelKeep": "Ở lại"
+    }
+  },
+  "cefr": {
+    "tier": {
+      "A1": "Tập sự",
+      "A2": "Học việc",
+      "B1": "Thợ học nghề",
+      "B2": "Thợ lành nghề",
+      "C1": "Chuyên gia",
+      "C2": "Bậc thầy"
+    }
+  },
+  "onboarding": {
+    "survey": {
+      "greeting": "Chào mừng bạn đến với PELA. Trả lời 5 câu hỏi ngắn để nhận lộ trình phù hợp.",
+      "progress": "{{current}}/{{total}}",
+      "progressA11y": "Câu {{current}} trên {{total}}",
+      "questionLabel": "CÂU {{current}}/{{total}}",
+      "previous": "Câu trước",
+      "next": "Tiếp theo",
+      "finish": "Hoàn thành",
+      "q1": {
+        "title": "Bạn là…?",
+        "high_school": "Học sinh",
+        "university": "Sinh viên",
+        "working": "Đã đi làm",
+        "other": "Khác",
+        "otherLabel": "Vai trò của bạn",
+        "otherPlaceholder": "Nhập vai trò của bạn",
+        "otherBlank": "Hãy nhập vai trò của bạn."
+      },
+      "q2": {
+        "title": "Bạn học tiếng Anh để làm gì?",
+        "hint": "Chọn tối đa 3",
+        "full": "Đã chọn đủ 3 mục. Bỏ chọn một mục để chọn mục khác.",
+        "school": "Học tốt ở trường",
+        "certificate": "Thi chứng chỉ (IELTS, TOEIC…)",
+        "daily_communication": "Giao tiếp hằng ngày",
+        "travel": "Du lịch",
+        "work": "Công việc",
+        "entertainment": "Xem phim, nghe nhạc"
+      },
+      "q3": {
+        "title": "Bạn thích học chủ đề nào?",
+        "hint": "Chọn ít nhất 1 chủ đề",
+        "family": "Gia đình",
+        "school": "Trường học",
+        "travel": "Du lịch",
+        "food": "Ẩm thực",
+        "sport": "Thể thao",
+        "music": "Âm nhạc",
+        "movie": "Phim ảnh",
+        "tech": "Công nghệ",
+        "animal": "Động vật",
+        "health": "Sức khoẻ"
+      },
+      "q4": {
+        "title": "Mỗi ngày bạn học được bao lâu?",
+        "minutes": "{{count}} phút",
+        "desc5": "Nhẹ nhàng",
+        "desc10": "Vừa sức",
+        "desc20": "Chăm chỉ",
+        "desc30": "Tập trung cao"
+      },
+      "q5": {
+        "title": "Bạn tự đánh giá trình độ tiếng Anh ở mức nào?",
+        "hint": "Chọn mức gần đúng nhất. Kết quả khảo sát và bài kiểm tra xếp lớp (nếu có) sẽ xác định cấp độ bắt đầu.",
+        "A1": "Mới bắt đầu, biết vài từ chào hỏi, số đếm, màu sắc.",
+        "A2": "Hiểu câu ngắn quen thuộc, giới thiệu được bản thân và gia đình.",
+        "B1": "Nói chuyện đơn giản về trường lớp, sở thích; đọc hiểu đoạn văn ngắn.",
+        "B2": "Nghe hiểu ý chính hội thoại, viết đoạn văn kể lại trải nghiệm.",
+        "C1": "Đọc báo, xem phim có phụ đề tiếng Anh; trình bày ý kiến rõ ràng.",
+        "C2": "Dùng tiếng Anh gần như tự nhiên trong học tập và công việc."
+      }
+    },
+    "analyzing": {
+      "bubble": "Đang xem kết quả của bạn…",
+      "title": "Đang xem kết quả khảo sát",
+      "subtitle": "PELA đang chọn lộ trình phù hợp với bạn.",
+      "errorTitle": "Chưa gửi được khảo sát",
+      "error": "Đã có lỗi khi gửi khảo sát. Câu trả lời vẫn được giữ. Hãy thử lại.",
+      "networkError": "Không kết nối được máy chủ. Câu trả lời vẫn được giữ. Hãy kiểm tra kết nối mạng và thử lại.",
+      "offline": "Thiết bị đang ngoại tuyến. Hãy kết nối mạng để gửi khảo sát.",
+      "review": "Xem lại câu trả lời"
     }
   }
 }

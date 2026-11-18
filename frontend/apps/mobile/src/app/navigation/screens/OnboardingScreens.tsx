@@ -5,7 +5,6 @@ import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Screen } from '../../../core/ui/components';
 import { useTheme } from '../../../core/ui/theme';
-import type { SurveyAnswers } from '../../../features/onboarding/application/types';
 import { useUseCases } from '../../UseCasesContext';
 import { useSession } from '../../session/sessionStore';
 import type { OnboardingStackParamList } from '../types';
@@ -22,15 +21,6 @@ function useBlockHardwareBack() {
   );
 }
 
-/** Câu trả lời mẫu để thử luồng; form 5 bước thật (09.1–09.5) dựng ở P3. */
-const SAMPLE_ANSWERS: SurveyAnswers = {
-  occupation: 'university',
-  learningGoals: ['communication'],
-  interests: ['travel'],
-  dailyGoalMinutes: 10,
-  selfAssessedLevel: 'B1',
-};
-
 function Frame({ title, figma, children }: { title: string; figma: string; children: React.ReactNode }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -45,34 +35,6 @@ function Frame({ title, figma, children }: { title: string; figma: string; child
       </Card>
     </Screen>
   );
-}
-
-/** 09.1–09.5: gửi khảo sát → A1 thì xong onboarding (SkipRule), ngược lại sang Placement. */
-export function SurveyScreen() {
-  const { t } = useTranslation();
-  const nav = useNavigation<OnboardingNav>();
-  const { onboarding } = useUseCases();
-  const [busy, setBusy] = useState(false);
-  const submit = async () => {
-    setBusy(true);
-    try {
-      const result = await onboarding.submitSurvey(SAMPLE_ANSWERS);
-      if (result.next === 'done') useSession.getState().completeOnboarding();
-      // replace: khảo sát đã gửi, không quay lại được.
-      else nav.replace('PlacementIntro', { orientedLevel: result.mappedLevel });
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <Frame title="Survey" figma="09.1–09.5, 10">
-      <Button label={t('nav.action.submitSurvey')} fullWidth loading={busy} onPress={() => void submit()} testID="survey-submit" />
-    </Frame>
-  );
-}
-
-export function SurveyAnalyzingScreen() {
-  return <Frame title="SurveyAnalyzing" figma="10">{null}</Frame>;
 }
 
 /** 11 Intro: làm bài, hoặc "Bắt đầu từ đầu" xếp A1 (UC-03 A1, FLOW-4). */

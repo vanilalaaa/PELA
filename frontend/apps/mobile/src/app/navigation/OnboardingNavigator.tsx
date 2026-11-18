@@ -5,16 +5,16 @@ import {
   PlacementIntroScreen,
   PlacementResultScreen,
   PlacementTestScreen,
-  SurveyAnalyzingScreen,
-  SurveyScreen,
 } from './screens/OnboardingScreens';
+import { SurveyAnalyzingScreen } from '../../features/onboarding/presentation/SurveyAnalyzingScreen';
+import { SurveyScreen } from '../../features/onboarding/presentation/SurveyScreen';
 import { useSession } from '../session/sessionStore';
 import type { OnboardingStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<OnboardingStackParamList>();
 
 /**
- * OnboardingStack (UC-02, UC-03). Survey → Intro → Test → Result đều chuyển bằng `replace`, nên không
+ * OnboardingStack (UC-02, UC-03). Survey → 10 Đang xem kết quả (navigate, lỗi thì quay lại sửa được) → Intro → Test → Result đều chuyển bằng `replace`, nên không
  * quay lại khảo sát đã gửi hay bài thi đã nộp; Test và Result chặn thêm nút Back Android (BR-19).
  */
 export function OnboardingNavigator() {
@@ -25,8 +25,9 @@ export function OnboardingNavigator() {
   const placement = entry?.screen === 'PlacementIntro' ? entry : null;
   return (
     <Stack.Navigator initialRouteName={placement ? 'PlacementIntro' : 'Survey'}>
-      <Stack.Screen name="Survey" component={SurveyScreen} options={title('Survey')} />
-      <Stack.Screen name="SurveyAnalyzing" component={SurveyAnalyzingScreen} options={title('SurveyAnalyzing')} />
+      {/* 09.1–09.5 và 10 tự vẽ thanh trên theo Figma. 10: không vuốt lùi (Back xử lý trong màn). */}
+      <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SurveyAnalyzing" component={SurveyAnalyzingScreen} options={{ headerShown: false, gestureEnabled: false }} />
       <Stack.Screen
         name="PlacementIntro"
         component={PlacementIntroScreen}

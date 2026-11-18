@@ -21,6 +21,8 @@ import { createApiWritingRepository } from '../features/writing/infrastructure/A
 import { createMockWritingRepository } from '../features/writing/infrastructure/MockWritingRepository';
 import { createOnboardingUseCases } from '../features/onboarding/application/onboardingUseCases';
 import { createMockOnboardingRepository } from '../features/onboarding/infrastructure/MockOnboardingRepository';
+import { createWatermelonSurveyDraftStore } from '../features/onboarding/infrastructure/WatermelonSurveyDraftStore';
+import { INITIAL_ONBOARDING, writeMockOnboarding } from '../core/infrastructure/mock';
 import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
 import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
 import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
@@ -117,10 +119,23 @@ function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['
   return mock();
 }
 
+/** Bản nháp khảo sát (ROB-1) trên WatermelonDB localStorage. */
+const surveyDrafts = createWatermelonSurveyDraftStore(getDatabase);
+
+/**
+ * Chỉ dùng ở DevUiKit (__DEV__): đưa onboarding mock về surveyPending và xoá nháp khảo sát, giữ phiên.
+ * Caller tự chuyển session sang nhánh Onboarding.
+ */
+export async function resetMockOnboardingForDev(): Promise<void> {
+  if (!__DEV__) return;
+  await writeMockOnboarding(mockStore, INITIAL_ONBOARDING);
+  await surveyDrafts.clear();
+}
+
 /** Use case của mọi tính năng, đã tiêm repository (mock hoặc API). */
 export const useCases: UseCases = {
   auth: createAuthUseCases(pick('auth', createMockAuthRepository, createApiAuthRepository), tokenStore),
-  onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore))),
+  onboarding: createOnboardingUseCases(pick('onboarding', () => createMockOnboardingRepository(mockStore)), surveyDrafts),
   placement: createPlacementUseCases(pick('placement', () => createMockPlacementRepository(mockStore))),
   roadmap: createRoadmapUseCases(pick('roadmap', createMockRoadmapRepository)),
   lesson: createLessonUseCases(pick('lesson', createMockLessonRepository)),

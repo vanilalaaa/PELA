@@ -78,7 +78,8 @@
     "openDialog": "Open confirm dialog",
     "openDialogDestructive": "Open destructive dialog",
     "dialogTitle": "Confirm this action?",
-    "dialogBody": "Two side-by-side buttons. Android Back and tapping the backdrop both close it."
+    "dialogBody": "Two side-by-side buttons. Android Back and tapping the backdrop both close it.",
+    "resetOnboarding": "Reset onboarding (mock)"
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -335,6 +336,90 @@
       "cancelMessage": "Your password hasn't been changed. You'll return to the login screen.",
       "cancelConfirm": "Leave",
       "cancelKeep": "Stay"
+    }
+  },
+  "cefr": {
+    "tier": {
+      "A1": "Novice",
+      "A2": "Apprentice",
+      "B1": "Trainee",
+      "B2": "Journeyman",
+      "C1": "Expert",
+      "C2": "Master"
+    }
+  },
+  "onboarding": {
+    "survey": {
+      "greeting": "Welcome to PELA. Answer 5 short questions to get a learning path that fits you.",
+      "progress": "{{current}}/{{total}}",
+      "progressA11y": "Question {{current}} of {{total}}",
+      "questionLabel": "QUESTION {{current}}/{{total}}",
+      "previous": "Previous question",
+      "next": "Next",
+      "finish": "Finish",
+      "q1": {
+        "title": "You are…?",
+        "high_school": "High-school student",
+        "university": "University student",
+        "working": "Working",
+        "other": "Other",
+        "otherLabel": "Your role",
+        "otherPlaceholder": "Enter your role",
+        "otherBlank": "Enter your role."
+      },
+      "q2": {
+        "title": "Why are you learning English?",
+        "hint": "Choose up to 3",
+        "full": "3 items selected. Deselect one to choose another.",
+        "school": "Do well at school",
+        "certificate": "Take a certificate exam (IELTS, TOEIC…)",
+        "daily_communication": "Everyday conversation",
+        "travel": "Travel",
+        "work": "Work",
+        "entertainment": "Movies and music"
+      },
+      "q3": {
+        "title": "Which topics do you like?",
+        "hint": "Choose at least 1 topic",
+        "family": "Family",
+        "school": "School",
+        "travel": "Travel",
+        "food": "Food",
+        "sport": "Sports",
+        "music": "Music",
+        "movie": "Movies",
+        "tech": "Technology",
+        "animal": "Animals",
+        "health": "Health"
+      },
+      "q4": {
+        "title": "How long can you study each day?",
+        "minutes": "{{count}} minutes",
+        "desc5": "Light",
+        "desc10": "Steady",
+        "desc20": "Committed",
+        "desc30": "Intensive"
+      },
+      "q5": {
+        "title": "How would you rate your English level?",
+        "hint": "Choose the closest level. Your survey results and the placement test (if any) will set your starting level.",
+        "A1": "Just starting; I know a few greetings, numbers and colours.",
+        "A2": "I understand short familiar sentences and can introduce myself and my family.",
+        "B1": "I can talk simply about school and hobbies and read short passages.",
+        "B2": "I follow the main ideas of conversations and can write about my experiences.",
+        "C1": "I read news and watch films with English subtitles; I express opinions clearly.",
+        "C2": "I use English almost naturally at school and at work."
+      }
+    },
+    "analyzing": {
+      "bubble": "Checking your results…",
+      "title": "Checking your survey",
+      "subtitle": "PELA is choosing the right path for you.",
+      "errorTitle": "Couldn't send the survey",
+      "error": "Something went wrong while sending the survey. Your answers are kept. Try again.",
+      "networkError": "Can't reach the server. Your answers are kept. Check your connection and try again.",
+      "offline": "You're offline. Connect to the internet to send the survey.",
+      "review": "Review answers"
     }
   }
 }

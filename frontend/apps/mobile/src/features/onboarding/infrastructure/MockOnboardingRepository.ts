@@ -20,8 +20,10 @@ export function createMockOnboardingRepository(store: KeyValueStore): Onboarding
       const state = await readMockOnboarding(store);
       return mockCall(() => state as OnboardingStatus, state as OnboardingStatus);
     },
-    submitSurvey: async () => {
-      const result = clone(data.surveyResult);
+    // Mock ánh xạ = trình độ tự đánh giá (server thật dùng bảng survey_level_rule): chọn A1 để thử nhánh
+    // bỏ Placement, bậc khác để sang Placement. Không có thì dùng mẫu trong fixture.
+    submitSurvey: async (answers) => {
+      const result: SurveyResult = answers.selfAssessedLevel ? { mappedLevel: answers.selfAssessedLevel } : clone(data.surveyResult);
       const level = result.mappedLevel;
       const out = await mockCall(() => result, result);
       await writeMockOnboarding(store, {

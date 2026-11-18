@@ -4,7 +4,7 @@ import type { SurveyAnswers } from './types';
 
 const ANSWERS: SurveyAnswers = {
   occupation: 'working',
-  learningGoals: ['a', 'b', 'c', 'd'],
+  learningGoals: ['school', 'certificate', 'travel', 'work'],
   interests: [],
   dailyGoalMinutes: 20,
   selfAssessedLevel: null,
@@ -35,6 +35,6 @@ describe('onboarding (UC-02, Onboarding.Survey.SkipRule)', () => {
     const submitSurvey = vi.fn(async (_answers: SurveyAnswers) => ({ mappedLevel: 'B1' as const }));
     const uc = createOnboardingUseCases({ getStatus: vi.fn(), submitSurvey, startFromBeginning: vi.fn() });
     expect(await uc.submitSurvey(ANSWERS)).toEqual({ mappedLevel: 'B1', next: 'placement' });
-    expect(submitSurvey.mock.calls[0]?.[0]?.learningGoals).toEqual(['a', 'b', 'c']);
+    expect(submitSurvey.mock.calls[0]?.[0]?.learningGoals).toEqual(['school', 'certificate', 'travel']);
   });
 });

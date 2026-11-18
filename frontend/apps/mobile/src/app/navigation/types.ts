@@ -5,6 +5,7 @@
  */
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { CefrLevel } from '../../domain/types';
+import type { SurveyAnswers } from '../../features/onboarding/application/types';
 
 /** AuthStack (UC-01): 01 Welcome, 02/03 Register, 04 Verify Email, 05/06 Login, 44b–44d quên mật khẩu. */
 export type AuthStackParamList = {
@@ -23,7 +24,8 @@ export type AuthStackParamList = {
 /** OnboardingStack (UC-02, UC-03): 09.1–09.5 Survey, 10 Analyzing, 11–15 Placement. */
 export type OnboardingStackParamList = {
   Survey: undefined;
-  SurveyAnalyzing: undefined;
+  /** 10: câu trả lời 5 câu, gửi khi mở màn. */
+  SurveyAnalyzing: { answers: SurveyAnswers };
   PlacementIntro: { orientedLevel: CefrLevel };
   PlacementTest: { orientedLevel: CefrLevel };
   PlacementResult: { placedLevel: CefrLevel; passed: boolean; score: number };

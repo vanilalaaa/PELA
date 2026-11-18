@@ -7,7 +7,8 @@ import { BottomSheet, Button, Chip, ConfirmDialog, Screen } from '../../core/ui/
 import { UIIcon } from '../../core/ui/icons';
 import { useDevMockSettings, type MockMode } from '../../core/infrastructure/mock';
 import { useQuery } from '@tanstack/react-query';
-import { resolvedDataSources } from '../container';
+import { resetMockOnboardingForDev, resolvedDataSources } from '../container';
+import { useSession } from '../session/sessionStore';
 import { useUseCases } from '../UseCasesContext';
 
 const MOCK_MODES: MockMode[] = ['normal', 'error', 'empty'];
@@ -57,6 +58,21 @@ export function UiKitScreen() {
         <Button label={t('uiKit.openActions')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitActions')} />
         <Button label={t('uiKit.openDisplay')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitDisplay')} />
         <Button label={t('uiKit.openAuth')} variant="soft" fullWidth onPress={() => navigation.navigate('DevUiKitAuth')} />
+        {/* Mock: về surveyPending + xoá nháp khảo sát, giữ phiên rồi chuyển sang nhánh Onboarding. */}
+        <Button
+          label={t('uiKit.resetOnboarding')}
+          variant="secondary"
+          fullWidth
+          onPress={async () => {
+            await resetMockOnboardingForDev();
+            const me = useSession.getState().me;
+            if (!me) return;
+            useSession.getState().signIn(me, { screen: 'Survey' });
+            // Nhánh Onboarding có thể đã mount (đang ở Placement): đặt lại stack về câu 1 sau khi nhánh đổi.
+            requestAnimationFrame(() => navigation.reset({ index: 0, routes: [{ name: 'Onboarding', params: { screen: 'Survey' } }] }));
+          }}
+          testID="uikit-reset-onboarding"
+        />
       </View>
 
       <Section title={t('uiKit.mockTitle')}>
