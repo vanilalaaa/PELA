@@ -11,9 +11,13 @@ interface SessionState {
   onboardingDone: boolean;
   /** Màn mở đầu của OnboardingStack khi chưa xong (khôi phục theo trạng thái server). */
   onboardingEntry: OnboardingEntry;
-  signIn: (me: Me, onboardingEntry: OnboardingEntry) => void;
+  /** Phiên đang dùng ảnh chụp trên máy, chưa xác nhận lại với server (lỗi tạm thời khi mở app). */
+  stale: boolean;
+  signIn: (me: Me, onboardingEntry: OnboardingEntry, options?: { stale?: boolean }) => void;
   signOut: () => void;
   completeOnboarding: () => void;
+  /** Ghi lại bước onboarding hiện tại (vd. khảo sát xong → PlacementIntro) để mở lại app đúng màn. */
+  setOnboardingEntry: (entry: OnboardingEntry) => void;
 }
 
 export const useSession = create<SessionState>((set) => ({
@@ -21,7 +25,10 @@ export const useSession = create<SessionState>((set) => ({
   me: null,
   onboardingDone: false,
   onboardingEntry: { screen: 'Survey' },
-  signIn: (me, onboardingEntry) => set({ status: 'signedIn', me, onboardingEntry, onboardingDone: onboardingEntry === null }),
-  signOut: () => set({ status: 'signedOut', me: null, onboardingDone: false, onboardingEntry: { screen: 'Survey' } }),
+  stale: false,
+  signIn: (me, onboardingEntry, options) =>
+    set({ status: 'signedIn', me, onboardingEntry, onboardingDone: onboardingEntry === null, stale: options?.stale ?? false }),
+  signOut: () => set({ status: 'signedOut', me: null, onboardingDone: false, onboardingEntry: { screen: 'Survey' }, stale: false }),
   completeOnboarding: () => set({ onboardingDone: true, onboardingEntry: null }),
+  setOnboardingEntry: (entry) => set({ onboardingEntry: entry, onboardingDone: entry === null }),
 }));

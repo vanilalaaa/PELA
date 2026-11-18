@@ -421,5 +421,11 @@
       "offline": "Thiết bị đang ngoại tuyến. Hãy kết nối mạng để gửi khảo sát.",
       "review": "Xem lại câu trả lời"
     }
+  },
+  "session": {
+    "stale": {
+      "offline": "Thiết bị đang ngoại tuyến. Dữ liệu đang hiển thị là bản đã lưu trên máy và sẽ được cập nhật khi có mạng.",
+      "serverUnavailable": "Chưa kết nối được máy chủ. Dữ liệu đang hiển thị là bản đã lưu trên máy."
+    }
   }
 }

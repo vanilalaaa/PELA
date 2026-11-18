@@ -421,5 +421,11 @@
       "offline": "You're offline. Connect to the internet to send the survey.",
       "review": "Review answers"
     }
+  },
+  "session": {
+    "stale": {
+      "offline": "You're offline. You're seeing data saved on this device; it will update when you're back online.",
+      "serverUnavailable": "Can't reach the server. You're seeing data saved on this device."
+    }
   }
 }

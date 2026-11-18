@@ -12,6 +12,7 @@ import { DbCheckScreen } from '../dev/DbCheckScreen';
 import { useSession } from '../session/sessionStore';
 import { selectRootBranch } from '../session/rootBranch';
 import { useSessionBootstrap } from '../session/useSessionActions';
+import { StaleSessionBanner } from '../session/StaleSessionBanner';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabs } from './MainTabs';
 import { OnboardingNavigator } from './OnboardingNavigator';
@@ -75,6 +76,7 @@ export function RootNavigator() {
   const title = (name: keyof RootStackParamList) => ({ title: t(`nav.title.${name}`) });
 
   return (
+    <StaleSessionBanner>
     <NavigationContainer
       ref={navigationRef}
       linking={linking}
@@ -155,5 +157,6 @@ export function RootNavigator() {
         ) : null}
       </Stack.Navigator>
     </NavigationContainer>
+    </StaleSessionBanner>
   );
 }

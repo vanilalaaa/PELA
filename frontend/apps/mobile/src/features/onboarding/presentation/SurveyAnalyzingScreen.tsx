@@ -28,8 +28,12 @@ export function SurveyAnalyzingScreen() {
   const onDone = useCallback(
     (next: OnboardingNextStep, mappedLevel: CefrLevel) => {
       if (next === 'done') useSession.getState().completeOnboarding();
-      // replace: khảo sát đã gửi, không quay lại được.
-      else nav.replace('PlacementIntro', { orientedLevel: mappedLevel });
+      else {
+        // Ghi bước hiện tại vào phiên (ảnh chụp trên máy) để mở lại app vào thẳng PlacementIntro.
+        useSession.getState().setOnboardingEntry({ screen: 'PlacementIntro', orientedLevel: mappedLevel });
+        // replace: khảo sát đã gửi, không quay lại được.
+        nav.replace('PlacementIntro', { orientedLevel: mappedLevel });
+      }
     },
     [nav],
   );

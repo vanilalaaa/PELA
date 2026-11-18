@@ -23,6 +23,7 @@ import { createOnboardingUseCases } from '../features/onboarding/application/onb
 import { createMockOnboardingRepository } from '../features/onboarding/infrastructure/MockOnboardingRepository';
 import { createWatermelonSurveyDraftStore } from '../features/onboarding/infrastructure/WatermelonSurveyDraftStore';
 import { INITIAL_ONBOARDING, writeMockOnboarding } from '../core/infrastructure/mock';
+import { parseSessionSnapshot, type SessionSnapshotStore } from './session/sessionSnapshot';
 import { createPlacementUseCases } from '../features/placement/application/placementUseCases';
 import { createMockPlacementRepository } from '../features/placement/infrastructure/MockPlacementRepository';
 import { createRoadmapUseCases } from '../features/roadmap/application/roadmapUseCases';
@@ -118,6 +119,23 @@ function pick<R>(feature: FeatureName, mock: () => R, api?: (client: ApiClient['
   }
   return mock();
 }
+
+/** Ảnh chụp phiên (tài khoản + bước onboarding) trên WatermelonDB localStorage, dùng khi mở app lúc lỗi mạng. */
+const SESSION_SNAPSHOT_KEY = 'session.snapshot';
+export const sessionSnapshots: SessionSnapshotStore = {
+  async load() {
+    const db = await getDatabase();
+    return parseSessionSnapshot(await db.localStorage.get<unknown>(SESSION_SNAPSHOT_KEY));
+  },
+  async save(snapshot) {
+    const db = await getDatabase();
+    await db.localStorage.set(SESSION_SNAPSHOT_KEY, snapshot);
+  },
+  async clear() {
+    const db = await getDatabase();
+    await db.localStorage.remove(SESSION_SNAPSHOT_KEY);
+  },
+};
 
 /** Bản nháp khảo sát (ROB-1) trên WatermelonDB localStorage. */
 const surveyDrafts = createWatermelonSurveyDraftStore(getDatabase);
