@@ -1,0 +1,16 @@
+{
+  "daily": {
+    "challengeId": "b5000000-0000-4000-8000-000000000001", "type": "daily", "challengeDate": "2026-11-17", "status": "in_progress", "starsEarned": null, "generatedAt": "2026-11-17T00:00:00Z",
+    "items": [
+      { "questionId": "b6000000-0000-4000-8000-000000000001", "vocabId": "f1000000-0000-4000-8000-000000000001", "type": "mcq", "prompt": "colleague", "options": ["đồng nghiệp", "hạn chót", "cuộc họp", "văn phòng"], "source": "due_review", "position": 1 },
+      { "questionId": "b6000000-0000-4000-8000-000000000002", "vocabId": "f1000000-0000-4000-8000-000000000002", "type": "fill_blank", "prompt": "The ___ is Friday.", "options": [], "source": "weak", "position": 2 }
+    ]
+  },
+  "weekly": {
+    "challengeId": "b5000000-0000-4000-8000-000000000002", "type": "weekly", "challengeDate": "2026-11-16", "status": "in_progress", "starsEarned": null, "generatedAt": "2026-11-16T00:00:00Z",
+    "items": [
+      { "questionId": "b6000000-0000-4000-8000-000000000003", "vocabId": "f1000000-0000-4000-8000-000000000001", "type": "listen_choose", "prompt": "colleague", "options": ["colleague", "college", "collect", "collar"], "source": "due_review", "position": 1 }
+    ]
+  },
+  "result": { "challengeId": "b5000000-0000-4000-8000-000000000001", "correctCount": 9, "totalCount": 10, "starsEarned": 4 }
+}

@@ -6,7 +6,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "lint": "pnpm -r --if-present lint",
-    "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs"
+    "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "gen:api": "pnpm --filter @pela/api-contract gen:api"
   },
   "devDependencies": {
     "dependency-cruiser": "^18.7.0"

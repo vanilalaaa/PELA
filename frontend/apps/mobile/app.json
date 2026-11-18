@@ -37,7 +37,8 @@
             "./assets/fonts/Baloo2-ExtraBold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../core/ui/theme';
 import { PelaIcon, UIIcon } from '../../../core/ui/icons';
@@ -27,6 +27,7 @@ import {
   type IconCircleTone,
   type ProgressTone,
   type TagTone,
+  Screen,
 } from '../../../core/ui/components';
 import { Caption, Row, Section } from './Section';
 
@@ -57,10 +58,7 @@ export function DisplayPage() {
   ] as const;
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.bgCanvas }}
-      contentContainerStyle={{ padding: theme.spacing.screenGutter, gap: theme.spacing.xl }}
-    >
+    <Screen edges={['bottom']} contentStyle={{ gap: theme.spacing.xl }}>
       <Section title="Tag">
         <Row>
           {TAG_TONES.map((tone) => (
@@ -178,6 +176,6 @@ export function DisplayPage() {
           <BottomNav active={nav} onChange={setNav} rankBadgeCount={2} />
         </View>
       </Section>
-    </ScrollView>
+    </Screen>
   );
 }

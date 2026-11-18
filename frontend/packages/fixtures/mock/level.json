@@ -1,0 +1,27 @@
+{
+  "overview": {
+    "currentLevel": "A2",
+    "options": [
+      { "cefrLevel": "A1", "status": "completed", "requiresTest": false },
+      { "cefrLevel": "A2", "status": "unlocked", "requiresTest": false },
+      { "cefrLevel": "B1", "status": "locked", "requiresTest": true },
+      { "cefrLevel": "B2", "status": "locked", "requiresTest": true },
+      { "cefrLevel": "C1", "status": "locked", "requiresTest": true },
+      { "cefrLevel": "C2", "status": "locked", "requiresTest": true }
+    ],
+    "testConfig": { "questionCount": 20, "durationMinutes": 20, "passPercent": 80, "retryWaitDays": 7 },
+    "nextAttemptAt": null,
+    "inProgressAttemptId": null
+  },
+  "test": {
+    "attemptId": "aa000000-0000-4000-8000-000000000001",
+    "fromLevel": "A2",
+    "targetLevel": "B1",
+    "startedAt": "2026-11-17T10:00:00Z",
+    "deadlineAt": "2026-11-17T10:20:00Z",
+    "questions": [
+      { "questionId": "ab000000-0000-4000-8000-000000000001", "vocabId": "f1000000-0000-4000-8000-000000000001", "type": "mcq", "prompt": "colleague", "options": ["đồng nghiệp", "hạn chót", "cuộc họp", "văn phòng"] }
+    ]
+  },
+  "result": { "attemptId": "aa000000-0000-4000-8000-000000000001", "targetLevel": "B1", "score": 85, "passed": true, "newLevel": "B1", "nextAttemptAt": null }
+}
