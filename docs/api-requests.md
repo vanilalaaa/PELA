@@ -14,6 +14,8 @@ Trạng thái: `cần đặc tả` · `đang làm` · `đã có` · `bỏ`.
 | API-4 | Writing | Writing.Draft | Lưu / lấy / xoá bài nháp chủ động (hiện chỉ có nháp khi nộp bị 429 hết lượt) | Learner viết dở cần lưu nháp để viết tiếp, kể cả offline | cần đặc tả |
 | API-5 | Writing | BR-30 | Bỏ qua một từ gợi ý (vd. `POST /practice/writing/vocab-suggestions/{id}/dismiss` → `status = dismissed`) | Schema đã có trạng thái `dismissed` nhưng chưa có endpoint đặt trạng thái này | cần đặc tả |
 | API-19 | Lỗi `VALIDATION_FAILED` (`components.responses.ValidationFailed`) | UI-2 | Xác nhận `details[].field` dùng đúng tên thuộc tính của request body (vd. `fullName`, `email`, `password`, `confirmPassword`) | Mobile đặt lỗi dưới đúng ô theo `field`; OpenAPI chưa nói rõ quy ước tên | cần đặc tả |
+| API-20 | `POST /auth/password/forgot` (202) | Auth.Recover.Request, Auth.Recover.Expire, MNT-3 | Trả `codeExpiresIn` (giây, thời hạn mã) và `resendAfter` (giây chờ trước khi gửi lại được) | 44c không hard-code "5 phút" và không đoán thời gian chờ; hiện app bỏ câu thời hạn, chỉ báo chờ khi gặp 429 (đọc `Retry-After`) | cần đặc tả |
+| API-21 | `POST /auth/password/verify-otp` (422) | Auth.Recover.Expire, GAP-7 | Tách mã `OTP_EXPIRED` khỏi `INVALID_OTP`; đồng thời ghi rõ 429 có header `Retry-After` | Để báo "mã đã hết hạn, hãy gửi lại" khác "mã chưa đúng"; hiện app dùng một thông báo chung cho cả hai | cần đặc tả |
 
 ## Tính năng chưa có endpoint (mobile đang chạy mock)
 

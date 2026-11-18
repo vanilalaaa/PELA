@@ -16,13 +16,16 @@ export class ApiRequestError extends Error {
   readonly status: number;
   readonly code: string;
   readonly details: unknown;
+  /** Số giây phải chờ theo header `Retry-After` (thường đi kèm 429); null nếu server không gửi. */
+  readonly retryAfterSec: number | null;
 
-  constructor(status: number, code: string, message: string, details?: unknown) {
+  constructor(status: number, code: string, message: string, details?: unknown, retryAfterSec: number | null = null) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
     this.code = code;
     this.details = details;
+    this.retryAfterSec = retryAfterSec;
   }
 
   /** Lỗi mạng/5xx có thể thử lại; 4xx thì không. */
@@ -42,12 +45,31 @@ function isApiErrorBody(body: unknown): body is ApiError {
   );
 }
 
-/** Dựng ApiRequestError từ status + body đã parse; body sai khuôn thì dùng mã HTTP_<status>. */
-export function toApiRequestError(status: number, body: unknown): ApiRequestError {
+/**
+ * Đọc header `Retry-After` (RFC 9110): số giây, hoặc mốc thời gian HTTP-date. Trả số giây làm tròn lên
+ * (≥ 0); không có hoặc sai định dạng thì null.
+ */
+export function parseRetryAfter(value: string | null | undefined, nowMs: number = Date.now()): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) return Number(trimmed);
+  // HTTP-date luôn có tên thứ/tháng; chặn chuỗi như "-5" mà Date.parse hiểu thành năm.
+  if (!/[a-z]/i.test(trimmed)) return null;
+  const at = Date.parse(trimmed);
+  if (Number.isNaN(at)) return null;
+  return Math.max(0, Math.ceil((at - nowMs) / 1000));
+}
+
+/**
+ * Dựng ApiRequestError từ status + body đã parse; body sai khuôn thì dùng mã HTTP_<status>.
+ * `headers` (tuỳ chọn) để đọc `Retry-After`.
+ */
+export function toApiRequestError(status: number, body: unknown, headers?: Pick<Headers, 'get'>): ApiRequestError {
+  const retryAfterSec = parseRetryAfter(headers?.get('Retry-After'));
   if (isApiErrorBody(body)) {
-    return new ApiRequestError(status, body.error.code, body.error.message, body.error.details ?? undefined);
+    return new ApiRequestError(status, body.error.code, body.error.message, body.error.details ?? undefined, retryAfterSec);
   }
-  return new ApiRequestError(status, `HTTP_${status}`, `Request failed with status ${status}`);
+  return new ApiRequestError(status, `HTTP_${status}`, `Request failed with status ${status}`, undefined, retryAfterSec);
 }
 
 /** Lỗi ném ra khi fetch thất bại trước khi có response. */

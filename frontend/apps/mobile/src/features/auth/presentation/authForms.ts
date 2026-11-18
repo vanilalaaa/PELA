@@ -24,25 +24,39 @@ export const loginSchema = z.object({
 });
 export type LoginForm = z.infer<typeof loginSchema>;
 
+const newPassword = z
+  .string()
+  .min(1, 'required')
+  .max(PASSWORD_MAX, 'passwordTooLong')
+  .refine((p) => evaluatePassword(p).valid, 'weakPassword');
+
 export const registerSchema = z
   .object({
     fullName: z.string().trim().min(1, 'required').max(FULL_NAME_MAX, 'nameTooLong'),
     email,
-    password: z
-      .string()
-      .min(1, 'required')
-      .max(PASSWORD_MAX, 'passwordTooLong')
-      .refine((p) => evaluatePassword(p).valid, 'weakPassword'),
+    password: newPassword,
     confirmPassword: z.string().min(1, 'required'),
   })
   .refine((d) => d.password === d.confirmPassword, { path: ['confirmPassword'], message: 'passwordMismatch' });
 export type RegisterForm = z.infer<typeof registerSchema>;
+
+/** 44b: email nhận mã (POST /auth/password/forgot). */
+export const forgotSchema = z.object({ email });
+export type ForgotForm = z.infer<typeof forgotSchema>;
+
+/** 44d: mật khẩu mới theo luật như đăng ký (Auth.Recover.Reset, GAP-17). */
+export const resetSchema = z
+  .object({ password: newPassword, confirmPassword: z.string().min(1, 'required') })
+  .refine((d) => d.password === d.confirmPassword, { path: ['confirmPassword'], message: 'passwordMismatch' });
+export type ResetForm = z.infer<typeof resetSchema>;
 
 /** Lỗi API dạng tối thiểu (presentation không import infrastructure). */
 interface ApiErrorLike {
   status?: number;
   code?: string;
   details?: unknown;
+  /** Header Retry-After (giây), có khi 429. */
+  retryAfterSec?: number | null;
 }
 
 function asApiError(error: unknown): ApiErrorLike {
@@ -70,11 +84,18 @@ function validationFieldErrors(error: ApiErrorLike): FieldErrors {
 }
 
 /** Lỗi chung cho mọi form auth (mạng, quá tải, dịch vụ xác thực, không rõ). */
-export type CommonAlert = { key: 'network' } | { key: 'tooManyRequests' } | { key: 'providerUnavailable' } | { key: 'unknown' };
+export type CommonAlert =
+  | { key: 'network' }
+  | { key: 'tooManyRequests'; retryAfterSec: number | null }
+  | { key: 'providerUnavailable' }
+  | { key: 'unknown' };
 
 function commonAlert(error: ApiErrorLike): CommonAlert {
   if (error.status === 0) return { key: 'network' };
-  if (error.status === 429 || error.code === 'TOO_MANY_REQUESTS') return { key: 'tooManyRequests' };
+  if (error.status === 429 || error.code === 'TOO_MANY_REQUESTS') {
+    const sec = error.retryAfterSec;
+    return { key: 'tooManyRequests', retryAfterSec: typeof sec === 'number' && sec > 0 ? sec : null };
+  }
   if (error.status === 503 || error.code === 'AUTH_PROVIDER_UNAVAILABLE') return { key: 'providerUnavailable' };
   return { key: 'unknown' };
 }
@@ -120,4 +141,61 @@ export function mapRegisterError(raw: unknown): { alert: RegisterAlert; fieldErr
   if (e.code === 'EMAIL_ALREADY_REGISTERED') return { alert: { key: 'emailTaken' }, fieldErrors: { email: 'emailTakenHint' } };
   if (e.code === 'VALIDATION_FAILED') return { alert: { key: 'invalidInput' }, fieldErrors: validationFieldErrors(e) };
   return { alert: commonAlert(e), fieldErrors: {} };
+}
+
+export type ForgotAlert = { key: 'invalidInput' } | CommonAlert;
+
+/**
+ * 44b / "Gửi lại mã" ở 44c (POST /auth/password/forgot). API luôn trả 202 với email hợp lệ dạng,
+ * nên không có lỗi "email không tồn tại" (không tiết lộ tài khoản).
+ */
+export function mapForgotError(raw: unknown): { alert: ForgotAlert; fieldErrors: FieldErrors } {
+  const e = asApiError(raw);
+  if (e.code === 'VALIDATION_FAILED') return { alert: { key: 'invalidInput' }, fieldErrors: validationFieldErrors(e) };
+  return { alert: commonAlert(e), fieldErrors: {} };
+}
+
+export type OtpAlert = { key: 'invalidOtp' } | CommonAlert;
+
+/** 44c (POST /auth/password/verify-otp): INVALID_OTP = mã sai hoặc đã hết hạn (OpenAPI gộp một mã). */
+export function mapOtpError(raw: unknown): OtpAlert {
+  const e = asApiError(raw);
+  if (e.code === 'INVALID_OTP' || e.code === 'VALIDATION_FAILED') return { key: 'invalidOtp' };
+  return commonAlert(e);
+}
+
+export type ResetAlert = { key: 'resetExpired' } | { key: 'invalidInput' } | CommonAlert;
+
+/** 44d (POST /auth/password/reset): token hỏng/hết hạn → banner hết hạn; mật khẩu bị từ chối → lỗi dưới ô. */
+export function mapResetError(raw: unknown): { alert: ResetAlert | null; fieldErrors: FieldErrors } {
+  const e = asApiError(raw);
+  switch (e.code) {
+    case 'INVALID_RESET_TOKEN':
+      return { alert: { key: 'resetExpired' }, fieldErrors: {} };
+    case 'WEAK_PASSWORD':
+      return { alert: null, fieldErrors: { password: 'weakPassword' } };
+    case 'SAME_PASSWORD':
+      return { alert: null, fieldErrors: { password: 'samePassword' } };
+    case 'VALIDATION_FAILED': {
+      const fields = validationFieldErrors(e);
+      // Server đặt tên ô theo body: newPassword/confirmPassword.
+      const out: FieldErrors = {};
+      if (fields.newPassword || fields.password) out.password = 'invalidValue';
+      if (fields.confirmPassword) out.confirmPassword = 'invalidValue';
+      return { alert: { key: 'invalidInput' }, fieldErrors: out };
+    }
+    default:
+      return { alert: commonAlert(e), fieldErrors: {} };
+  }
+}
+
+/** Mốc hết hạn phiên đặt lại (ISO) từ `expiresIn` server trả lúc xác thực mã. */
+export function resetDeadline(nowMs: number, expiresInSec: number): string {
+  return new Date(nowMs + Math.max(0, expiresInSec) * 1000).toISOString();
+}
+
+/** Đã quá hạn đặt lại chưa; mốc sai định dạng coi như hết hạn. */
+export function isResetExpired(deadlineIso: string, nowMs: number): boolean {
+  const at = Date.parse(deadlineIso);
+  return Number.isNaN(at) || nowMs >= at;
 }

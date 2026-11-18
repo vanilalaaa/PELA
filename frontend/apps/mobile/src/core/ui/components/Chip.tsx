@@ -33,7 +33,7 @@ export function Chip({ label, tone = 'neutral', appearance = 'soft', size = 'sm'
       style={[styles.chip, { height: s.h, paddingHorizontal: s.px, gap: s.gap, borderRadius: theme.radii.full, backgroundColor: c.bg }]}
     >
       {renderIcon ? renderIcon(c.fg, s.icon) : null}
-      <Text style={[theme.typeScale.captionBold, { color: c.fg }]} numberOfLines={1}>
+      <Text style={[theme.typeScale.captionBold, styles.label, { color: c.fg }]} numberOfLines={1}>
         {label}
       </Text>
     </View>
@@ -41,5 +41,7 @@ export function Chip({ label, tone = 'neutral', appearance = 'soft', size = 'sm'
 }
 
 const styles = StyleSheet.create({
-  chip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' },
+  // Không vượt bề ngang khung; chữ dài thì co lại và cắt bằng dấu …
+  chip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', maxWidth: '100%' },
+  label: { flexShrink: 1 },
 });

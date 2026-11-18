@@ -2,12 +2,13 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Button,
   Checkbox,
   DividerText,
+  InlineAlert,
   Input,
   PasswordField,
   Screen,
@@ -23,12 +24,16 @@ import { AuthFooterLink } from './AuthFooterLink';
 import { OfflineNotice } from './OfflineNotice';
 import { useLoginViewModel } from './useLoginViewModel';
 
-/** 05 Login / 06 Login Error / 05 Tooltip (Figma 613:14609, 613:14725, 644:17884); lỗi khác theo GAP-6. */
+/**
+ * 05 Login / 06 Login Error / 05 Tooltip (Figma 613:14609, 613:14725, 644:17884); lỗi khác theo GAP-6.
+ * Sau khi đặt lại mật khẩu (44d) mở với email điền sẵn và thông báo đã đổi.
+ */
 export function LoginScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const nav = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const vm = useLoginViewModel();
+  const { params } = useRoute<RouteProp<AuthStackParamList, 'Login'>>();
+  const vm = useLoginViewModel(params?.email ?? '');
   const fieldError = (client?: string, server?: string) =>
     client ? t(`auth.validation.${client}`) : server && server !== 'highlight' ? t(`auth.validation.${server}`) : undefined;
 
@@ -39,6 +44,7 @@ export function LoginScreen() {
         {t('auth.loginScreen.title')}
       </Text>
       <OfflineNotice />
+      {params?.passwordReset && !vm.alert ? <InlineAlert tone="info" message={t('auth.reset.done')} testID="login-reset-done" /> : null}
       {vm.alert ? <AuthAlert alert={vm.alert} /> : null}
       <Controller
         control={vm.control}
@@ -101,7 +107,7 @@ export function LoginScreen() {
           </Tooltip>
         </View>
         <Pressable
-          onPress={() => nav.navigate('ForgotPassword')}
+          onPress={() => nav.navigate('ForgotPassword', { email: vm.currentEmail(), source: 'login' })}
           accessibilityRole="link"
           hitSlop={{ top: 11, bottom: 11 }}
           testID="login-forgot"

@@ -73,7 +73,12 @@
     },
     "openAuth": "Wave 3a · Auth",
     "authTitle": "UI Kit · Auth",
-    "mascotName": "PELA Bunny"
+    "mascotName": "PELA Bunny",
+    "sectionDialog": "ConfirmDialog",
+    "openDialog": "Open confirm dialog",
+    "openDialogDestructive": "Open destructive dialog",
+    "dialogTitle": "Confirm this action?",
+    "dialogBody": "Two side-by-side buttons. Android Back and tapping the backdrop both close it."
   },
   "dbCheck": {
     "title": "DB check (dev)",
@@ -284,7 +289,10 @@
       "network": "Can't reach the server. Check your connection and try again.",
       "tooManyRequests": "Too many attempts. Wait a moment and try again.",
       "providerUnavailable": "Sign-in is temporarily unavailable. Try again in a few minutes.",
-      "unknown": "Something went wrong. Try again later."
+      "unknown": "Something went wrong. Try again later.",
+      "tooManyRequestsWait": "Too many attempts. Try again in {{seconds}} seconds.",
+      "invalidOtp": "The code is incorrect or has expired. Check your email or resend the code.",
+      "resetExpired": "Your password reset session has expired. Resend the code to continue."
     },
     "validation": {
       "required": "This field is empty. Enter a value.",
@@ -295,7 +303,38 @@
       "weakPassword": "This password isn't strong enough. Meet all the conditions below.",
       "passwordMismatch": "The passwords don't match. Enter it again.",
       "invalidValue": "This value isn't valid. Check and try again.",
-      "emailTakenHint": "Use another email or log in."
+      "emailTakenHint": "Use another email or log in.",
+      "samePassword": "Your new password must differ from your current password."
+    },
+    "forgot": {
+      "bubble": "Don't worry, you can recover your account with a verification code.",
+      "title": "Recover password",
+      "subtitle": "Enter the email you registered with. A 6-digit verification code will be sent to it.",
+      "submit": "Send code"
+    },
+    "otp": {
+      "title": "Enter verification code",
+      "sentTo": "A 6-digit code has been sent to ",
+      "sentToEnd": ".",
+      "resend": "Resend code",
+      "resending": "Resending code…",
+      "resent": "A new code has been sent. Check your email.",
+      "submit": "Continue"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "verified": "Verified {{email}}",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Create a new password",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Re-enter the new password",
+      "submit": "Reset password",
+      "resendCode": "Resend code",
+      "done": "Your password has been changed. Log in with your new password.",
+      "cancelTitle": "Cancel password reset?",
+      "cancelMessage": "Your password hasn't been changed. You'll return to the login screen.",
+      "cancelConfirm": "Leave",
+      "cancelKeep": "Stay"
     }
   }
 }

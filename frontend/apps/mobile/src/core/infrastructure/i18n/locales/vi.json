@@ -73,7 +73,12 @@
     },
     "openAuth": "Đợt 3a · Màn Auth",
     "authTitle": "UI Kit · Auth",
-    "mascotName": "Thỏ PELA"
+    "mascotName": "Thỏ PELA",
+    "sectionDialog": "ConfirmDialog",
+    "openDialog": "Mở hộp xác nhận",
+    "openDialogDestructive": "Mở hộp xác nhận phá huỷ",
+    "dialogTitle": "Xác nhận thao tác?",
+    "dialogBody": "Hộp 2 nút ngang. Nút Back Android và chạm nền mờ đều đóng hộp."
   },
   "dbCheck": {
     "title": "Kiểm tra DB (dev)",
@@ -284,7 +289,10 @@
       "network": "Không kết nối được máy chủ. Hãy kiểm tra kết nối mạng và thử lại.",
       "tooManyRequests": "Bạn đã thử quá nhiều lần. Hãy đợi một lát và thử lại.",
       "providerUnavailable": "Dịch vụ đăng nhập đang tạm gián đoạn. Hãy thử lại sau ít phút.",
-      "unknown": "Đã có lỗi xảy ra. Hãy thử lại sau."
+      "unknown": "Đã có lỗi xảy ra. Hãy thử lại sau.",
+      "tooManyRequestsWait": "Bạn đã thử quá nhiều lần. Hãy thử lại sau {{seconds}} giây.",
+      "invalidOtp": "Mã chưa đúng hoặc đã hết hạn. Hãy kiểm tra email hoặc gửi lại mã.",
+      "resetExpired": "Phiên đặt lại mật khẩu đã hết hạn. Hãy gửi lại mã để tiếp tục."
     },
     "validation": {
       "required": "Không được để trống. Hãy nhập thông tin này.",
@@ -295,7 +303,38 @@
       "weakPassword": "Mật khẩu chưa đủ mạnh. Hãy đáp ứng đủ các điều kiện bên dưới.",
       "passwordMismatch": "Mật khẩu xác nhận chưa khớp. Hãy nhập lại.",
       "invalidValue": "Giá trị chưa hợp lệ. Hãy kiểm tra lại.",
-      "emailTakenHint": "Hãy dùng email khác hoặc đăng nhập."
+      "emailTakenHint": "Hãy dùng email khác hoặc đăng nhập.",
+      "samePassword": "Mật khẩu mới phải khác mật khẩu hiện tại."
+    },
+    "forgot": {
+      "bubble": "Đừng lo, bạn có thể lấy lại tài khoản bằng mã xác thực.",
+      "title": "Lấy lại mật khẩu",
+      "subtitle": "Nhập email đã đăng ký. Mã xác thực 6 số sẽ được gửi tới email này.",
+      "submit": "Gửi mã xác thực"
+    },
+    "otp": {
+      "title": "Nhập mã xác thực",
+      "sentTo": "Mã 6 số đã được gửi tới ",
+      "sentToEnd": ".",
+      "resend": "Gửi lại mã",
+      "resending": "Đang gửi lại mã…",
+      "resent": "Mã mới đã được gửi. Hãy kiểm tra email.",
+      "submit": "Tiếp tục"
+    },
+    "reset": {
+      "title": "Đặt mật khẩu mới",
+      "verified": "Đã xác thực {{email}}",
+      "newPassword": "Mật khẩu mới",
+      "newPasswordPlaceholder": "Tạo mật khẩu mới",
+      "confirm": "Xác nhận mật khẩu mới",
+      "confirmPlaceholder": "Nhập lại mật khẩu mới",
+      "submit": "Đặt lại mật khẩu",
+      "resendCode": "Gửi lại mã",
+      "done": "Mật khẩu đã được đổi. Hãy đăng nhập bằng mật khẩu mới.",
+      "cancelTitle": "Huỷ đặt lại mật khẩu?",
+      "cancelMessage": "Mật khẩu chưa được đổi. Bạn sẽ quay về màn đăng nhập.",
+      "cancelConfirm": "Thoát",
+      "cancelKeep": "Ở lại"
     }
   }
 }

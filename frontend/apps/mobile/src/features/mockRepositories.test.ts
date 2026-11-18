@@ -50,6 +50,22 @@ describe('Mock repositories', () => {
     expect(await bad).toBe('INVALID_CREDENTIALS');
   });
 
+  it('auth: quên mật khẩu — 429 kèm Retry-After, mã sai/hết hạn, hạn ngắn, token hỏng, trùng mật khẩu', async () => {
+    const repo = createMockAuthRepository();
+    await expect(run(repo.requestPasswordReset('busy@example.com'))).rejects.toMatchObject({ code: 'TOO_MANY_REQUESTS', retryAfterSec: 30 });
+    await expect(run(repo.requestPasswordReset('learner@example.com'))).resolves.toBeUndefined();
+    await expect(run(repo.verifyPasswordOtp('learner@example.com', '000000'))).rejects.toMatchObject({ code: 'INVALID_OTP' });
+    await expect(run(repo.verifyPasswordOtp('expired@example.com', '123456'))).rejects.toMatchObject({ code: 'INVALID_OTP' });
+    await expect(run(repo.verifyPasswordOtp('learner@example.com', '123456'))).resolves.toMatchObject({ expiresInSec: 600 });
+    await expect(run(repo.verifyPasswordOtp('shortreset@example.com', '123456'))).resolves.toMatchObject({ expiresInSec: 20 });
+    const broken = await run(repo.verifyPasswordOtp('resetfail@example.com', '123456'));
+    const reset = (resetToken: string, newPassword: string) =>
+      run(repo.resetPassword({ resetToken, newPassword, confirmPassword: newPassword }));
+    await expect(reset(broken.resetToken, 'Abcdef12')).rejects.toMatchObject({ status: 401, code: 'INVALID_RESET_TOKEN' });
+    await expect(reset('token', 'SamePass1')).rejects.toMatchObject({ code: 'SAME_PASSWORD' });
+    await expect(reset('token', 'Abcdef12')).resolves.toBeUndefined();
+  });
+
   it('onboarding: lưu trạng thái qua các lần mở app (surveyPending → placementPending → done)', async () => {
     const store = createMemoryKeyValueStore();
     const repo = createMockOnboardingRepository(store);

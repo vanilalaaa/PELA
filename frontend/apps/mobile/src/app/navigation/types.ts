@@ -9,12 +9,15 @@ import type { CefrLevel } from '../../domain/types';
 /** AuthStack (UC-01): 01 Welcome, 02/03 Register, 04 Verify Email, 05/06 Login, 44b–44d quên mật khẩu. */
 export type AuthStackParamList = {
   Welcome: undefined;
-  Login: undefined;
+  /** `email` điền sẵn; `passwordReset` = vừa đặt lại mật khẩu xong (hiện thông báo). */
+  Login: { email?: string; passwordReset?: boolean } | undefined;
   Register: { fullName?: string } | undefined;
   VerifyEmail: { email: string; fullName?: string };
-  ForgotPassword: { email?: string } | undefined;
+  /** `source`: mở từ Login (nhập email) hay Cài đặt (email đã biết, U12 — chưa dựng). */
+  ForgotPassword: { email?: string; source: 'login' | 'settings' };
   ForgotPasswordOtp: { email: string };
-  ResetPassword: { resetToken: string };
+  /** `expiresAt`: ISO, hạn phiên đặt lại tính từ `expiresIn` server trả. */
+  ResetPassword: { resetToken: string; email: string; expiresAt: string };
 };
 
 /** OnboardingStack (UC-02, UC-03): 09.1–09.5 Survey, 10 Analyzing, 11–15 Placement. */

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Middleware } from '@pela/api-contract';
-import { ApiRequestError, toApiRequestError, toNetworkError } from './ApiRequestError';
+import { ApiRequestError, parseRetryAfter, toApiRequestError, toNetworkError } from './ApiRequestError';
 import { createAuthMiddleware, isPublicAuthPath } from './authMiddleware';
 import { resolveApiBaseUrl } from './config';
 import { createRefreshCoordinator } from './refreshCoordinator';
@@ -155,5 +155,34 @@ describe('authMiddleware', () => {
   );
   it('/auth/logout cần token (không công khai)', () => {
     expect(isPublicAuthPath('/auth/logout')).toBe(false);
+  });
+});
+
+describe('Retry-After', () => {
+  const now = Date.parse('2026-11-18T10:00:00Z');
+
+  it('đọc số giây', () => {
+    expect(parseRetryAfter('30', now)).toBe(30);
+    expect(parseRetryAfter(' 0 ', now)).toBe(0);
+  });
+
+  it('đọc HTTP-date, làm tròn lên và không âm', () => {
+    expect(parseRetryAfter('Wed, 18 Nov 2026 10:00:45 GMT', now)).toBe(45);
+    expect(parseRetryAfter('Wed, 18 Nov 2026 09:59:00 GMT', now)).toBe(0);
+  });
+
+  it('thiếu hoặc sai định dạng thì null', () => {
+    expect(parseRetryAfter(null, now)).toBeNull();
+    expect(parseRetryAfter('', now)).toBeNull();
+    expect(parseRetryAfter('soon', now)).toBeNull();
+    expect(parseRetryAfter('-5', now)).toBeNull();
+  });
+
+  it('toApiRequestError gắn retryAfterSec từ header', () => {
+    const body = { error: { code: 'TOO_MANY_REQUESTS', message: 'Slow down' } };
+    const e = toApiRequestError(429, body, new Headers({ 'Retry-After': '12' }));
+    expect(e.code).toBe('TOO_MANY_REQUESTS');
+    expect(e.retryAfterSec).toBe(12);
+    expect(toApiRequestError(429, body).retryAfterSec).toBeNull();
   });
 });

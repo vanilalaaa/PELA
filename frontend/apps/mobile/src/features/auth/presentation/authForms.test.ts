@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { loginSchema, mapLoginError, mapRegisterError, registerSchema } from './authForms';
+import {
+  forgotSchema,
+  isResetExpired,
+  loginSchema,
+  mapForgotError,
+  mapLoginError,
+  mapOtpError,
+  mapRegisterError,
+  mapResetError,
+  registerSchema,
+  resetDeadline,
+  resetSchema,
+} from './authForms';
 
 const VALID = { fullName: 'Trần Thuỳ Linh', email: 'linh@pela.vn', password: 'Abcdef12', confirmPassword: 'Abcdef12' };
 /** Lỗi đầu tiên của mỗi ô (giống zodResolver: mỗi ô hiện một lỗi). */
@@ -89,5 +101,61 @@ describe('mapRegisterError (1.0.E1, BR-1)', () => {
   });
   it('lỗi khác dùng lỗi chung', () => {
     expect(mapRegisterError({ status: 0 }).alert.key).toBe('network');
+  });
+});
+
+describe('quên mật khẩu (UC-01 2.0.A2, Auth.Recover)', () => {
+  it('forgotSchema: email bắt buộc và đúng dạng', () => {
+    expect(forgotSchema.safeParse({ email: ' linh@pela.vn ' }).success).toBe(true);
+    expect(issues(forgotSchema.safeParse({ email: '' })).email).toBe('required');
+    expect(issues(forgotSchema.safeParse({ email: 'abc' })).email).toBe('invalidEmail');
+  });
+
+  it('resetSchema: luật mạnh như đăng ký, khớp xác nhận', () => {
+    expect(resetSchema.safeParse({ password: 'Abcdef12', confirmPassword: 'Abcdef12' }).success).toBe(true);
+    expect(issues(resetSchema.safeParse({ password: 'abcdefg1', confirmPassword: 'abcdefg1' })).password).toBe('weakPassword');
+    expect(issues(resetSchema.safeParse({ password: 'Abcdef12', confirmPassword: 'Abcdef13' })).confirmPassword).toBe('passwordMismatch');
+    expect(issues(resetSchema.safeParse({ password: '', confirmPassword: '' }))).toMatchObject({ password: 'required', confirmPassword: 'required' });
+  });
+
+  it('429 mang Retry-After thành số giây chờ; không có thì null', () => {
+    expect(mapForgotError({ status: 429, code: 'TOO_MANY_REQUESTS', retryAfterSec: 30 }).alert).toEqual({ key: 'tooManyRequests', retryAfterSec: 30 });
+    expect(mapForgotError({ status: 429, code: 'TOO_MANY_REQUESTS' }).alert).toEqual({ key: 'tooManyRequests', retryAfterSec: null });
+    expect(mapForgotError({ status: 429, code: 'TOO_MANY_REQUESTS', retryAfterSec: 0 }).alert).toEqual({ key: 'tooManyRequests', retryAfterSec: null });
+  });
+
+  it('mapForgotError: lỗi dạng ô và lỗi chung', () => {
+    expect(mapForgotError({ status: 422, code: 'VALIDATION_FAILED', details: [{ field: 'email', message: 'x' }] })).toEqual({
+      alert: { key: 'invalidInput' },
+      fieldErrors: { email: 'invalidValue' },
+    });
+    expect(mapForgotError({ status: 0, code: 'NETWORK_ERROR' }).alert.key).toBe('network');
+    expect(mapForgotError({ status: 503, code: 'AUTH_PROVIDER_UNAVAILABLE' }).alert.key).toBe('providerUnavailable');
+  });
+
+  it('mapOtpError: INVALID_OTP (sai hoặc hết hạn) → invalidOtp', () => {
+    expect(mapOtpError({ status: 422, code: 'INVALID_OTP' })).toEqual({ key: 'invalidOtp' });
+    expect(mapOtpError({ status: 0, code: 'TIMEOUT' }).key).toBe('network');
+    expect(mapOtpError(new Error('x')).key).toBe('unknown');
+  });
+
+  it('mapResetError: token hỏng, mật khẩu bị từ chối, lỗi ô', () => {
+    expect(mapResetError({ status: 401, code: 'INVALID_RESET_TOKEN' })).toEqual({ alert: { key: 'resetExpired' }, fieldErrors: {} });
+    expect(mapResetError({ status: 422, code: 'SAME_PASSWORD' })).toEqual({ alert: null, fieldErrors: { password: 'samePassword' } });
+    expect(mapResetError({ status: 422, code: 'WEAK_PASSWORD' })).toEqual({ alert: null, fieldErrors: { password: 'weakPassword' } });
+    expect(
+      mapResetError({ status: 422, code: 'VALIDATION_FAILED', details: [{ field: 'newPassword' }, { field: 'confirmPassword' }] }),
+    ).toEqual({ alert: { key: 'invalidInput' }, fieldErrors: { password: 'invalidValue', confirmPassword: 'invalidValue' } });
+    expect(mapResetError({ status: 503, code: 'AUTH_PROVIDER_UNAVAILABLE' }).alert?.key).toBe('providerUnavailable');
+  });
+
+  it('hạn phiên đặt lại', () => {
+    const now = Date.parse('2026-11-18T10:00:00Z');
+    const deadline = resetDeadline(now, 600);
+    expect(deadline).toBe('2026-11-18T10:10:00.000Z');
+    expect(isResetExpired(deadline, now + 599_999)).toBe(false);
+    expect(isResetExpired(deadline, now + 600_000)).toBe(true);
+    expect(isResetExpired('not-a-date', now)).toBe(true);
+    expect(resetDeadline(now, -5)).toBe('2026-11-18T10:00:00.000Z');
   });
 });

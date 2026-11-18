@@ -31,7 +31,7 @@ export function createRefreshRequest(baseUrl: string, fetchFn: typeof fetch = fe
       throw toNetworkError(cause);
     }
     const body: unknown = await response.json().catch(() => null);
-    if (!response.ok) throw toApiRequestError(response.status, body);
+    if (!response.ok) throw toApiRequestError(response.status, body, response.headers);
     const tokens = body as Schemas['TokenResponse'];
     return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
   };
@@ -55,7 +55,7 @@ export function createApiClient({ baseUrl, tokenStore, onSessionExpired, fetchFn
  * Dùng trong Api<Feature>Repository: `unwrap(await client.GET(...))`.
  */
 export function unwrap<T>(result: { data?: T; error?: unknown; response: Response }): T {
-  if (result.error !== undefined || !result.response.ok) throw toApiRequestError(result.response.status, result.error);
+  if (result.error !== undefined || !result.response.ok) throw toApiRequestError(result.response.status, result.error, result.response.headers);
   return result.data as T;
 }
 

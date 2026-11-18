@@ -12,23 +12,6 @@ const DEV = __DEV__
   ? [{ label: 'devUiKit', variant: 'ghost' as const, run: (n: RootNav) => n.navigate('DevUiKit') }]
   : [];
 
-// ---- AuthStack
-export const ForgotPasswordScreen = placeholderScreen({
-  title: 'ForgotPassword',
-  figma: '44b · GAP-5',
-  actions: [{ label: 'next', run: (n) => n.navigate('Auth', { screen: 'ForgotPasswordOtp', params: { email: 'learner@example.com' } }) }],
-});
-export const ForgotPasswordOtpScreen = placeholderScreen({
-  title: 'ForgotPasswordOtp',
-  figma: '44c · GAP-7',
-  actions: [{ label: 'next', run: (n) => n.navigate('Auth', { screen: 'ResetPassword', params: { resetToken: DEMO } }) }],
-});
-export const ResetPasswordScreen = placeholderScreen({
-  title: 'ResetPassword',
-  figma: '44d',
-  actions: [{ label: 'toLogin', run: (n) => n.navigate('Auth', { screen: 'Login' }) }],
-});
-
 // ---- MainTabs
 export const HomeScreen = placeholderScreen({
   title: 'Home',

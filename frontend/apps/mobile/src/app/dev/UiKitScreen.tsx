@@ -3,7 +3,8 @@ import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../core/ui/theme';
-import { BottomSheet, Button, Chip, Screen } from '../../core/ui/components';
+import { BottomSheet, Button, Chip, ConfirmDialog, Screen } from '../../core/ui/components';
+import { UIIcon } from '../../core/ui/icons';
 import { useDevMockSettings, type MockMode } from '../../core/infrastructure/mock';
 import { useQuery } from '@tanstack/react-query';
 import { resolvedDataSources } from '../container';
@@ -22,6 +23,7 @@ export function UiKitScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [dialog, setDialog] = useState<'none' | 'default' | 'destructive'>('none');
   const navigation = useNavigation();
   const mockMode = useDevMockSettings((st) => st.mode);
   const setMockMode = useDevMockSettings((st) => st.setMode);
@@ -92,6 +94,23 @@ export function UiKitScreen() {
           </Text>
           <Button label={t('common.close')} variant="ghost" onPress={() => setSheetVisible(false)} />
         </BottomSheet>
+      </Section>
+
+      <Section title={t('uiKit.sectionDialog')}>
+        <Button label={t('uiKit.openDialog')} onPress={() => setDialog('default')} />
+        <Button label={t('uiKit.openDialogDestructive')} variant="warn" onPress={() => setDialog('destructive')} />
+        <ConfirmDialog
+          visible={dialog !== 'none'}
+          destructive={dialog === 'destructive'}
+          title={t('uiKit.dialogTitle')}
+          message={t('uiKit.dialogBody')}
+          cancelLabel={t('common.cancel')}
+          confirmLabel={t('common.ok')}
+          onCancel={() => setDialog('none')}
+          onConfirm={() => setDialog('none')}
+          renderIcon={(color, size) => <UIIcon name={dialog === 'destructive' ? 'Close' : 'Check'} size={size} color={color} />}
+          testID="uikit-dialog"
+        />
       </Section>
     </Screen>
   );

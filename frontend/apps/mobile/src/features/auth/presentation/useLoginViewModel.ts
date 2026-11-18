@@ -9,9 +9,9 @@ import { loginSchema, mapLoginError, type FieldErrors, type LoginAlert, type Log
  * ViewModel 05 Login: form (react-hook-form + zod), "Ghi nhớ đăng nhập" (mặc định bật, Auth.Login.Remember),
  * gọi đăng nhập và ánh xạ lỗi server thành banner + lỗi ô. Đăng nhập xong RootNavigator tự chuyển nhánh.
  */
-export function useLoginViewModel() {
+export function useLoginViewModel(initialEmail = '') {
   const { login } = useSessionActions();
-  const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '' } });
+  const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: initialEmail, password: '' } });
   const [remember, setRemember] = useState(true);
   const [alert, setAlert] = useState<LoginAlert | null>(null);
   const [serverFieldErrors, setServerFieldErrors] = useState<FieldErrors>({});
@@ -37,6 +37,8 @@ export function useLoginViewModel() {
 
   return {
     control: form.control,
+    /** Email đang gõ (điền sẵn cho 44b). */
+    currentEmail: () => form.getValues('email').trim(),
     /** Chuyển focus sang ô khác; dời sang khung hình sau để Android không đóng bàn phím khi Enter. */
     focusField: (name: Parameters<typeof form.setFocus>[0]) => requestAnimationFrame(() => form.setFocus(name)),
     submitting: form.formState.isSubmitting,
