@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Q, type Database } from '@nozbe/watermelondb';
 import { useTheme } from '../../core/ui/theme';
-import { Button } from '../../core/ui/components';
+import { Button, Screen } from '../../core/ui/components';
 import type { ReviewCard } from '../../core/infrastructure/database';
 import { getDatabase } from '../container';
 
@@ -134,10 +134,7 @@ export function DbCheckScreen() {
   const passed = rows !== null && rows.every((row) => row.ok);
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.background }}
-      contentContainerStyle={{ padding: theme.spacing.md, gap: theme.spacing.md }}
-    >
+    <Screen edges={['bottom']} contentStyle={{ gap: theme.spacing.md }}>
       <Text style={{ color: theme.colors.textSecondary }}>{t('dbCheck.subtitle')}</Text>
 
       <Button label={t('dbCheck.write')} onPress={write} />
@@ -146,29 +143,29 @@ export function DbCheckScreen() {
 
       {status.kind === 'written' ? <Text style={{ color: theme.colors.textPrimary }}>{t('dbCheck.written')}</Text> : null}
       {status.kind === 'deleted' ? <Text style={{ color: theme.colors.textPrimary }}>{t('dbCheck.deleted')}</Text> : null}
-      {status.kind === 'missing' ? <Text style={{ color: theme.colors.danger }}>{t('dbCheck.missing')}</Text> : null}
+      {status.kind === 'missing' ? <Text style={{ color: theme.colors.warnFg }}>{t('dbCheck.missing')}</Text> : null}
       {status.kind === 'error' ? (
-        <Text style={{ color: theme.colors.danger }}>{t('dbCheck.error', { message: status.message })}</Text>
+        <Text style={{ color: theme.colors.warnFg }}>{t('dbCheck.error', { message: status.message })}</Text>
       ) : null}
 
       {rows ? (
         <View style={{ gap: theme.spacing.xs }}>
           <Text
             style={{
-              color: passed ? theme.colors.success : theme.colors.danger,
-              fontSize: theme.typography.size.lg,
+              color: passed ? theme.colors.successFg : theme.colors.warnFg,
+              ...theme.typeScale.h3,
               fontWeight: '700',
             }}
           >
             {passed ? t('dbCheck.passed') : t('dbCheck.failed')}
           </Text>
           {rows.map((row) => (
-            <Text key={row.field} style={{ color: row.ok ? theme.colors.textPrimary : theme.colors.danger }}>
+            <Text key={row.field} style={{ color: row.ok ? theme.colors.textPrimary : theme.colors.warnFg }}>
               {`${row.ok ? '✓' : '✗'} ${row.field} = ${row.actual}`}
             </Text>
           ))}
         </View>
       ) : null}
-    </ScrollView>
+    </Screen>
   );
 }

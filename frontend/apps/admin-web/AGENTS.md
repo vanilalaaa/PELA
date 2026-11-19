@@ -25,6 +25,7 @@ pnpm --filter admin-web typecheck
   - `presentation/`: page, component riêng của feature, hook ViewModel (TanStack Query gọi use case). Không import infrastructure.
 - `src/domain/`: tuỳ chọn, chỉ cho logic riêng của Admin; logic dùng chung ở `frontend/packages/domain`.
 - Fixture dùng chung: `frontend/packages/fixtures`.
+- Gọi API bằng `createPelaClient` của `@pela/api-contract` (dùng chung với mobile) trong Api repository; xem [README api-contract](../../packages/api-contract/README.md).
 
 ## Quy tắc UI
 

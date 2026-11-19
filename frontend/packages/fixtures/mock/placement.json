@@ -1,0 +1,127 @@
+{
+  "questions": [
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000001",
+      "kind": "fill_blank",
+      "text": "She ___ to school every day.",
+      "options": [
+        "go",
+        "goes",
+        "going",
+        "gone"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000002",
+      "kind": "meaning",
+      "text": "grateful",
+      "options": [
+        "thankful",
+        "angry",
+        "tired",
+        "careful"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000003",
+      "kind": "fill_blank",
+      "text": "If I ___ more time, I would travel.",
+      "options": [
+        "have",
+        "had",
+        "will have",
+        "having"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000004",
+      "kind": "meaning",
+      "text": "enormous",
+      "options": [
+        "tiny",
+        "huge",
+        "quiet",
+        "late"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000005",
+      "kind": "fill_blank",
+      "text": "They have lived here ___ 2015.",
+      "options": [
+        "for",
+        "since",
+        "during",
+        "from"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000006",
+      "kind": "meaning",
+      "text": "reluctant",
+      "options": [
+        "unwilling",
+        "eager",
+        "angry",
+        "lucky"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000007",
+      "kind": "fill_blank",
+      "text": "The report ___ by the manager yesterday.",
+      "options": [
+        "was written",
+        "wrote",
+        "has write",
+        "writing"
+      ],
+      "correctOptionIndex": 0
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000008",
+      "kind": "meaning",
+      "text": "scarce",
+      "options": [
+        "plenty",
+        "rare",
+        "bright",
+        "cheap"
+      ],
+      "correctOptionIndex": 1
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000009",
+      "kind": "fill_blank",
+      "text": "I wish I ___ harder for the exam.",
+      "options": [
+        "study",
+        "studied",
+        "had studied",
+        "will study"
+      ],
+      "correctOptionIndex": 2
+    },
+    {
+      "questionId": "c1000000-0000-4000-8000-000000000010",
+      "kind": "meaning",
+      "text": "diligent",
+      "options": [
+        "lazy",
+        "hard-working",
+        "noisy",
+        "early"
+      ],
+      "correctOptionIndex": 1
+    }
+  ],
+  "durationSec": 1200,
+  "shortDurationSec": 75,
+  "shortDurationForOrientedLevel": "C2"
+}

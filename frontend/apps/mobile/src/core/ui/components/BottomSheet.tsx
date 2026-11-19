@@ -35,7 +35,7 @@ export function BottomSheet({ visible, onClose, children, style }: BottomSheetPr
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <Animated.View
-        style={[styles.backdrop, { backgroundColor: theme.colors.overlay, opacity: backdropOpacity }]}
+        style={[styles.backdrop, { backgroundColor: theme.colors.scrim, opacity: backdropOpacity }]}
       >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
       </Animated.View>
@@ -43,9 +43,9 @@ export function BottomSheet({ visible, onClose, children, style }: BottomSheetPr
         style={[
           styles.sheet,
           {
-            backgroundColor: theme.colors.background,
-            borderTopLeftRadius: theme.radius.sheet, // radius/sheet (Figma) = 28, không phải radius.lg
-            borderTopRightRadius: theme.radius.sheet,
+            backgroundColor: theme.colors.bgCanvas,
+            borderTopLeftRadius: theme.radii.sheet, // radius/sheet (Figma) = 28
+            borderTopRightRadius: theme.radii.sheet,
             padding: theme.spacing.lg,
             transform: [{ translateY }],
           },
@@ -58,7 +58,7 @@ export function BottomSheet({ visible, onClose, children, style }: BottomSheetPr
             width: 36,
             height: 4,
             borderRadius: 2,
-            backgroundColor: theme.colors.border,
+            backgroundColor: theme.colors.borderDefault,
             marginBottom: theme.spacing.md,
           }}
         />

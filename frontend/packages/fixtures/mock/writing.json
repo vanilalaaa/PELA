@@ -1,0 +1,46 @@
+{
+  "prompts": [
+    { "questionId": "5b000000-0000-4000-8000-000000000001", "text": "Write an email to a friend about your last weekend.", "taskType": "email", "minWords": 50, "maxWords": 120, "done": false },
+    { "questionId": "5b000000-0000-4000-8000-000000000002", "text": "Describe your favourite place in your city.", "taskType": "paragraph", "minWords": 60, "maxWords": 150, "done": true }
+  ],
+  "generated": {
+    "promptSource": "ai_generated",
+    "ragCacheId": "7c000000-0000-4000-8000-000000000001",
+    "questionId": null,
+    "promptText": "Write a short paragraph about a hobby you would like to try.",
+    "taskType": "paragraph",
+    "minWords": 50,
+    "maxWords": 150,
+    "cacheHit": false,
+    "fallbackReason": null
+  },
+  "submission": {
+    "submissionId": "8d000000-0000-4000-8000-000000000001",
+    "status": "graded",
+    "promptSource": "bank",
+    "promptText": "Write an email to a friend about your last weekend.",
+    "submittedText": "Hi Lan, last weekend I go to the beach with my family. It was very fun.",
+    "wordCount": 15,
+    "score": 72,
+    "starsEarned": 3,
+    "criteria": { "task_achievement": 19, "coherence": 18, "vocabulary": 17, "grammar": 18 },
+    "comment": "Bài viết rõ ý, cần chú ý thì của động từ.",
+    "rewrites": ["Hi Lan, last weekend I went to the beach with my family. It was a lot of fun."],
+    "issues": [
+      { "issueId": "a1000000-0000-4000-8000-000000000001", "sentenceIndex": 0, "startOffset": 22, "endOffset": 24, "original": "go", "suggestion": "went", "category": "grammar", "severity": "error", "explanationVi": "Dùng quá khứ đơn cho hành động đã xảy ra." }
+    ],
+    "vocabSuggestions": [
+      { "suggestionId": "b2000000-0000-4000-8000-000000000001", "learnerForm": "very fun", "word": "enjoyable", "reason": "better_alternative", "meaningVi": "thú vị, dễ chịu", "cefrLevel": "B1", "status": "suggested" }
+    ],
+    "submittedAt": "2026-11-16T12:00:00Z",
+    "gradedAt": "2026-11-16T12:00:20Z",
+    "nextRetryAt": null
+  },
+  "history": {
+    "items": [
+      { "submissionId": "8d000000-0000-4000-8000-000000000001", "status": "graded", "promptSource": "bank", "promptText": "Write an email to a friend about your last weekend.", "wordCount": 15, "score": 72, "starsEarned": 3, "submittedAt": "2026-11-16T12:00:00Z", "gradedAt": "2026-11-16T12:00:20Z" }
+    ],
+    "scoreTrend": [{ "submissionId": "8d000000-0000-4000-8000-000000000001", "gradedAt": "2026-11-16T12:00:20Z", "score": 72 }],
+    "topIssueCategories": [{ "category": "grammar", "count": 1 }]
+  }
+}

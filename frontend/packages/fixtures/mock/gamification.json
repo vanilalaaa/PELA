@@ -1,0 +1,18 @@
+{
+  "stats": { "starTotal": 1250, "currentStreak": 12 },
+  "streak": { "currentStreak": 12, "longestStreak": 20, "restoresUsed": 1, "lastActiveDate": "2026-11-16", "activeDates": ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16"] },
+  "badges": [
+    { "badgeId": "e7000000-0000-4000-8000-000000000001", "name": "Bước đầu tiên", "description": "Hoàn thành bài học đầu tiên", "iconUrl": "https://example.com/mock/badge-first.png", "category": "first_steps", "tier": 1, "threshold": 1, "progress": 1, "earnedAt": "2026-10-01T08:00:00Z", "isDisplayed": true },
+    { "badgeId": "e7000000-0000-4000-8000-000000000002", "name": "Chuỗi 7 ngày", "description": "Học 7 ngày liên tiếp", "iconUrl": "https://example.com/mock/badge-streak7.png", "category": "streak", "tier": 1, "threshold": 7, "progress": 7, "earnedAt": "2026-10-08T08:00:00Z", "isDisplayed": true },
+    { "badgeId": "e7000000-0000-4000-8000-000000000003", "name": "Chuỗi 30 ngày", "description": "Học 30 ngày liên tiếp", "iconUrl": "https://example.com/mock/badge-streak30.png", "category": "streak", "tier": 2, "threshold": 30, "progress": 12, "earnedAt": null, "isDisplayed": false }
+  ],
+  "leaderboard": {
+    "period": "weekly", "periodStart": "2026-11-16", "computedAt": "2026-11-17T00:00:00Z",
+    "entries": [
+      { "userId": "6f1c2a3b-0000-4000-8000-000000000003", "fullName": "Lê Quốc Huy", "avatarUrl": null, "starTotal": 64, "rank": 1, "isMe": false },
+      { "userId": "6f1c2a3b-0000-4000-8000-000000000001", "fullName": "Nguyễn Minh Anh", "avatarUrl": null, "starTotal": 52, "rank": 2, "isMe": true },
+      { "userId": "6f1c2a3b-0000-4000-8000-000000000002", "fullName": "Trần Bảo Lan", "avatarUrl": null, "starTotal": 40, "rank": 3, "isMe": false }
+    ],
+    "me": { "userId": "6f1c2a3b-0000-4000-8000-000000000001", "fullName": "Nguyễn Minh Anh", "avatarUrl": null, "starTotal": 52, "rank": 2, "isMe": true }
+  }
+}

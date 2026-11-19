@@ -82,6 +82,7 @@ Các lựa chọn công nghệ ở mục 1 (React Navigation, WatermelonDB, Jdbc
 - userId của người gọi: tham số `@CurrentUserId UUID userId` trong controller (lấy từ claim `sub` của JWT).
 - Thời gian và id do server sinh: inject `ClockPort` / `IdGeneratorPort`; không gọi `Instant.now()`, `LocalDate.now()`, `UUID.randomUUID()` trong domain/application (ArchUnit chặn).
 - Đổi API → cập nhật `docs/api/openapi.yaml` trong cùng PR.
+- Sau khi sửa `openapi.yaml`, chạy `pnpm gen:api` trong `frontend/` và commit cả `frontend/packages/api-contract/src/schema.d.ts` (xem [README](frontend/packages/api-contract/README.md)).
 - Logic dùng chung client/server (SM-2, Star, sinh câu hỏi, đếm từ) phải có test vector trong `frontend/packages/fixtures`, dùng cho cả Vitest và JUnit.
 
 ## 9. Git

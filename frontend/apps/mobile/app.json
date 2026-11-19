@@ -7,9 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "vn.edu.uit.pela"
     },
     "android": {
+      "package": "vn.edu.uit.pela",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -29,6 +31,7 @@
         "expo-font",
         {
           "fonts": [
+            "./assets/fonts/Nunito-Regular.ttf",
             "./assets/fonts/Nunito-SemiBold.ttf",
             "./assets/fonts/Nunito-Bold.ttf",
             "./assets/fonts/Nunito-ExtraBold.ttf",
@@ -36,7 +39,8 @@
             "./assets/fonts/Baloo2-ExtraBold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

@@ -1,13 +1,31 @@
 import { createContext, useContext } from 'react';
-import { colorTokens, radius, shadows, spacing, textStyles, typography, type ColorTokens } from './tokens';
+import {
+  colorTokens,
+  elevation,
+  componentColors,
+  motion,
+  radii,
+  rankTiers,
+  rings,
+  spacing,
+  tones,
+  typeScale,
+  typography,
+  type ColorTokens,
+} from './tokens';
 
 export interface Theme {
   colors: ColorTokens;
+  tones: typeof tones;
+  rankTiers: typeof rankTiers;
   spacing: typeof spacing;
-  radius: typeof radius;
+  radii: typeof radii;
   typography: typeof typography;
-  textStyles: typeof textStyles;
-  shadows: typeof shadows;
+  typeScale: typeof typeScale;
+  elevation: typeof elevation;
+  rings: typeof rings;
+  componentColors: typeof componentColors;
+  motion: typeof motion;
 }
 
 /**
@@ -16,16 +34,21 @@ export interface Theme {
  */
 export const theme: Theme = {
   colors: colorTokens,
+  tones,
+  rankTiers,
   spacing,
-  radius,
+  radii,
   typography,
-  textStyles,
-  shadows,
+  typeScale,
+  elevation,
+  rings,
+  componentColors,
+  motion,
 };
 
 export const ThemeContext = createContext<Theme>(theme);
 
-/** Lấy theme hiện tại (màu + spacing + radius + typography + textStyles + shadows). */
+/** Lấy theme hiện tại (màu, tone, spacing, radii, typography, typeScale, elevation, motion). */
 export function useTheme(): Theme {
   return useContext(ThemeContext);
 }

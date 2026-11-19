@@ -1,0 +1,15 @@
+{
+  "lesson": {
+    "lessonId": "e1000000-0000-4000-8000-000000000002",
+    "title": "At work",
+    "newWords": [
+      { "vocabId": "f1000000-0000-4000-8000-000000000001", "word": "colleague", "meaning": "đồng nghiệp", "partOfSpeech": "noun", "ipa": "/ˈkɒliːɡ/", "exampleSentence": "My colleague helps me a lot.", "exampleMeaning": "Đồng nghiệp giúp tôi rất nhiều.", "audioUrl": null, "imageUrl": null, "cefrLevel": "A2" },
+      { "vocabId": "f1000000-0000-4000-8000-000000000002", "word": "deadline", "meaning": "hạn chót", "partOfSpeech": "noun", "ipa": "/ˈdedlaɪn/", "exampleSentence": "The deadline is Friday.", "exampleMeaning": "Hạn chót là thứ Sáu.", "audioUrl": null, "imageUrl": null, "cefrLevel": "A2" }
+    ],
+    "questions": [
+      { "questionId": "f2000000-0000-4000-8000-000000000001", "vocabId": "f1000000-0000-4000-8000-000000000001", "type": "mcq", "prompt": "colleague", "options": ["đồng nghiệp", "hạn chót", "cuộc họp", "văn phòng"] },
+      { "questionId": "f2000000-0000-4000-8000-000000000002", "vocabId": "f1000000-0000-4000-8000-000000000002", "type": "spelling", "prompt": "hạn chót", "options": [] }
+    ]
+  },
+  "result": { "lessonId": "e1000000-0000-4000-8000-000000000002", "correctCount": 7, "totalCount": 8, "starsEarned": 4, "starsAdded": 4 }
+}
