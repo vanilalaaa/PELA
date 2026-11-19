@@ -1,0 +1,8 @@
+clip_code,title,topic,cefr_level,row_type,speaker,voice,text_en,text_vi,question_type,option_a,option_b,option_c,option_d,answer,explanation
+DL-A1-01,At the bakery,Daily life,A1,line,Linh,Kore,"Good morning! Can I have two croissants, please?","Chào buổi sáng! Cho tôi hai cái bánh sừng bò nhé?",,,,,,,
+DL-A1-01,,,,line,Baker,Puck,"Sure. That's four dollars.","Được ạ. Tổng cộng bốn đô la.",,,,,,,
+DL-A1-01,,,,line,Linh,Kore,"Here you are. Thank you!","Gửi anh. Cảm ơn anh!",,,,,,,
+DL-A1-01,,,,question,,,How many croissants does Linh want?,Linh muốn mấy cái bánh sừng bò?,dialogue_question,One,Two,Three,Four,B,"Linh says ""two croissants, please""."
+DL-A1-01,,,,question,,,"Choose the word you hear: ""That's ___ dollars.""","Chọn từ bạn nghe được: ""Tổng cộng ___ đô la.""",fill_blank,two,three,four,five,C,"The baker says ""That's four dollars."""
+DL-A1-02,My morning,Daily life,A1,line,Nam,Charon,"I get up at six o'clock. Then I have breakfast with my family.","Tôi thức dậy lúc sáu giờ. Sau đó tôi ăn sáng cùng gia đình.",,,,,,,
+DL-A1-02,,,,question,,,Which word do you hear?,Bạn nghe thấy từ nào?,choose_heard,breakfast,lunch,dinner,snack,A,"Nam says ""I have breakfast with my family."""
