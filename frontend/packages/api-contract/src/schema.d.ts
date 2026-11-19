@@ -339,6 +339,270 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/practice/listening/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Topic có bài nghe ở một cấp CEFR (UC-11, Listening.Select) */
+        get: operations["listListeningTopics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/practice/listening/clips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bài nghe của một topic + cấp, theo thứ tự Admin đặt (Listening.Select.Source)
+         * @description Sắp theo `orderIndex`; không gợi ý, không lọc theo độ khó, không sắp lại (DE-5).
+         */
+        get: operations["listListeningClips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/practice/listening/clips/{clipId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Chi tiết bài nghe để làm bài (UC-11)
+         * @description URL audio ký tạm (hết hạn sau `listening.audio_url_ttl_sec`) và câu hỏi. Không trả đáp án, giải thích hay
+         *     transcript trước khi nộp; chúng nằm trong kết quả `POST /practice/listening/sessions`.
+         */
+        get: operations["getListeningClip"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/practice/listening/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Nộp đáp án một phiên nghe (UC-11, Listening.Score, BR-16, BR-23, BR-36)
+         * @description `sessionId` do client sinh (UUID); client gửi đáp án thô (chữ cái A–D) của mọi câu hỏi theo một lô. Server
+         *     chấm lại, tính sao theo `star.bands` (BR-16). Làm lại bài: `starsAdded` chỉ là phần vượt sao tốt nhất trước đó
+         *     (BR-36). Gửi lại cùng `sessionId` trả đúng kết quả đã lưu, không chấm và không cộng sao lần hai. Kết quả
+         *     kèm đáp án đúng, giải thích và transcript có bản dịch.
+         */
+        post: operations["submitListeningSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tải file nhập Listening (UC-19, Admin.QuestionBank.ImportListening)
+         * @description Chỉ `kind = listening_csv`. Kiểm đuôi `.csv` + kiểu MIME và dung lượng (`import.max_csv_mb`), lưu file vào
+         *     bucket `imports`, tạo job `queued` rồi xử lý nền: đọc + kiểm theo mẫu và BR-37 → `preview_ready` (preview
+         *     theo bài + `warnings` theo dòng/cột), hoặc `failed` khi sai cột / không phải UTF-8 / không có bài nào.
+         *     Theo dõi bằng `GET /admin/imports/{jobId}`.
+         */
+        post: operations["uploadImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/imports/templates/listening": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tải file CSV mẫu nhập Listening */
+        get: operations["getListeningImportTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/imports/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trạng thái và preview của job nhập */
+        get: operations["getImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/imports/{jobId}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Admin sửa preview (Admin.QuestionBank.Preview, BR-34)
+         * @description Thay toàn bộ danh sách bài; server kiểm lại BR-37 và trả `warnings` mới. Audio đã sinh được giữ theo vị trí
+         *     bài nhưng `audio.current = false` khi lời thoại hoặc giọng không còn khớp: phải sinh lại trước khi lưu.
+         */
+        patch: operations["updateImportPreview"];
+        trace?: never;
+    };
+    "/admin/imports/{jobId}/clips/{clipIndex}/tts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sinh audio TTS cho một bài của preview (Admin.QuestionBank.Tts, BR-37, AS-16)
+         * @description Gọi TTS (`ai.model.tts`) với giọng của từng người nói và cách đọc theo cấp (`ai.tts.style_by_level`), lưu WAV
+         *     tạm ở bucket `imports`, trả URL ký tạm để nghe thử. `attempts` của job + 1. Audio được gắn dấu vân tay của
+         *     lời thoại + giọng hiện tại. Bài còn lỗi BR-37 hoặc người nói chưa có giọng thì không sinh.
+         */
+        post: operations["generateImportClipAudio"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/imports/{jobId}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lưu các bài nghe của job (Admin.QuestionBank.Save, BR-14, BR-35, BR-37)
+         * @description Chỉ khi không còn lỗi BR-37 và mọi bài có audio khớp lời thoại + giọng hiện tại. Audio được chép sang bucket
+         *     `listening-audio`; mỗi bài tạo `listening_clip` (voice_config, tts_model, audio_format, duration_sec,
+         *     order_index tiếp theo trong topic + cấp) và `question_bank` (question_purpose = listening) trong một
+         *     transaction cùng nhật ký Admin và trạng thái job `saved`. Lỗi thì không lưu gì.
+         */
+        post: operations["saveImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/listening/clips/{clipId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Chi tiết bài nghe đã lưu, kèm đáp án (UC-19) */
+        get: operations["getAdminListeningClip"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Sửa bài nghe đã lưu (UC-19, BR-35, BR-37)
+         * @description Trường bỏ trống giữ nguyên; câu hỏi nhận diện bằng `questionId`. Đổi `lines` hoặc `voices` thì phải gửi
+         *     `audioToken` lấy từ `POST /admin/listening/clips/{clipId}/tts` với đúng lời thoại + giọng mới. Ghi nhật ký
+         *     trước/sau.
+         */
+        patch: operations["updateAdminListeningClip"];
+        trace?: never;
+    };
+    "/admin/listening/clips/{clipId}/tts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sinh audio nghe thử cho lời thoại + giọng mới của bài đã lưu (BR-37) */
+        post: operations["previewAdminListeningClipAudio"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/listening/clips/{clipId}/retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retire bài nghe (BR-34, BR-35)
+         * @description Ẩn bài và câu hỏi khỏi learner; không xoá bài, câu hỏi hay lịch sử làm bài. Gọi lại khi đã retire không đổi gì.
+         */
+        post: operations["retireAdminListeningClip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -568,6 +832,189 @@ export interface components {
                 category: string;
                 count: number;
             }[];
+        };
+        /** @enum {string} */
+        CefrLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+        ListeningClipItem: {
+            /** Format: uuid */
+            clipId: string;
+            title: string;
+            orderIndex: number;
+            durationSec?: number | null;
+            questionCount: number;
+            /** @description Sao cao nhất người gọi từng đạt; null = chưa làm */
+            bestStars?: number | null;
+        };
+        ListeningClipView: {
+            /** Format: uuid */
+            clipId: string;
+            title: string;
+            topic: string;
+            cefrLevel: components["schemas"]["CefrLevel"];
+            durationSec?: number | null;
+            /** Format: uri */
+            audioUrl: string;
+            /** Format: date-time */
+            audioUrlExpiresAt: string;
+            bestStars?: number | null;
+            questions: {
+                /** Format: uuid */
+                questionId: string;
+                type: components["schemas"]["ListeningQuestionType"];
+                text: string;
+                /** @description Lựa chọn A, B, C, D theo thứ tự */
+                options: string[];
+            }[];
+        };
+        /**
+         * @description Listening.Answer.Types
+         * @enum {string}
+         */
+        ListeningQuestionType: "choose_heard" | "fill_blank" | "dialogue_question";
+        ListeningSubmitRequest: {
+            /**
+             * Format: uuid
+             * @description Do client sinh để gửi lại an toàn
+             */
+            sessionId: string;
+            /** Format: uuid */
+            clipId: string;
+            /** Format: date-time */
+            startedAt?: string;
+            answers: {
+                /** Format: uuid */
+                questionId: string;
+                /** @enum {string} */
+                selectedAnswer: "A" | "B" | "C" | "D";
+            }[];
+        };
+        ListeningSessionResult: {
+            /** Format: uuid */
+            sessionId: string;
+            /** Format: uuid */
+            clipId: string;
+            correctCount: number;
+            totalQuestions: number;
+            /** @description BR-16 */
+            stars: number;
+            /** @description Sao tốt nhất trước phiên này (0 nếu chưa làm) */
+            previousBest: number;
+            /** @description BR-36: max(0, stars - previousBest) */
+            starsAdded: number;
+            /** Format: date-time */
+            completedAt: string;
+            results: {
+                /** Format: uuid */
+                questionId: string;
+                selectedAnswer: string;
+                correctAnswer: string;
+                correct: boolean;
+                explanation: string;
+            }[];
+            transcript: {
+                speaker: string;
+                en: string;
+                vi: string;
+            }[];
+        };
+        ListeningLineDraft: {
+            /** @description Dòng CSV gốc; null khi Admin thêm trên preview */
+            row?: number | null;
+            speaker?: string;
+            en?: string;
+            vi?: string;
+        };
+        /** @description Một bài nghe trong preview; `voices` là người nói → tên giọng dựng sẵn của TTS */
+        ListeningClipDraft: {
+            clipCode?: string;
+            row?: number | null;
+            title?: string;
+            topic?: string;
+            cefrLevel?: string;
+            voices?: {
+                [key: string]: string;
+            };
+            lines?: components["schemas"]["ListeningLineDraft"][];
+            questions?: {
+                row?: number | null;
+                type?: string;
+                text?: string;
+                options?: string[];
+                answer?: string;
+                explanation?: string;
+            }[];
+        };
+        /** @description Lỗi theo dòng CSV + cột để admin-web tô đỏ (UC-19 E3) */
+        ImportIssue: {
+            /** @description null = lỗi cả file */
+            clipIndex?: number | null;
+            /** @description Số dòng CSV (đếm từ 1 */
+            row?: number | null;
+            column?: string | null;
+            code: string;
+            message: string;
+        };
+        ImportJob: {
+            /** Format: uuid */
+            jobId: string;
+            /** @enum {string} */
+            kind: "listening_csv";
+            /** @enum {string} */
+            status: "queued" | "processing" | "preview_ready" | "saved" | "failed" | "cancelled";
+            /** @description Số lần sinh audio TTS */
+            attempts: number;
+            error?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            finishedAt?: string | null;
+            clips: {
+                clip: components["schemas"]["ListeningClipDraft"];
+                audio?: {
+                    fingerprint?: string;
+                    durationSec?: number;
+                    ttsModel?: string;
+                    format?: string;
+                    /** @description Audio khớp lời thoại + giọng hiện tại (lưu được) */
+                    current?: boolean;
+                } | null;
+                /** Format: uuid */
+                savedClipId?: string | null;
+            }[];
+            warnings: components["schemas"]["ImportIssue"][];
+        };
+        AdminListeningClip: {
+            /** Format: uuid */
+            clipId: string;
+            title: string;
+            topic: string;
+            cefrLevel: components["schemas"]["CefrLevel"];
+            orderIndex: number;
+            /** @enum {string} */
+            status: "published" | "retired";
+            durationSec?: number | null;
+            ttsModel?: string | null;
+            voices: {
+                [key: string]: string;
+            };
+            lines: components["schemas"]["ListeningLineDraft"][];
+            questions: {
+                /** Format: uuid */
+                questionId?: string;
+                type?: components["schemas"]["ListeningQuestionType"];
+                text?: string;
+                options?: string[];
+                /** @enum {string} */
+                answer?: "A" | "B" | "C" | "D";
+                explanation?: string;
+                /** @enum {string} */
+                status?: "active" | "retired";
+            }[];
+            /** Format: uri */
+            audioUrl?: string | null;
+            audioFingerprint: string;
+            /** Format: date-time */
+            retiredAt?: string | null;
         };
     };
     responses: {
@@ -1329,6 +1776,691 @@ export interface operations {
             };
             /** @description Đang có lượt tạo bù khác. Mã: BACKFILL_RUNNING */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listListeningTopics: {
+        parameters: {
+            query: {
+                level: components["schemas"]["CefrLevel"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Topic có ít nhất một bài nghe chơi được (published, đã có audio, còn câu hỏi), theo tên */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        topic: string;
+                        clipCount: number;
+                    }[];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["AccountBlocked"];
+            422: components["responses"]["ValidationFailed"];
+        };
+    };
+    listListeningClips: {
+        parameters: {
+            query: {
+                topic: string;
+                level: components["schemas"]["CefrLevel"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách bài nghe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningClipItem"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["AccountBlocked"];
+            422: components["responses"]["ValidationFailed"];
+        };
+    };
+    getListeningClip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bài nghe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningClipView"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["AccountBlocked"];
+            /** @description Không có, đã retire hoặc chưa có audio. Mã: CLIP_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    submitListeningSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ListeningSubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description Kết quả chấm */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningSessionResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["AccountBlocked"];
+            /** @description Mã: CLIP_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description sessionId đã dùng cho người khác hoặc bài khác. Mã: SESSION_ID_CONFLICT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /**
+             * @description ANSWERS_MISMATCH (thiếu / thừa / trùng câu hỏi; mỗi câu hỏi active của bài đúng một đáp án) hoặc
+             *     INVALID_ANSWER (không phải A–D).
+             */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploadImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** @enum {string} */
+                    kind: "listening_csv";
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Job đã tạo (status queued) */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED, hoặc ACCOUNT_SUSPENDED / ACCOUNT_PENDING_DELETION (xem AccountBlocked) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description UNSUPPORTED_IMPORT_KIND, UNSUPPORTED_FILE_TYPE, FILE_EMPTY, FILE_TOO_LARGE (details {maxBytes, bytes}) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getListeningImportTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cột: clip_code, title, topic, cefr_level, row_type, speaker, voice, text_en, text_vi, question_type, option_a…option_d, answer, explanation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Job */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: IMPORT_JOB_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateImportPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    clips: components["schemas"]["ListeningClipDraft"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Job sau khi sửa */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: IMPORT_JOB_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Job không ở preview_ready. Mã: IMPORT_NOT_EDITABLE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: NO_CLIPS */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    generateImportClipAudio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+                clipIndex: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audio nghe thử */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        clipIndex: number;
+                        /** Format: uri */
+                        audioUrl: string;
+                        durationSec: number;
+                        fingerprint: string;
+                        attempts: number;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description IMPORT_JOB_NOT_FOUND hoặc CLIP_NOT_FOUND (không có bài ở vị trí này) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: IMPORT_NOT_EDITABLE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description LISTENING_CLIP_INVALID (details.issues) hoặc VOICE_REQUIRED (details.speaker) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    saveImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Đã lưu; bài hiển thị cho learner ngay */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        jobId: string;
+                        clipIds: string[];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: IMPORT_JOB_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description AUDIO_OUT_OF_DATE (details.clipIndexes: bài chưa có audio hoặc audio không khớp) hoặc IMPORT_NOT_EDITABLE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Còn lỗi BR-37. Mã: IMPORT_HAS_ERRORS (details.issues) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAdminListeningClip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bài nghe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListeningClip"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: CLIP_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateAdminListeningClip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    title?: string;
+                    voices?: {
+                        [key: string]: string;
+                    };
+                    lines?: components["schemas"]["ListeningLineDraft"][];
+                    questions?: {
+                        /** Format: uuid */
+                        questionId: string;
+                        text?: string;
+                        options?: string[];
+                        /** @enum {string} */
+                        answer?: "A" | "B" | "C" | "D";
+                        explanation?: string;
+                    }[];
+                    audioToken?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Bài sau khi sửa */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListeningClip"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: CLIP_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description AUDIO_REGENERATION_REQUIRED (details.fingerprint) hoặc CLIP_RETIRED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description LISTENING_CLIP_INVALID (details.issues) hoặc QUESTION_NOT_IN_CLIP */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewAdminListeningClipAudio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    voices: {
+                        [key: string]: string;
+                    };
+                    lines: components["schemas"]["ListeningLineDraft"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Audio nghe thử; gửi `audioToken` kèm bản sửa */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        audioToken: string;
+                        fingerprint: string;
+                        /** Format: uri */
+                        audioUrl: string;
+                        durationSec: number;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: CLIP_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description LISTENING_CLIP_INVALID hoặc VOICE_REQUIRED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    retireAdminListeningClip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bài sau khi retire */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListeningClip"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Mã: ADMIN_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Mã: CLIP_NOT_FOUND */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
